@@ -1,0 +1,770 @@
+// Prisma Schema pour Simpshopy
+// Zone CFA Afrique de l'Ouest
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTHENTIFICATION & UTILISATEURS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  SELLER
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+model User {
+  id            String      @id @default(uuid())
+  authUserId    String?     @unique // Supabase auth.users.id
+  email         String      @unique
+  phone         String?     @unique
+  password      String?     // Nullable : Supabase Auth gère le mot de passe
+  firstName     String
+  lastName      String
+  role          UserRole    @default(SELLER)
+  status        UserStatus  @default(PENDING_VERIFICATION)
+  emailVerified Boolean     @default(false)
+  phoneVerified Boolean     @default(false)
+  avatar        String?
+  
+  // Relations
+  stores        Store[]
+  orders        Order[]
+  addresses     Address[]
+  reviews       Review[]
+  cartItems     CartItem[]
+  
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  lastLoginAt   DateTime?
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([authUserId])
+  @@map("users")
+}
+
+// ============================================
+// BOUTIQUES (STORES)
+// ============================================
+
+enum StoreStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+model Store {
+  id              String       @id @default(uuid())
+  name            String
+  slug            String       @unique // URL-friendly
+  description     String?
+  logo            String?
+  banner          String?
+  status          StoreStatus  @default(DRAFT)
+  
+  // Propriétaire
+  ownerId         String
+  owner           User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  // Abonnement
+  subscriptionId  String?
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
+  
+  // Contact
+  email           String
+  phone           String
+  whatsapp        String?
+  
+  // Adresse
+  country         String       @default("SN") // Code pays ISO
+  city            String
+  address         String?
+  
+  // Configuration
+  currency        String       @default("XOF")
+  language        String       @default("fr")
+  timezone        String       @default("Africa/Dakar")
+  
+  // Domaine personnalisé
+  customDomain    String?
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  // Relations
+  products        Product[]
+  orders          Order[]
+  categories      Category[]
+  pages           Page[]
+  settings        StoreSettings?
+  wallet          Wallet?
+  platformFees    PlatformFee[]
+  shippingZones   ShippingZone[]
+  eventLogs       EventLog[]
+  
+  // Timestamps
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  publishedAt     DateTime?
+
+  @@index([ownerId])
+  @@index([slug])
+  @@index([status])
+  @@map("stores")
+}
+
+model StoreSettings {
+  id                    String  @id @default(uuid())
+  storeId               String  @unique
+  store                 Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Paiements
+  enableMobileMoney     Boolean @default(true)
+  enableCardPayment     Boolean @default(true)
+  enableBankTransfer    Boolean @default(true)
+  enableCashOnDelivery  Boolean @default(true)
+  
+  // Livraison (déprécié - utiliser ShippingZone et ShippingMethod)
+  enableShipping        Boolean @default(true)
+  freeShippingThreshold Float?
+  
+  // Notifications
+  enableEmailNotifications Boolean @default(true)
+  enableSMSNotifications   Boolean @default(false)
+  enableWhatsAppNotifications Boolean @default(true)
+  
+  // Taxes
+  enableTaxes           Boolean @default(true)
+  taxRate               Float?  @default(18.0) // TVA par défaut
+  
+  // Thème (template boutique)
+  themeId               String?  // Ex: classique, mode, tech, food, etc.
+  
+  // Personnalisation du thème (surcharge les valeurs par défaut)
+  themeCustomization    Json?   // { colors, hero, about, contact, footer, promoBanner, newsletterTitle, richText }
+  
+  // Page Builder
+  homePageConfig        Json?   // Configuration JSON du page builder
+  footerConfig          Json?
+  headerConfig          Json?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("store_settings")
+}
+
+// ============================================
+// ABONNEMENTS
+// ============================================
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING_PAYMENT
+}
+
+model Subscription {
+  id                String             @id @default(uuid())
+  plan              SubscriptionPlan   @default(FREE)
+  status            SubscriptionStatus @default(ACTIVE)
+  
+  // Limites
+  maxProducts       Int?               // null = illimité
+  maxOrders         Int?               // null = illimité
+  maxStorage        Int?               // MB, null = illimité
+  maxStores         Int                @default(1)
+  
+  // Prix (en XOF)
+  price             Float              @default(0)
+  currency          String             @default("XOF")
+  billingCycle      String             @default("monthly") // monthly, yearly
+  
+  // Paiement
+  paymentMethod     String?
+  lastPaymentDate   DateTime?
+  nextPaymentDate   DateTime?
+  
+  // Relations
+  stores            Store[]
+  
+  // Timestamps
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  expiresAt         DateTime?
+
+  @@index([plan])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ============================================
+// PRODUITS
+// ============================================
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String
+  description String?
+  image       String?
+  parentId    String?
+  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryTree")
+  storeId     String
+  store       Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  products    Product[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@map("categories")
+}
+
+model Product {
+  id              String         @id @default(uuid())
+  name            String
+  slug            String
+  description     String?        @db.Text
+  shortDescription String?
+  sku             String?
+  status          ProductStatus  @default(DRAFT)
+  
+  // Prix
+  price           Float
+  compareAtPrice  Float?         // Prix barré
+  costPrice       Float?         // Prix de revient
+  currency        String         @default("XOF")
+  
+  // Stock
+  trackInventory  Boolean        @default(true)
+  inventoryQty    Int            @default(0)
+  allowBackorder  Boolean        @default(false)
+  
+  // Images
+  images          String[]       // URLs des images
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  // Relations
+  storeId         String
+  store           Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  categoryId      String?
+  category        Category?      @relation(fields: [categoryId], references: [id])
+  variants        ProductVariant[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+  cartItems       CartItem[]
+  
+  // Timestamps
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  publishedAt     DateTime?
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([status])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id          String       @id @default(uuid())
+  name        String       // Ex: "Petit - Rouge"
+  sku         String?
+  price       Float?       // Si null, utilise prix du produit
+  inventoryQty Int         @default(0)
+  trackInventory Boolean   @default(true)
+  
+  // Attributs (taille, couleur, etc.)
+  attributes  Json?        // {size: "M", color: "Rouge"}
+  
+  productId   String
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+// ============================================
+// COMMANDES & PAIEMENTS
+// ============================================
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  MOBILE_MONEY
+  CARD
+  BANK_TRANSFER
+  CASH_ON_DELIVERY
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  orderNumber     String         @unique // Numéro de commande unique
+  
+  // Relations
+  storeId         String
+  store           Store          @relation(fields: [storeId], references: [id])
+  customerId      String
+  customer        User           @relation(fields: [customerId], references: [id])
+  
+  // Statut
+  status          OrderStatus    @default(PENDING)
+  
+  // Totaux
+  subtotal        Float
+  taxAmount       Float          @default(0)
+  shippingAmount  Float          @default(0)
+  discountAmount  Float          @default(0)
+  platformFeeAmount Float        @default(0) // Commission Simpshopy
+  total           Float
+  
+  currency        String         @default("XOF")
+  
+  // Adresses
+  shippingAddress Json           // Adresse de livraison
+  billingAddress  Json?          // Adresse de facturation
+  
+  // Paiement
+  paymentMethod   PaymentMethod?
+  paymentStatus   PaymentStatus  @default(PENDING)
+  paymentId       String?        // ID transaction paiement
+  paymentData     Json?          // Détails transaction
+  
+  // Livraison
+  shippingZoneId  String?
+  shippingZone    ShippingZone? @relation(fields: [shippingZoneId], references: [id])
+  shippingMethodId String?
+  shippingMethod  ShippingMethod? @relation(fields: [shippingMethodId], references: [id])
+  trackingNumber  String?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  
+  // Notes
+  customerNote    String?
+  adminNote       String?
+  
+  // Relations
+  items           OrderItem[]
+  
+  // Timestamps
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([storeId])
+  @@index([customerId])
+  @@index([status])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+model OrderItem {
+  id              String          @id @default(uuid())
+  orderId         String
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product         @relation(fields: [productId], references: [id])
+  variantId       String?
+  variant         ProductVariant? @relation(fields: [variantId], references: [id])
+  
+  quantity        Int
+  price           Float           // Prix au moment de la commande
+  total           Float
+  
+  createdAt       DateTime        @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ============================================
+// PANIER
+// ============================================
+
+model CartItem {
+  id        String          @id @default(uuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  quantity  Int             @default(1)
+  
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@unique([userId, productId, variantId])
+  @@index([userId])
+  @@map("cart_items")
+}
+
+// ============================================
+// ADRESSES
+// ============================================
+
+model Address {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Type d'adresse
+  type        String   @default("shipping") // shipping, billing
+  
+  // Détails
+  firstName   String
+  lastName    String
+  phone       String
+  addressLine1 String
+  addressLine2 String?
+  city        String
+  state       String?
+  postalCode  String?
+  country     String   @default("SN")
+  
+  // Par défaut
+  isDefault   Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ============================================
+// AVIS & NOTES
+// ============================================
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  rating    Int      // 1-5
+  title     String?
+  comment   String?  @db.Text
+  
+  approved  Boolean  @default(false) // Modération
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+// ============================================
+// PAGES (Page Builder)
+// ============================================
+
+model Page {
+  id          String        @id @default(uuid())
+  title       String
+  slug        String
+  content     Json          // Configuration JSON du page builder
+  storeId     String
+  store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  versions    PageVersion[] // Historique des versions
+  
+  isPublished Boolean       @default(false)
+  publishedAt DateTime?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@map("pages")
+}
+
+// ============================================
+// VERSIONING PAGE BUILDER
+// ============================================
+
+model PageVersion {
+  id        String   @id @default(uuid())
+  pageId    String
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  content   Json     // Configuration JSON de cette version
+  version   Int      // Numéro de version (auto-incrémenté)
+  note      String?  // Note de commit (ex: "Ajout section produits")
+  
+  createdAt DateTime @default(now())
+
+  @@index([pageId])
+  @@index([pageId, version])
+  @@map("page_versions")
+}
+
+// ============================================
+// COMMISSIONS PLATEFORME (PLATFORM FEES)
+// ============================================
+
+model PlatformFee {
+  id        String   @id @default(uuid())
+  storeId   String
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  // Type de commission
+  type      String   // "percentage" | "fixed"
+  value     Float    // Ex: 2.5 (%) ou 500 (XOF)
+  currency  String   @default("XOF")
+  
+  // Application
+  appliesTo String   // "order" | "product" | "payment"
+  isActive  Boolean  @default(true)
+  
+  // Conditions (optionnel)
+  minAmount Float?   // Montant minimum pour application
+  maxAmount Float?   // Montant maximum
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([storeId])
+  @@index([isActive])
+  @@map("platform_fees")
+}
+
+// ============================================
+// WALLET (PORTEFEUILLE VENDEUR)
+// ============================================
+
+model Wallet {
+  id        String              @id @default(uuid())
+  storeId   String              @unique
+  store     Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  balance   Float               @default(0) // Solde disponible
+  currency  String              @default("XOF")
+  
+  // Limite de retrait (pour sécurité)
+  pendingPayout Float           @default(0) // Montant en attente de retrait
+  
+  // Relations
+  transactions WalletTransaction[]
+  
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@index([storeId])
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id        String   @id @default(uuid())
+  walletId  String
+  wallet    Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  type      String   // "credit" | "debit" | "fee" | "payout" | "refund"
+  amount    Float
+  balance   Float    // Solde après transaction
+  
+  // Référence
+  orderId   String?  // Si lié à une commande
+  reference String?  // Référence externe (ex: ID paiement)
+  
+  // Métadonnées
+  description String?
+  meta        Json?  // Données additionnelles
+  
+  createdAt   DateTime @default(now())
+
+  @@index([walletId])
+  @@index([type])
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("wallet_transactions")
+}
+
+// ============================================
+// LIVRAISON (STRUCTURE PROPRE)
+// ============================================
+
+model ShippingZone {
+  id        String           @id @default(uuid())
+  storeId   String
+  store     Store            @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  
+  name      String           // Ex: "Dakar", "Abidjan"
+  countries String[]         // Codes pays ISO ["SN", "CI"]
+  cities    String[]         // ["Dakar", "Thiès"]
+  regions   String[]         // Optionnel
+  
+  isActive  Boolean          @default(true)
+  
+  // Relations
+  methods   ShippingMethod[]
+  orders    Order[]
+  
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([storeId])
+  @@index([isActive])
+  @@map("shipping_zones")
+}
+
+model ShippingMethod {
+  id        String        @id @default(uuid())
+  zoneId    String
+  zone      ShippingZone  @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  
+  name      String        // Ex: "Livraison Standard", "Express"
+  price     Float         // Prix fixe
+  currency  String        @default("XOF")
+  
+  // Délai de livraison
+  minDays   Int           // Ex: 2
+  maxDays   Int           // Ex: 5
+  delay     String?       // Ex: "2-5 jours", "24h"
+  
+  // Conditions
+  minWeight Float?        // Poids minimum (kg)
+  maxWeight Float?        // Poids maximum (kg)
+  isActive  Boolean       @default(true)
+  
+  // Relations
+  orders    Order[]
+  
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([zoneId])
+  @@index([isActive])
+  @@map("shipping_methods")
+}
+
+// ============================================
+// LOGS D'ÉVÉNEMENTS (EVENT LOGGING)
+// ============================================
+
+enum EventType {
+  ORDER_CREATED
+  ORDER_UPDATED
+  ORDER_CANCELLED
+  ORDER_COMPLETED
+  PAYMENT_INITIATED
+  PAYMENT_COMPLETED
+  PAYMENT_FAILED
+  PAYMENT_REFUNDED
+  PRODUCT_CREATED
+  PRODUCT_UPDATED
+  PRODUCT_DELETED
+  STORE_CREATED
+  STORE_UPDATED
+  STORE_SUSPENDED
+  USER_REGISTERED
+  USER_LOGIN
+  USER_LOGOUT
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_RENEWED
+  SUBSCRIPTION_CANCELLED
+  WALLET_CREDIT
+  WALLET_DEBIT
+  WALLET_PAYOUT
+  PLATFORM_FEE_APPLIED
+  SHIPPING_CREATED
+  SHIPPING_UPDATED
+  REVIEW_CREATED
+  REVIEW_APPROVED
+  REVIEW_REJECTED
+  PAGE_CREATED
+  PAGE_UPDATED
+  PAGE_PUBLISHED
+  CUSTOM // Pour événements personnalisés
+}
+
+model EventLog {
+  id        String    @id @default(uuid())
+  
+  // Acteur (qui a déclenché)
+  actorId   String?   // ID utilisateur (User)
+  actorType String?   // "user" | "system" | "admin"
+  
+  // Contexte
+  storeId   String?
+  store     Store?    @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  
+  // Type d'événement
+  type      EventType
+  
+  // Données
+  payload   Json?     // Données additionnelles structurées
+  
+  // Métadonnées
+  ipAddress String?
+  userAgent String?
+  metadata  Json?     // Données additionnelles
+  
+  createdAt DateTime  @default(now())
+
+  @@index([storeId])
+  @@index([type])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("event_logs")
+}

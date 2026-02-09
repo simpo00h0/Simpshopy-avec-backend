@@ -1,0 +1,14 @@
+/* Dashboard layout - editor pleine page sur mobile */
+
+.editorMain {
+  overflow: hidden;
+  padding: 0 !important;
+  height: calc(100dvh - 60px) !important;
+  min-height: 300px;
+}
+
+@media (min-width: 64em) {
+  .editorMain {
+    height: calc(100vh - 60px) !important;
+  }
+}

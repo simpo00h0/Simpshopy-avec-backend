@@ -1,0 +1,48 @@
+{
+  "name": "simpshopy",
+  "version": "1.0.0",
+  "description": "Alternative à Shopify pour l'Afrique de l'Ouest",
+  "private": true,
+  "workspaces": [
+    "frontend-admin",
+    "storefront",
+    "shared"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:backend && npm run install:admin && npm run install:storefront && npm run install:shared",
+    "install:backend": "cd backend && npm install",
+    "install:admin": "cd frontend-admin && npm install",
+    "install:storefront": "cd storefront && npm install",
+    "install:shared": "cd shared && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:admin\" \"npm run dev:storefront\"",
+    "dev:all": "npm run dev",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:admin": "cd frontend-admin && npm run dev",
+    "dev:storefront": "cd storefront && npm run dev",
+    "build": "npm run build:backend && npm run build:admin && npm run build:storefront",
+    "build:backend": "cd backend && npm run build",
+    "build:admin": "cd frontend-admin && npm run build",
+    "build:storefront": "cd storefront && npm run build",
+    "test": "npm run test:backend && npm run test:admin && npm run test:storefront",
+    "test:backend": "cd backend && npm run test",
+    "test:admin": "cd frontend-admin && npm run test",
+    "test:storefront": "cd storefront && npm run test",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "prisma:generate": "cd backend && npx prisma generate",
+    "prisma:migrate": "cd backend && npx prisma migrate dev",
+    "prisma:studio": "cd backend && npx prisma studio"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "mode": "^0.3.2",
+    "node": "^25.3.0"
+  }
+}

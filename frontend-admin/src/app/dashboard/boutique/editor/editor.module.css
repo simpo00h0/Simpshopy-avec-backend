@@ -1,0 +1,137 @@
+/* Constructeur de boutique - Responsive mobile-first */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Mobile/Tablet: pleine hauteur (breakpoint Elementor: desktop > 1024px) */
+@media (max-width: 64em) {
+  .root {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+
+/* Desktop */
+@media (min-width: 64em) {
+  .root {
+    height: 100%;
+    min-height: 400px;
+  }
+}
+
+.toolbar {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* Panneaux latéraux - même disposition PC et mobile, avec croix pour fermer */
+.sidePanel {
+  transition: width 0.2s ease, min-width 0.2s ease;
+}
+
+.sidePanelLeft {
+  width: 280px;
+  min-width: 280px;
+}
+
+.sidePanelRight {
+  width: 300px;
+  min-width: 300px;
+}
+
+@media (min-width: 64em) {
+  /* Desktop: les deux panneaux toujours visibles, ignorer sidePanelClosed */
+  .sidePanelLeft,
+  .sidePanelLeft.sidePanelClosed {
+    width: 280px !important;
+    min-width: 220px !important;
+    padding: 1rem !important;
+    border-right: 1px solid var(--mantine-color-gray-2) !important;
+    overflow: hidden !important;
+  }
+  .sidePanelRight,
+  .sidePanelRight.sidePanelClosed {
+    width: 300px !important;
+    min-width: 260px !important;
+    padding: 1rem !important;
+    border-left: 1px solid var(--mantine-color-gray-2) !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Mobile: un seul panneau à la fois, replié avec croix */
+@media (max-width: 63.99em) {
+  .sidePanelLeft.sidePanelClosed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+  .sidePanelLeft.sidePanelOpen {
+    width: 280px !important;
+    min-width: 240px !important;
+  }
+  .sidePanelRight.sidePanelClosed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+  .sidePanelRight.sidePanelOpen {
+    width: 300px !important;
+    min-width: 260px !important;
+  }
+}
+
+.panelCloseBtn {
+  flex-shrink: 0;
+}
+
+@media (min-width: 64em) {
+  .panelCloseBtn {
+    display: none;
+  }
+}
+
+.canvasWrapper {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+  overflow: auto;
+}
+
+.canvasInner {
+  position: relative;
+  height: 100%;
+  min-height: 200px;
+  transition: width 0.3s;
+}
+
+/* Mobile/Tablet: canvas pleine largeur */
+@media (max-width: 64em) {
+  .canvasInner {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+

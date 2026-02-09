@@ -1,0 +1,41 @@
+{
+  "name": "@simpshopy/frontend-admin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@simpshopy/shared": "*",
+    "@mantine/core": "^7.4.0",
+    "@mantine/dates": "^7.4.0",
+    "@mantine/form": "^7.4.0",
+    "@mantine/hooks": "^7.4.0",
+    "@mantine/notifications": "^7.4.0",
+    "@supabase/supabase-js": "^2.94.0",
+    "@tabler/icons-react": "^2.47.0",
+    "@tanstack/react-query": "^5.14.2",
+    "axios": "^1.6.2",
+    "next": "14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.49.2",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "14.0.4",
+    "postcss": "^8.4.32",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3"
+  }
+}
