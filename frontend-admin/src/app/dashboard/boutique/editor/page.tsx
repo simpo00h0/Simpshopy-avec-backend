@@ -400,12 +400,23 @@ export default function BoutiqueEditorPage() {
   };
 
   useEffect(() => {
+    const paramSlug = searchParams.get('slug');
+    const cached = useStoreStore.getState().currentStore;
+    const cacheMatches = cached && (cached.id === storeId || cached.slug === (paramSlug ?? cached.slug));
+    if (cacheMatches && cached.settings !== undefined) {
+      const cust = (cached.settings.themeCustomization ?? {}) as ThemeCustomization;
+      setCustomization(cust);
+      setHistory([JSON.parse(JSON.stringify(cust))]);
+      setHistoryIndex(0);
+      lastSavedRef.current = JSON.stringify(cust);
+      return;
+    }
     const load = async () => {
       try {
         const res = await api.get<{ id: string; slug: string; settings?: { themeCustomization?: ThemeCustomization } }[]>('/stores');
-        const s = res.data?.find((x: { id: string; slug: string }) => x.id === storeId || x.slug === slug) ?? res.data?.[0];
+        const s = res.data?.find((x: { id: string; slug: string }) => x.id === storeId || x.slug === (paramSlug ?? slug)) ?? res.data?.[0];
         if (s) {
-          useStoreStore.getState().setCurrentStore(s as Parameters<typeof setCurrentStore>[0]);
+          useStoreStore.getState().setCurrentStore(s as Store);
           const cust = (s.settings as { themeCustomization?: ThemeCustomization })?.themeCustomization ?? {};
           setCustomization(cust);
           setHistory([JSON.parse(JSON.stringify(cust))]);
@@ -417,7 +428,7 @@ export default function BoutiqueEditorPage() {
       }
     };
     load();
-  }, [storeId, slug, router]);
+  }, [storeId, slug, router, searchParams]);
 
   useEffect(() => {
     const win = iframeRef.current?.contentWindow;

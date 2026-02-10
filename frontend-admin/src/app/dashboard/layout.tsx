@@ -98,31 +98,42 @@ export default function DashboardLayout({
     router.replace('/');
   };
 
+  const prefetchRoute = (href: string) => {
+    router.prefetch(href);
+  };
+
   const navItems = [
-    { href: '/dashboard', label: 'Accueil', icon: IconHome2, onPrefetch: () => prefetchDashboardStats(queryClient) },
-    { href: '/dashboard/boutique', label: 'Boutique', icon: IconShoppingBag, onPrefetch: () => prefetchStores(queryClient) },
-    { href: '/dashboard/themes', label: 'Thèmes', icon: IconPalette, onPrefetch: () => prefetchStores(queryClient) },
-    { href: '/dashboard/orders', label: 'Commandes', icon: IconShoppingCart, onPrefetch: () => prefetchOrders(queryClient) },
-    { href: '/dashboard/products', label: 'Produits', icon: IconPackage, onPrefetch: () => prefetchProducts(queryClient) },
-    { href: '/dashboard/customers', label: 'Clients', icon: IconUsers, onPrefetch: () => prefetchCustomers(queryClient) },
-    { href: '/dashboard/discounts', label: 'Réductions', icon: IconDiscount2 },
-    { href: '/dashboard/analytics', label: 'Analytiques', icon: IconChartBar },
-    { href: '/dashboard/wallet', label: 'Portefeuille', icon: IconWallet },
+    { href: '/dashboard', label: 'Accueil', icon: IconHome2, onPrefetch: () => { prefetchRoute('/dashboard'); prefetchDashboardStats(queryClient); } },
+    {
+      href: '/dashboard/boutique',
+      label: 'Boutique',
+      icon: IconShoppingBag,
+      onPrefetch: () => {
+        prefetchRoute('/dashboard/boutique');
+        prefetchRoute('/dashboard/boutique/editor');
+        prefetchStores(queryClient);
+      },
+    },
+    { href: '/dashboard/themes', label: 'Thèmes', icon: IconPalette, onPrefetch: () => { prefetchRoute('/dashboard/themes'); prefetchStores(queryClient); } },
+    { href: '/dashboard/orders', label: 'Commandes', icon: IconShoppingCart, onPrefetch: () => { prefetchRoute('/dashboard/orders'); prefetchOrders(queryClient); } },
+    { href: '/dashboard/products', label: 'Produits', icon: IconPackage, onPrefetch: () => { prefetchRoute('/dashboard/products'); prefetchProducts(queryClient); } },
+    { href: '/dashboard/customers', label: 'Clients', icon: IconUsers, onPrefetch: () => { prefetchRoute('/dashboard/customers'); prefetchCustomers(queryClient); } },
+    { href: '/dashboard/discounts', label: 'Réductions', icon: IconDiscount2, onPrefetch: () => prefetchRoute('/dashboard/discounts') },
+    { href: '/dashboard/analytics', label: 'Analytiques', icon: IconChartBar, onPrefetch: () => prefetchRoute('/dashboard/analytics') },
+    { href: '/dashboard/wallet', label: 'Portefeuille', icon: IconWallet, onPrefetch: () => prefetchRoute('/dashboard/wallet') },
   ];
 
   const navBottom = [
-    { href: '/dashboard/settings', label: 'Paramètres', icon: IconSettings },
-    { href: '/', label: 'Retour au site', icon: IconBuildingStore },
+    { href: '/dashboard/settings', label: 'Paramètres', icon: IconSettings, onPrefetch: () => prefetchRoute('/dashboard/settings') },
+    { href: '/', label: 'Retour au site', icon: IconBuildingStore, onPrefetch: () => prefetchRoute('/') },
   ];
 
-  if (!hasSession || hasStore === null || hasStore === false) {
+  if (!hasSession) {
     return (
       <AppShell header={{ height: 60 }} padding="md">
         <AppShell.Header>
           <Group h="100%" px="md" justify="space-between">
-            <Title order={4} c="green.7">
-              Simpshopy
-            </Title>
+            <Title order={4} c="green.7">Simpshopy</Title>
           </Group>
         </AppShell.Header>
         <AppShell.Main>
@@ -131,6 +142,10 @@ export default function DashboardLayout({
       </AppShell>
     );
   }
+
+  const mainContent = hasStore === null || hasStore === false
+    ? <Skeleton height={300} radius="md" />
+    : (children);
 
   return (
     <AppShell
@@ -219,6 +234,7 @@ export default function DashboardLayout({
                 leftSection={<item.icon size={20} stroke={1.5} />}
                 active={pathname === item.href || (item.href !== '/dashboard' && item.href !== '/' && pathname.startsWith(item.href + '/'))}
                 variant="subtle"
+                onMouseEnter={item.onPrefetch}
               />
             ))}
           </Stack>
@@ -229,7 +245,7 @@ export default function DashboardLayout({
         className={pathname?.includes('/boutique/editor') ? styles.editorMain : undefined}
         style={pathname?.includes('/boutique/editor') ? { overflow: 'hidden' } : undefined}
       >
-        {children}
+        {mainContent}
       </AppShell.Main>
     </AppShell>
   );
