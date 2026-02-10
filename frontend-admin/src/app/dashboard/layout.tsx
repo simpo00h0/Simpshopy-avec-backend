@@ -92,6 +92,20 @@ export default function DashboardLayout({
     }
   }, [hasStore, router]);
 
+  useEffect(() => {
+    if (hasStore !== true) return;
+    router.prefetch('/dashboard/boutique');
+    router.prefetch('/dashboard/boutique/editor');
+    router.prefetch('/dashboard/themes');
+    router.prefetch('/dashboard/orders');
+    router.prefetch('/dashboard/products');
+    router.prefetch('/dashboard/customers');
+    router.prefetch('/dashboard/settings');
+    prefetchOrders(queryClient);
+    prefetchProducts(queryClient);
+    prefetchCustomers(queryClient);
+  }, [hasStore, queryClient, router]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     logout();

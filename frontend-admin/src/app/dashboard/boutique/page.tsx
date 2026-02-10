@@ -27,6 +27,7 @@ export default function BoutiquePage() {
   const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3002';
 
   useEffect(() => {
+    if (currentStore != null) return;
     const refresh = async () => {
       try {
         const res = await api.get<{ id: string; name: string; slug: string; email: string; status: string; settings?: { themeId?: string | null } }[]>('/stores');
@@ -38,7 +39,7 @@ export default function BoutiquePage() {
       }
     };
     refresh();
-  }, [currentStore?.id, setCurrentStore]);
+  }, [currentStore, setCurrentStore]);
 
   if (!themeId) {
     return (
