@@ -246,7 +246,6 @@ export default function BoutiqueEditorPage() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropOverIndex, setDropOverIndex] = useState<number | null>(null);
-  const [hoveredPanelBlockIndex, setHoveredPanelBlockIndex] = useState<number | null>(null);
   const [libraryOpen, { open: openLibrary, close: closeLibrary }] = useDisclosure(false);
   const [settingsOpen, { open: openSettings, close: closeSettings }] = useDisclosure(false);
   const [previewMode, setPreviewMode] = useState(false);
@@ -700,48 +699,6 @@ export default function BoutiqueEditorPage() {
                     </Group>
                   </Paper>
                 ))}
-              </Stack>
-              <Text size="xs" fw={600} mt="md" mb="xs">Blocs sur la page</Text>
-              <Text size="xs" c="dimmed" mb="xs">Glissez un bloc pour le repositionner sur le canvas.</Text>
-              <Stack gap={4}>
-                {orderedHomeBlocks.map((blockId, i) => {
-                  const b = HOME_BLOCKS.find((x) => x.id === blockId);
-                  const label = b?.label ?? blockId;
-                  const isDragged = draggedId === blockId;
-                  return (
-                    <Paper
-                      key={`canvas-${i}`}
-                      p="xs"
-                      radius="sm"
-                      style={{
-                        cursor: 'grab',
-                        border: selectedBlock === blockId ? '2px solid var(--mantine-color-green-6)' : '1px solid var(--mantine-color-gray-2)',
-                        backgroundColor: selectedBlock === blockId ? 'var(--mantine-color-green-0)' : isDragged ? 'var(--mantine-color-gray-1)' : undefined,
-                        opacity: isDragged ? 0.7 : 1,
-                      }}
-                      onClick={() => selectBlock(blockId as BlockId)}
-                      draggable
-                      onDragStart={(e) => handleCanvasDragStart(e, blockId, i)}
-                      onDragEnd={handleDragEnd}
-                      onMouseEnter={() => setHoveredPanelBlockIndex(i)}
-                      onMouseLeave={() => setHoveredPanelBlockIndex(null)}
-                    >
-                      <Group gap="xs" justify="space-between" wrap="nowrap">
-                        <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
-                          <IconGripVertical size={14} style={{ color: 'var(--mantine-color-gray-5)', flexShrink: 0 }} />
-                          <Text size="sm" truncate>{label}</Text>
-                        </Group>
-                        {hoveredPanelBlockIndex === i && (
-                          <Tooltip label="Supprimer le bloc">
-                            <ActionIcon size="xs" color="red" variant="subtle" onClick={(e) => { e.stopPropagation(); removeBlockAtIndex(i); }} aria-label="Supprimer">
-                              <IconTrash size={12} />
-                            </ActionIcon>
-                          </Tooltip>
-                        )}
-                      </Group>
-                    </Paper>
-                  );
-                })}
               </Stack>
             </Box>
             <Button size="xs" variant="light" leftSection={<IconRefresh size={14} />} mt="md" onClick={() => update('sectionOrder', undefined)}>Réinitialiser l&apos;ordre</Button>
