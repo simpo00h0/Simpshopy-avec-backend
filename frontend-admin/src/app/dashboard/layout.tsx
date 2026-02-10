@@ -5,7 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import styles from './layout.module.css';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { AppShell, Group, Title, Text, Button, Burger, Skeleton, NavLink, Stack, Divider, TextInput, ActionIcon } from '@mantine/core';
+import { AppShell, Group, Title, Text, Button, Burger, NavLink, Stack, Divider, TextInput, ActionIcon } from '@mantine/core';
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconLogout,
@@ -159,14 +160,14 @@ export default function DashboardLayout({
           </Group>
         </AppShell.Header>
         <AppShell.Main>
-          <Skeleton height={200} />
+          <LoadingScreen />
         </AppShell.Main>
       </AppShell>
     );
   }
 
   const mainContent = hasStore === null || hasStore === false
-    ? <Skeleton height={300} radius="md" />
+    ? <LoadingScreen />
     : (children);
 
   return (
