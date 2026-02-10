@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import styles from './layout.module.css';
 import Link from 'next/link';
@@ -50,6 +50,29 @@ export default function DashboardLayout({
   const [opened, { toggle }] = useDisclosure();
   const [hasStore, setHasStore] = useState<boolean | null>(null);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+  const [showNavLoader, setShowNavLoader] = useState(false);
+  const navigatingToRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (navigatingTo && (pathname === navigatingTo || pathname.startsWith(navigatingTo + '/'))) {
+      navigatingToRef.current = null;
+      setNavigatingTo(null);
+      setShowNavLoader(false);
+    }
+  }, [navigatingTo, pathname]);
+
+  useEffect(() => {
+    if (!navigatingTo) return;
+    navigatingToRef.current = navigatingTo;
+    setShowNavLoader(false);
+    const t = setTimeout(() => {
+      if (navigatingToRef.current) setShowNavLoader(true);
+    }, 150);
+    return () => {
+      clearTimeout(t);
+    };
+  }, [navigatingTo]);
 
   useEffect(() => {
     const run = async () => {
@@ -170,7 +193,7 @@ export default function DashboardLayout({
 
   const mainContent = hasStore === null || hasStore === false
     ? <LoadingScreen />
-    : (children);
+    : (showNavLoader && navigatingTo ? <LoadingScreen /> : children);
 
   return (
     <AppShell
@@ -238,11 +261,13 @@ export default function DashboardLayout({
                 key={item.href}
                 component={Link}
                 href={item.href}
+                prefetch={false}
                 label={item.label}
                 leftSection={<item.icon size={20} stroke={1.5} />}
                 active={pathname === item.href || (item.href !== '/dashboard' && item.href !== '/' && pathname.startsWith(item.href + '/'))}
                 variant="subtle"
                 onMouseEnter={item.onPrefetch}
+                onClick={() => setNavigatingTo(item.href)}
               />
             ))}
           </Stack>
@@ -255,11 +280,13 @@ export default function DashboardLayout({
                 key={item.href}
                 component={Link}
                 href={item.href}
+                prefetch={false}
                 label={item.label}
                 leftSection={<item.icon size={20} stroke={1.5} />}
                 active={pathname === item.href || (item.href !== '/dashboard' && item.href !== '/' && pathname.startsWith(item.href + '/'))}
                 variant="subtle"
                 onMouseEnter={item.onPrefetch}
+                onClick={() => setNavigatingTo(item.href)}
               />
             ))}
           </Stack>
