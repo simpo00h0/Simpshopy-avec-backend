@@ -6,8 +6,17 @@
   gap: 10px;
 }
 
+/* Taille responsive : s'adapte à la largeur/hauteur de l'écran (grand sur desktop, petit sur mobile) */
+.loaderResponsive {
+  --loader-size: clamp(24px, 6vmin, 56px);
+  display: inline-flex;
+  gap: clamp(8px, 2vmin, 14px);
+}
+
 .loader::before,
-.loader::after {
+.loader::after,
+.loaderResponsive::before,
+.loaderResponsive::after {
   content: "";
   height: var(--loader-size);
   width: var(--loader-size);

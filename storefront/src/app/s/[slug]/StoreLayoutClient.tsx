@@ -151,6 +151,11 @@ export function StoreLayoutClient({ store, slug, children }: { store: StoreData;
     return () => window.removeEventListener('message', handler);
   }, [isEditor]);
 
+  useEffect(() => {
+    if (!isEditor) return;
+    window.parent?.postMessage({ type: 'simpshopy-editor-ready' }, '*');
+  }, [isEditor]);
+
   const effectiveCustomization = liveCustomization ?? store.themeCustomization;
 
   let theme: ThemeConfig = {

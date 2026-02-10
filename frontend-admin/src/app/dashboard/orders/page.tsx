@@ -15,6 +15,7 @@ import {
 } from '@mantine/core';
 import { IconShoppingCart } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 interface Order {
   id: string;
@@ -65,9 +66,7 @@ export default function OrdersPage() {
       </Group>
 
       {loading ? (
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <Text c="dimmed" ta="center" py={40}>Chargement...</Text>
-        </Card>
+        <LoadingScreen />
       ) : orders.length === 0 ? (
         <Card shadow="sm" padding="xl" radius="md" withBorder>
           <Group justify="center" py={60}>

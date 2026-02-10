@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useLayoutEffect, useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Box,
@@ -48,6 +48,7 @@ import {
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import { LoadingScreen } from '@/components/LoadingScreen';
 import { useStoreStore, type ThemeCustomization, type Store } from '@/stores/storeStore';
 import styles from './editor.module.css';
 
@@ -56,6 +57,7 @@ const SIMPSHOPY_BLOCK_DELETE = 'simpshopy-block-delete';
 const SIMPSHOPY_THEME_UPDATE = 'simpshopy-theme-update';
 const SIMPSHOPY_SCROLL_TO_BLOCK = 'simpshopy-scroll-to-block';
 const SIMPSHOPY_SELECTED_BLOCK = 'simpshopy-selected-block';
+const EDITOR_CACHED_KEY = 'simpshopy-editor-cached';
 
 const DEFAULT_SECTION_ORDER = [
   'promoBanner', 'hero', 'richText', 'categories', 'featuredCarousel', 'featuredProducts',
@@ -248,7 +250,20 @@ export default function BoutiqueEditorPage() {
   const [libraryOpen, { open: openLibrary, close: closeLibrary }] = useDisclosure(false);
   const [settingsOpen, { open: openSettings, close: closeSettings }] = useDisclosure(false);
   const [previewMode, setPreviewMode] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
+  const [showCanvasLoader, setShowCanvasLoader] = useState(false);
+  const [cachedFromSession, setCachedFromSession] = useState(false);
   const [addBlockOpen, setAddBlockOpen] = useState(false);
+
+  useLayoutEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage?.getItem(EDITOR_CACHED_KEY) === '1') {
+        setCachedFromSession(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
   const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
   const [leaveSaveInProgress, setLeaveSaveInProgress] = useState(false);
   const [saveAndLeaveFlow, setSaveAndLeaveFlow] = useState(false);
@@ -262,6 +277,34 @@ export default function BoutiqueEditorPage() {
   const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3002';
   const slug = currentStore?.slug ?? searchParams.get('slug') ?? '';
   const iframeSrc = slug ? `${storefrontUrl}/s/${slug}${currentTemplate.path}?editor=1` : '';
+
+  useEffect(() => {
+    if (!iframeSrc) return;
+    setCanvasReady(false);
+    setShowCanvasLoader(false);
+    const t = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.sessionStorage?.getItem(EDITOR_CACHED_KEY) !== '1') {
+        setShowCanvasLoader(true);
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [iframeSrc]);
+
+  useEffect(() => {
+    if (!iframeSrc) return;
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'simpshopy-editor-ready') {
+        setCanvasReady(true);
+        try {
+          window.sessionStorage?.setItem(EDITOR_CACHED_KEY, '1');
+        } catch {
+          // ignore
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [iframeSrc]);
 
   const isUndoRedoRef = useRef(false);
 
@@ -539,8 +582,16 @@ export default function BoutiqueEditorPage() {
     );
   }
 
+  const showEditorContent = cachedFromSession || canvasReady;
+
   return (
-    <Box className={styles.root}>
+    <>
+      {!showEditorContent && (
+        <Box style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--mantine-color-gray-0)' }}>
+          <LoadingScreen />
+        </Box>
+      )}
+      <Box className={styles.root}>
       {/* Barre supérieure - responsive avec hiddenFrom/visibleFrom (pas de useMediaQuery = pas de hydration mismatch) */}
       <Box className={styles.toolbar} p={{ base: 'xs', md: 'sm' }}>
         <Group justify="space-between" wrap="wrap" gap="xs" mb="xs">
@@ -699,7 +750,20 @@ export default function BoutiqueEditorPage() {
         {/* CENTRE : Canvas (preview) - CSS responsive pour largeur */}
         <Box className={styles.canvasWrapper}>
           <Box className={styles.canvasInner} style={{ width: viewport === 'mobile' ? 375 : viewport === 'tablet' ? 768 : '100%', maxWidth: '100%', boxShadow: viewport !== 'desktop' ? '0 0 20px rgba(0,0,0,0.15)' : 'none' }}>
-            <iframe ref={iframeRef} id="store-iframe" key={currentTemplate.path} src={iframeSrc} title="Ma boutique" style={{ width: '100%', height: '100%', border: 'none' }} />
+            {iframeSrc && showCanvasLoader && !canvasReady && (
+              <Box style={{ position: 'absolute', inset: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--mantine-color-gray-0)' }}>
+                <LoadingScreen />
+              </Box>
+            )}
+            <iframe
+              ref={iframeRef}
+              id="store-iframe"
+              key={currentTemplate.path}
+              src={iframeSrc}
+              title="Ma boutique"
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              onLoad={() => setCanvasReady(true)}
+            />
             {draggedId && (
               <Box
                 style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', pointerEvents: 'auto', zIndex: 50, minHeight: 200 }}
@@ -836,6 +900,7 @@ export default function BoutiqueEditorPage() {
         </Stack>
       </Modal>
     </Box>
+    </>
   );
 }
 

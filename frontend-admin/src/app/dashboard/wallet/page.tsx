@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Container, Title, Text, Card, Group, Table } from '@mantine/core';
 import { IconWallet } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 interface Transaction {
   id: string;
@@ -38,6 +39,17 @@ export default function WalletPage() {
     fetch();
   }, []);
 
+  if (loading) {
+    return (
+      <Container size="xl" py="xl">
+        <Title order={2} mb="xl">
+          Portefeuille
+        </Title>
+        <LoadingScreen />
+      </Container>
+    );
+  }
+
   return (
     <Container size="xl" py="xl">
       <Title order={2} mb="xl">
@@ -50,7 +62,7 @@ export default function WalletPage() {
               Solde disponible
             </Text>
             <Text size="xl" fw={700}>
-              {loading ? '...' : `${(balance ?? 0).toLocaleString('fr-FR')} XOF`}
+              {(balance ?? 0).toLocaleString('fr-FR')} XOF
             </Text>
           </div>
           <IconWallet size={40} stroke={1.5} />
@@ -63,11 +75,7 @@ export default function WalletPage() {
         <Title order={4} mb="md">
           Historique des transactions
         </Title>
-        {loading ? (
-          <Text size="sm" c="dimmed" py={20}>
-            Chargement...
-          </Text>
-        ) : transactions.length === 0 ? (
+        {transactions.length === 0 ? (
           <Text size="sm" c="dimmed" py={20} ta="center">
             Aucune transaction pour le moment
           </Text>

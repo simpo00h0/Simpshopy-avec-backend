@@ -21,6 +21,7 @@ import { IconPackage, IconPlus } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 interface Product {
   id: string;
@@ -113,9 +114,7 @@ export default function ProductsPage() {
       </Group>
 
       {loading ? (
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <Text c="dimmed" ta="center" py={40}>Chargement...</Text>
-        </Card>
+        <LoadingScreen />
       ) : products.length === 0 ? (
         <Card shadow="sm" padding="xl" radius="md" withBorder>
           <Group justify="center" py={60}>

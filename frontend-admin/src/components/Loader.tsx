@@ -4,20 +4,22 @@ import { Box } from '@mantine/core';
 import styles from '@/styles/loader.module.css';
 
 interface LoaderProps {
-  /** Taille en px (hauteur des cercles) */
+  /** Taille en px (hauteur des cercles). Ignoré si responsive=true */
   size?: number;
+  /** Taille adaptée à l'écran (clamp 24px–56px selon viewport) */
+  responsive?: boolean;
   /** Pour centrer dans un conteneur */
   centered?: boolean;
   /** Class name additionnel */
   className?: string;
 }
 
-export function Loader({ size = 20, centered, className }: LoaderProps) {
+export function Loader({ size = 20, responsive, centered, className }: LoaderProps) {
   const loaderEl = (
     <Box
       component="div"
-      className={[styles.loader, className].filter(Boolean).join(' ')}
-      style={{ ['--loader-size' as string]: `${size}px` }}
+      className={[responsive ? styles.loaderResponsive : styles.loader, className].filter(Boolean).join(' ')}
+      style={responsive ? undefined : { ['--loader-size' as string]: `${size}px` }}
       role="status"
       aria-label="Chargement"
     />

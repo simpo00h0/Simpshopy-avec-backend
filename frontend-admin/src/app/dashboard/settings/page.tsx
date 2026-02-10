@@ -8,6 +8,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { useStoreStore } from '@/stores/storeStore';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 export default function SettingsPage() {
   const currentStore = useStoreStore((s) => s.currentStore);
@@ -100,10 +101,23 @@ export default function SettingsPage() {
     settingsMutation.mutate(values);
   };
 
-  if (loading || !currentStore) {
+  if (loading) {
     return (
       <Container size="xl" py="xl">
-        <Text c="dimmed">{loading ? 'Chargement...' : 'Aucune boutique sélectionnée'}</Text>
+        <Title order={2} mb="xl">
+          Paramètres
+        </Title>
+        <LoadingScreen />
+      </Container>
+    );
+  }
+  if (!currentStore) {
+    return (
+      <Container size="xl" py="xl">
+        <Title order={2} mb="xl">
+          Paramètres
+        </Title>
+        <Text c="dimmed">Aucune boutique sélectionnée</Text>
       </Container>
     );
   }

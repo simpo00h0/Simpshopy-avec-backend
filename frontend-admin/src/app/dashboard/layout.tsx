@@ -76,12 +76,14 @@ export default function DashboardLayout({
           api.get<{ id: string; name: string; slug: string; email: string; status: string }[]>('/stores'),
           api.get('/auth/me').catch(() => null),
         ]);
-        if (meRes?.data) setUser(meRes.data);
         const stores = storesRes.data;
-        setHasStore(stores != null && stores.length > 0);
-        if (stores?.length) useStoreStore.getState().setCurrentStore(stores[0]);
+        queueMicrotask(() => {
+          if (meRes?.data) setUser(meRes.data);
+          setHasStore(stores != null && stores.length > 0);
+          if (stores?.length) useStoreStore.getState().setCurrentStore(stores[0]);
+        });
       } catch {
-        setHasStore(false);
+        queueMicrotask(() => setHasStore(false));
       }
     };
     run();

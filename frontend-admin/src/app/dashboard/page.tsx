@@ -30,7 +30,7 @@ async function fetchDashboardStats() {
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const currentStore = useStoreStore((s) => s.currentStore);
-  const { data: stats = { products: 0, orders: 0, revenue: 0, customers: 0 }, isLoading: loading } = useQuery({
+  const { data: stats = { products: 0, orders: 0, revenue: 0, customers: 0 }, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: fetchDashboardStats,
     staleTime: 30_000,
@@ -102,10 +102,10 @@ export default function DashboardPage() {
 
       <Grid gutter="md">
         {[
-          { title: 'Produits', value: loading ? '...' : stats.products.toString(), icon: IconPackage },
-          { title: 'Commandes', value: loading ? '...' : stats.orders.toString(), icon: IconShoppingBag },
-          { title: 'Revenus', value: loading ? '...' : `${stats.revenue.toLocaleString('fr-FR')} XOF`, icon: IconCurrencyDollar },
-          { title: 'Clients', value: loading ? '...' : stats.customers.toString(), icon: IconUsers },
+          { title: 'Produits', value: isLoading ? '...' : stats.products.toString(), icon: IconPackage },
+          { title: 'Commandes', value: isLoading ? '...' : stats.orders.toString(), icon: IconShoppingBag },
+          { title: 'Revenus', value: isLoading ? '...' : `${stats.revenue.toLocaleString('fr-FR')} XOF`, icon: IconCurrencyDollar },
+          { title: 'Clients', value: isLoading ? '...' : stats.customers.toString(), icon: IconUsers },
         ].map((stat) => (
           <Grid.Col key={stat.title} span={{ base: 12, sm: 6, md: 3 }}>
             <Card shadow="sm" padding="lg" radius="md" withBorder>

@@ -14,7 +14,7 @@ export function LoadingScreen() {
         width: '100%',
       }}
     >
-      <Loader size={28} />
+      <Loader responsive />
     </Box>
   );
 }
