@@ -93,7 +93,8 @@ export default function DashboardLayout({
   }, [hasStore, router]);
 
   useEffect(() => {
-    if (hasStore !== true) return;
+    if (hasSession !== true) return;
+    router.prefetch('/dashboard');
     router.prefetch('/dashboard/boutique');
     router.prefetch('/dashboard/boutique/editor');
     router.prefetch('/dashboard/themes');
@@ -101,10 +102,17 @@ export default function DashboardLayout({
     router.prefetch('/dashboard/products');
     router.prefetch('/dashboard/customers');
     router.prefetch('/dashboard/settings');
+    router.prefetch('/dashboard/discounts');
+    router.prefetch('/dashboard/analytics');
+    router.prefetch('/dashboard/wallet');
+  }, [hasSession, router]);
+
+  useEffect(() => {
+    if (hasStore !== true) return;
     prefetchOrders(queryClient);
     prefetchProducts(queryClient);
     prefetchCustomers(queryClient);
-  }, [hasStore, queryClient, router]);
+  }, [hasStore, queryClient]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

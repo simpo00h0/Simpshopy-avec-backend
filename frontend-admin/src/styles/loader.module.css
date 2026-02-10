@@ -1,0 +1,36 @@
+/* Loader deux cercles animés — identité Simpshopy (vert) */
+
+.loader {
+  --loader-size: 20px;
+  display: inline-flex;
+  gap: 10px;
+}
+
+.loader::before,
+.loader::after {
+  content: "";
+  height: var(--loader-size);
+  width: var(--loader-size);
+  border-radius: 50%;
+  background:
+    linear-gradient(var(--loader-fill, var(--mantine-color-green-7)) 0 0) top/100% 0% no-repeat,
+    radial-gradient(farthest-side, var(--loader-dot, var(--mantine-color-green-8)) 95%, transparent) 50% / calc(var(--loader-size) * 0.4) calc(var(--loader-size) * 0.4) no-repeat
+    var(--mantine-color-green-1);
+  animation: loaderFill 4s infinite ease-in;
+}
+
+@keyframes loaderFill {
+  0% {
+    background-size: 100% 0%, calc(var(--loader-size) * 0.4) calc(var(--loader-size) * 0.4);
+    background-position: top, 50% 50%;
+  }
+  80% {
+    background-size: 100% 70%, calc(var(--loader-size) * 0.4) calc(var(--loader-size) * 0.4);
+    background-position: top, 50% 70%;
+  }
+  84%,
+  100% {
+    background-size: 100% 0%, calc(var(--loader-size) * 0.4) calc(var(--loader-size) * 0.4);
+    background-position: top, 50% 50%;
+  }
+}
