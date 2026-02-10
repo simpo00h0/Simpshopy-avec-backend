@@ -294,7 +294,7 @@ export default function DashboardLayout({
       </AppShell.Navbar>
       <AppShell.Main
         p={pathname?.includes('/boutique/editor') ? 0 : 'md'}
-        className={pathname?.includes('/boutique/editor') ? styles.editorMain : undefined}
+        className={pathname?.includes('/boutique/editor') ? styles.editorMain : styles.appShellMain}
         style={pathname?.includes('/boutique/editor') ? { overflow: 'hidden' } : undefined}
       >
         {mainContent}

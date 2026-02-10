@@ -5,7 +5,7 @@ import { IconChartBar, IconTrendingUp } from '@tabler/icons-react';
 
 export default function AnalyticsPage() {
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Title order={2} mb="xl">
         Analytiques
       </Title>

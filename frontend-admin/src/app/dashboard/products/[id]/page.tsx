@@ -105,14 +105,14 @@ export default function ProductEditPage() {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
+      <Container fluid py="xl">
         <Text c="dimmed">Chargement...</Text>
       </Container>
     );
   }
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Group mb="xl" gap="md">
         <Button variant="subtle" leftSection={<IconArrowLeft size={16} />} component={Link} href="/dashboard/products">
           Retour

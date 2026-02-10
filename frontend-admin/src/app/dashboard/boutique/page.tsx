@@ -43,7 +43,7 @@ export default function BoutiquePage() {
 
   if (!themeId) {
     return (
-      <Container size="xl" py="xl">
+      <Container fluid py="xl">
         <Title order={2} mb="xl">
           Boutique
         </Title>
@@ -77,7 +77,7 @@ export default function BoutiquePage() {
   const previewUrl = `${storefrontUrl}/preview/${themeId}`;
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Group justify="space-between" mb="xl">
         <div>
           <Title order={2}>Boutique</Title>

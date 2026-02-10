@@ -45,7 +45,7 @@ export default function OrderDetailPage() {
 
   if (loading || !order) {
     return (
-      <Container size="xl" py="xl">
+      <Container fluid py="xl">
         {!loading && !order && (
           <Text c="dimmed">Commande introuvable. <Link href="/dashboard/orders">Retour aux commandes</Link></Text>
         )}
@@ -60,7 +60,7 @@ export default function OrderDetailPage() {
   };
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Group mb="xl" gap="md">
         <Button variant="subtle" leftSection={<IconArrowLeft size={16} />} component={Link} href="/dashboard/orders">
           Retour aux commandes

@@ -86,7 +86,7 @@ export default function ThemesPage() {
   };
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Group justify="space-between" mb="xl">
         <div>
           <Title order={2}>Templates de boutique</Title>

@@ -44,7 +44,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Title order={1} mb="lg">
         Bienvenue, {user?.firstName || 'Vendeur'} !
       </Title>

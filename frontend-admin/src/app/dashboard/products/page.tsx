@@ -105,7 +105,7 @@ export default function ProductsPage() {
   };
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Group justify="space-between" mb="xl">
         <Title order={2}>Produits</Title>
         <Button leftSection={<IconPlus size={18} />} color="green" onClick={() => setModalOpen(true)}>

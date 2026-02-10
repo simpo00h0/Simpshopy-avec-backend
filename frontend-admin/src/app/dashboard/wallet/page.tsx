@@ -41,7 +41,7 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
+      <Container fluid py="xl">
         <Title order={2} mb="xl">
           Portefeuille
         </Title>
@@ -51,7 +51,7 @@ export default function WalletPage() {
   }
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Title order={2} mb="xl">
         Portefeuille
       </Title>
@@ -61,7 +61,7 @@ export default function WalletPage() {
             <Text size="sm" c="dimmed">
               Solde disponible
             </Text>
-            <Text size="xl" fw={700}>
+            <Text fluid fw={700}>
               {(balance ?? 0).toLocaleString('fr-FR')} XOF
             </Text>
           </div>

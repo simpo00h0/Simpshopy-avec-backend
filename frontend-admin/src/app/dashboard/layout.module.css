@@ -12,3 +12,18 @@
     height: calc(100vh - 60px) !important;
   }
 }
+
+/* Zone principale : padding gauche = largeur navbar (variable Mantine avec repli 260px).
+   Un seul offset, pas de margin-left, pour éviter gap au dézoom et overlap à 100 %. */
+.appShellMain {
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 576px) {
+  .appShellMain {
+    padding-left: calc(var(--mantine-navbar-width, 260px) + var(--mantine-spacing-md, 1rem)) !important;
+  }
+}

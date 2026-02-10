@@ -20,7 +20,7 @@ export default function CustomersPage() {
   });
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Title order={2} mb="xl">
         Clients
       </Title>

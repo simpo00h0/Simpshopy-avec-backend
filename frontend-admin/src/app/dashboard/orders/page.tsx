@@ -45,7 +45,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Group justify="space-between" mb="xl">
         <Title order={2}>Commandes</Title>
         <Select

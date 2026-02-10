@@ -103,7 +103,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <Container size="xl" py="xl">
+      <Container fluid py="xl">
         <Title order={2} mb="xl">
           Paramètres
         </Title>
@@ -113,7 +113,7 @@ export default function SettingsPage() {
   }
   if (!currentStore) {
     return (
-      <Container size="xl" py="xl">
+      <Container fluid py="xl">
         <Title order={2} mb="xl">
           Paramètres
         </Title>
@@ -123,7 +123,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Title order={2} mb="xl">
         Paramètres
       </Title>

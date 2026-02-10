@@ -5,7 +5,7 @@ import { IconDiscount2 } from '@tabler/icons-react';
 
 export default function DiscountsPage() {
   return (
-    <Container size="xl" py="xl">
+    <Container fluid py="xl">
       <Title order={2} mb="xl">
         Réductions
       </Title>
