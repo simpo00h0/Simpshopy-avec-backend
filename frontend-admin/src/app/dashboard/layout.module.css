@@ -13,13 +13,13 @@
   }
 }
 
-/* Zone principale : padding gauche = largeur navbar (variable Mantine avec repli 260px).
-   Un seul offset, pas de margin-left, pour éviter gap au dézoom et overlap à 100 %. */
+/* Zone principale : offset haut = hauteur header (évite que le header fixe coupe le contenu). */
 .appShellMain {
   min-width: 0;
   flex: 1;
   overflow-x: auto;
   box-sizing: border-box;
+  padding-top: calc(var(--mantine-header-height, 60px) + var(--mantine-spacing-md, 1rem)) !important;
 }
 
 @media (min-width: 576px) {
