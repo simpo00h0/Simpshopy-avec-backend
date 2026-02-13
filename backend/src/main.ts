@@ -2,10 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { join } from 'path';
 import { AppModule } from './app.module';
+import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalFilters(new DomainExceptionFilter());
+
+  const serveStatic = require('serve-static');
+  app.use('/uploads', serveStatic(join(process.cwd(), 'uploads')));
 
   const configService = app.get(ConfigService);
   const port = configService.get('PORT') || 3000;

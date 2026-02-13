@@ -5,10 +5,10 @@ export interface CreateEventInput {
   actorType?: 'user' | 'system' | 'admin';
   storeId?: string;
   type: EventType;
-  payload?: any;
+  payload?: unknown;
   ipAddress?: string;
   userAgent?: string;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 export interface EventLog {
@@ -17,9 +17,9 @@ export interface EventLog {
   actorType?: string;
   storeId?: string;
   type: EventType;
-  payload?: any;
+  payload?: unknown;
   ipAddress?: string;
   userAgent?: string;
-  metadata?: any;
+  metadata?: unknown;
   createdAt: Date;
 }

@@ -72,7 +72,7 @@ export class WalletRepository implements IWalletRepository {
     return transactions.map((t) => this.mapTransactionToEntity(t));
   }
 
-  private mapToEntity(wallet: any): Wallet {
+  private mapToEntity(wallet: { id: string; storeId: string; balance: number; currency: string; pendingPayout: number }): Wallet {
     return {
       id: wallet.id,
       storeId: wallet.storeId,
@@ -82,11 +82,11 @@ export class WalletRepository implements IWalletRepository {
     };
   }
 
-  private mapTransactionToEntity(transaction: any): WalletTransaction {
+  private mapTransactionToEntity(transaction: { id: string; walletId: string; type: string; amount: number; balance: number; orderId?: string | null; description?: string | null; reference?: string | null }): WalletTransaction {
     return {
       id: transaction.id,
       walletId: transaction.walletId,
-      type: transaction.type,
+      type: transaction.type as WalletTransaction['type'],
       amount: transaction.amount,
       balance: transaction.balance,
       orderId: transaction.orderId ?? undefined,

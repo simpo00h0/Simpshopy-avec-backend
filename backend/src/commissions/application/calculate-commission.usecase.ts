@@ -1,5 +1,4 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { CommissionPolicy } from '../domain/commission.policy';
 import { ICommissionRepository } from '../domain/commission.repository';
 import { CommissionResult } from '../domain/commission.entity';
@@ -15,14 +14,15 @@ export class CalculateCommissionUseCase {
   constructor(
     @Inject('ICommissionRepository')
     private commissionRepository: ICommissionRepository,
-    private prisma: PrismaService,
   ) {}
 
   async execute(input: CalculateCommissionInput): Promise<CommissionResult> {
     const { storeId, amount, appliesTo } = input;
 
-    const store = await this.getStoreWithSubscription(storeId);
-    const plan = store.subscription?.plan || 'FREE';
+    const store = await this.commissionRepository.findStoreWithSubscription(
+      storeId,
+    );
+    const plan = store?.plan ?? 'FREE';
 
     const customFee = await this.commissionRepository.findByStoreAndType(
       storeId,
@@ -46,29 +46,30 @@ export class CalculateCommissionUseCase {
     };
   }
 
-  private async getStoreWithSubscription(storeId: string) {
-    return this.prisma.store.findUnique({
-      where: { id: storeId },
-      include: { subscription: true },
-    });
-  }
-
   private calculateAmount(
     amount: number,
     plan: string,
-    customFee?: any,
+    customFee?: { type?: string; value?: number; isActive?: boolean; minAmount?: number; maxAmount?: number } | null,
   ): number {
-    if (customFee?.isActive) {
-      return this.calculateWithCustomFee(amount, customFee);
+    if (customFee?.isActive && customFee?.type && customFee?.value != null) {
+      return this.calculateWithCustomFee(amount, {
+        type: customFee.type,
+        value: customFee.value,
+        minAmount: customFee.minAmount,
+        maxAmount: customFee.maxAmount,
+      });
     }
 
-    const rate = CommissionPolicy.getDefaultRate(plan as any);
+    const rate = CommissionPolicy.getDefaultRate(plan as 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE');
     const commission = CommissionPolicy.calculatePercentage(amount, rate);
 
     return Math.round(commission * 100) / 100;
   }
 
-  private calculateWithCustomFee(amount: number, fee: any): number {
+  private calculateWithCustomFee(
+    amount: number,
+    fee: { type: string; value: number; minAmount?: number; maxAmount?: number },
+  ): number {
     let commission = 0;
 
     if (fee.type === 'percentage') {

@@ -2,19 +2,19 @@ export interface CreatePageInput {
   storeId: string;
   title: string;
   slug: string;
-  content: any;
+  content: unknown;
 }
 
 export interface UpdatePageInput {
   id: string;
   title?: string;
-  content?: any;
+  content?: unknown;
   isPublished?: boolean;
 }
 
 export interface CreatePageVersionInput {
   pageId: string;
-  content: any;
+  content: unknown;
   note?: string;
 }
 
@@ -23,7 +23,7 @@ export interface Page {
   storeId: string;
   title: string;
   slug: string;
-  content: any;
+  content: unknown;
   isPublished: boolean;
   publishedAt?: Date;
 }
@@ -31,7 +31,7 @@ export interface Page {
 export interface PageVersion {
   id: string;
   pageId: string;
-  content: any;
+  content: unknown;
   version: number;
   note?: string;
   createdAt: Date;

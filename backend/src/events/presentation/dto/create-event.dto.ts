@@ -24,5 +24,5 @@ export class CreateEventDto {
 
   @ApiProperty({ required: false, description: 'Payload JSON' })
   @IsOptional()
-  payload?: any;
+  payload?: unknown;
 }

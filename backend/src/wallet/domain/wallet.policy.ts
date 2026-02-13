@@ -1,7 +1,12 @@
+import {
+  InsufficientBalanceException,
+  InvalidAmountException,
+} from '../../common/domain/exceptions';
+
 export class WalletPolicy {
   static validateSufficientBalance(currentBalance: number, amount: number): void {
     if (currentBalance < amount) {
-      throw new Error('Solde insuffisant');
+      throw new InsufficientBalanceException();
     }
   }
 
@@ -11,7 +16,7 @@ export class WalletPolicy {
 
   static validatePositiveAmount(amount: number): void {
     if (amount <= 0) {
-      throw new Error('Le montant doit être positif');
+      throw new InvalidAmountException();
     }
   }
 }

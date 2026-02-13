@@ -2,20 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   IPageRepository,
+  ListPagesFilters,
 } from '../domain/page.repository';
-import { Page, PageVersion } from '../domain/page.entity';
+import {
+  Page,
+  PageVersion,
+  CreatePageInput,
+  UpdatePageInput,
+} from '../domain/page.entity';
 
 @Injectable()
 export class PageRepository implements IPageRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(input: any): Promise<Page> {
+  async create(input: CreatePageInput): Promise<Page> {
     const created = await this.prisma.page.create({
       data: {
         storeId: input.storeId,
         title: input.title,
         slug: input.slug,
-        content: input.content,
+        content: input.content as object,
         isPublished: false,
       },
     });
@@ -23,8 +29,8 @@ export class PageRepository implements IPageRepository {
     return this.mapToEntity(created);
   }
 
-  async update(input: any): Promise<Page> {
-    const data: any = {};
+  async update(input: UpdatePageInput): Promise<Page> {
+    const data: Record<string, unknown> = {};
     if (input.title) data.title = input.title;
     if (input.content) data.content = input.content;
     if (input.isPublished !== undefined) {
@@ -60,9 +66,22 @@ export class PageRepository implements IPageRepository {
     return page ? this.mapToEntity(page) : null;
   }
 
+  async findMany(filters: ListPagesFilters): Promise<Page[]> {
+    const where: Record<string, unknown> = {};
+    if (filters.storeId) where.storeId = filters.storeId;
+    if (filters.isPublished !== undefined) where.isPublished = filters.isPublished;
+
+    const pages = await this.prisma.page.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return pages.map((p) => this.mapToEntity(p));
+  }
+
   async createVersion(
     pageId: string,
-    content: any,
+    content: unknown,
     note?: string,
   ): Promise<PageVersion> {
     const versions = await this.prisma.pageVersion.findMany({
@@ -76,7 +95,7 @@ export class PageRepository implements IPageRepository {
     const created = await this.prisma.pageVersion.create({
       data: {
         pageId,
-        content,
+        content: content as object,
         version: nextVersion,
         note,
       },
@@ -108,7 +127,15 @@ export class PageRepository implements IPageRepository {
     return versionData ? this.mapVersionToEntity(versionData) : null;
   }
 
-  private mapToEntity(page: any): Page {
+  private mapToEntity(page: {
+    id: string;
+    storeId: string;
+    title: string;
+    slug: string;
+    content: unknown;
+    isPublished: boolean;
+    publishedAt?: Date | null;
+  }): Page {
     return {
       id: page.id,
       storeId: page.storeId,
@@ -120,7 +147,14 @@ export class PageRepository implements IPageRepository {
     };
   }
 
-  private mapVersionToEntity(version: any): PageVersion {
+  private mapVersionToEntity(version: {
+    id: string;
+    pageId: string;
+    content: unknown;
+    version: number;
+    note?: string | null;
+    createdAt: Date;
+  }): PageVersion {
     return {
       id: version.id,
       pageId: version.pageId,

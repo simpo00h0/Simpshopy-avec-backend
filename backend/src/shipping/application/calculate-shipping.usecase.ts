@@ -5,6 +5,8 @@ import {
 import {
   CalculateShippingInput,
   ShippingQuote,
+  ShippingZone,
+  ShippingMethod,
 } from '../domain/shipping.entity';
 import { ShippingPolicy } from '../domain/shipping.policy';
 
@@ -40,22 +42,25 @@ export class CalculateShippingUseCase {
   }
 
   private findMatchingZone(
-    zones: any[],
+    zones: ShippingZone[],
     country: string,
     city?: string,
-  ): any | null {
+  ): ShippingZone | null {
     return zones.find((zone) =>
       ShippingPolicy.matchesZone(zone, country, city),
-    ) || null;
+    ) ?? null;
   }
 
-  private filterByWeight(methods: any[], weight?: number): any[] {
+  private filterByWeight(
+    methods: ShippingMethod[],
+    weight?: number,
+  ): ShippingMethod[] {
     return methods.filter((method) =>
       ShippingPolicy.matchesWeight(method, weight),
     );
   }
 
-  private createQuote(method: any): ShippingQuote {
+  private createQuote(method: ShippingMethod): ShippingQuote {
     return {
       method,
       price: method.price,

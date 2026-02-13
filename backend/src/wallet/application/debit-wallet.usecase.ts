@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { IWalletRepository } from '../domain/wallet.repository';
 import { DebitWalletInput, WalletTransaction } from '../domain/wallet.entity';
 import { WalletPolicy } from '../domain/wallet.policy';
@@ -16,7 +16,7 @@ export class DebitWalletUseCase {
     const wallet = await this.walletRepository.findByStoreId(input.storeId);
 
     if (!wallet) {
-      throw new Error('Wallet introuvable');
+      throw new NotFoundException('Wallet introuvable');
     }
 
     WalletPolicy.validateSufficientBalance(wallet.balance, input.amount);

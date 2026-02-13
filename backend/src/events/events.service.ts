@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { CreateEventUseCase } from './application/create-event.usecase';
+import { ListEventsUseCase } from './application/list-events.usecase';
 import { CreateEventInput, EventLog } from './domain/event.entity';
+import { ListEventsFilters } from './domain/event.repository';
 
 @Injectable()
 export class EventsService {
-  constructor(private createEventUseCase: CreateEventUseCase) {}
+  constructor(
+    private createEventUseCase: CreateEventUseCase,
+    private listEventsUseCase: ListEventsUseCase,
+  ) {}
+
+  async list(filters: ListEventsFilters): Promise<EventLog[]> {
+    return this.listEventsUseCase.execute(filters);
+  }
 
   async log(input: CreateEventInput): Promise<EventLog> {
     return this.createEventUseCase.execute(input);

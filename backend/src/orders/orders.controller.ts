@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -18,9 +19,9 @@ import {
 } from '@nestjs/swagger';
 import { SupabaseJwtGuard } from '../auth/guards/supabase-jwt.guard';
 import { OrdersService } from './orders.service';
+import { StoresService } from '../stores/stores.service';
 import { CreateOrderDto } from './presentation/dto/create-order.dto';
 import { ConfirmPaymentDto } from './presentation/dto/confirm-payment.dto';
-import { PrismaService } from '../prisma/prisma.service';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -29,7 +30,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
-    private prisma: PrismaService,
+    private readonly storesService: StoresService,
   ) {}
 
   @Post()
@@ -48,43 +49,26 @@ export class OrdersController {
   @ApiQuery({ name: 'storeId', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiResponse({ status: 200, description: 'Liste des commandes' })
-  async findAll(@Request() req, @Query('storeId') storeId?: string, @Query('status') status?: string) {
-    const where: any = {};
+  async findAll(
+    @Request() req,
+    @Query('storeId') storeId?: string,
+    @Query('status') status?: string,
+  ) {
+    const filters: Record<string, string> = {};
+    if (status) filters.status = status;
 
     if (req.user.role === 'SELLER') {
-      const store = await this.getStoreFromUser(req.user.id);
-      where.storeId = store.id;
+      const store = await this.storesService.findFirstByOwner(req.user.id);
+      filters.storeId = store.id;
     } else if (storeId) {
-      where.storeId = storeId;
+      filters.storeId = storeId;
     }
 
     if (req.user.role === 'CUSTOMER') {
-      where.customerId = req.user.id;
+      filters.customerId = req.user.id;
     }
 
-    if (status) {
-      where.status = status;
-    }
-
-    return this.prisma.order.findMany({
-      where,
-      include: {
-        items: {
-          include: {
-            product: true,
-            variant: true,
-          },
-        },
-        store: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.ordersService.listOrders(filters);
   }
 
   @Get(':id')
@@ -93,39 +77,16 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Détails de la commande' })
   @ApiResponse({ status: 404, description: 'Commande non trouvée' })
   async findOne(@Request() req, @Param('id') id: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { id },
-      include: {
-        items: {
-          include: {
-            product: true,
-            variant: true,
-          },
-        },
-        store: true,
-        customer: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    if (!order) {
-      throw new Error('Commande non trouvée');
-    }
+    const order = await this.ordersService.getOrder(id);
 
     if (req.user.role === 'CUSTOMER' && order.customerId !== req.user.id) {
-      throw new Error('Accès non autorisé');
+      throw new ForbiddenException('Accès non autorisé');
     }
 
     if (req.user.role === 'SELLER') {
-      const store = await this.getStoreFromUser(req.user.id);
+      const store = await this.storesService.findFirstByOwner(req.user.id);
       if (order.storeId !== store.id) {
-        throw new Error('Accès non autorisé');
+        throw new ForbiddenException('Accès non autorisé');
       }
     }
 
@@ -143,17 +104,5 @@ export class OrdersController {
   ) {
     await this.ordersService.confirmPayment(id, dto.paymentId);
     return { message: 'Paiement confirmé avec succès' };
-  }
-
-  private async getStoreFromUser(userId: string) {
-    const store = await this.prisma.store.findFirst({
-      where: { ownerId: userId },
-    });
-
-    if (!store) {
-      throw new Error('Aucune boutique trouvée pour cet utilisateur');
-    }
-
-    return store;
   }
 }

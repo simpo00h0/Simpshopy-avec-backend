@@ -2,8 +2,8 @@ export interface CreateOrderInput {
   storeId: string;
   customerId: string;
   items: OrderItemInput[];
-  shippingAddress: any;
-  billingAddress?: any;
+  shippingAddress: unknown;
+  billingAddress?: unknown;
   paymentMethod: string;
   shippingZoneId?: string;
   shippingMethodId?: string;

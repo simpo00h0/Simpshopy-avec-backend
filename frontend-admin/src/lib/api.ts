@@ -3,6 +3,10 @@ import { supabase } from './supabase';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
+/** Base URL pour les images uploadées (sans /api/v1) */
+export const UPLOAD_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v\d+\/?$/, '') || 'http://localhost:3000';
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -41,6 +45,9 @@ if (typeof window !== 'undefined') {
 
 api.interceptors.request.use(async (config) => {
   if (typeof window === 'undefined') return config;
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
   let token = getCachedToken();
   if (!token) {
     const { data: { session } } = await supabase.auth.getSession();

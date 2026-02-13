@@ -13,7 +13,7 @@ export class CreatePageDto {
   slug: string;
 
   @ApiProperty({ description: 'Configuration JSON du page builder' })
-  content: any;
+  content: unknown;
 }
 
 export class UpdatePageDto {
@@ -24,7 +24,7 @@ export class UpdatePageDto {
 
   @ApiProperty({ required: false, description: 'Configuration JSON du page builder' })
   @IsOptional()
-  content?: any;
+  content?: unknown;
 
   @ApiProperty({ required: false, example: true })
   @IsOptional()

@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import {
   IPageRepository,
 } from '../domain/page.repository';
@@ -18,7 +18,7 @@ export class RestorePageVersionUseCase {
     );
 
     if (!versionData) {
-      throw new Error('Version introuvable');
+      throw new NotFoundException('Version introuvable');
     }
 
     await this.pageRepository.createVersion(

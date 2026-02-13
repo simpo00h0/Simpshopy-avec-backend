@@ -8,6 +8,7 @@ import {
   UseGuards,
   Request,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,8 +20,8 @@ import {
 } from '@nestjs/swagger';
 import { SupabaseJwtGuard } from '../auth/guards/supabase-jwt.guard';
 import { PagesService } from './pages.service';
+import { StoresService } from '../stores/stores.service';
 import { CreatePageDto, UpdatePageDto } from './presentation/dto/page.dto';
-import { PrismaService } from '../prisma/prisma.service';
 
 @ApiTags('pages')
 @Controller('pages')
@@ -29,14 +30,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class PagesController {
   constructor(
     private readonly pagesService: PagesService,
-    private prisma: PrismaService,
+    private readonly storesService: StoresService,
   ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une nouvelle page' })
   @ApiResponse({ status: 201, description: 'Page créée avec succès' })
   async create(@Request() req, @Body() dto: CreatePageDto) {
-    const store = await this.getStoreFromUser(req.user.id);
+    const store = await this.storesService.findFirstByOwner(req.user.id);
 
     return this.pagesService.createPage({
       ...dto,
@@ -54,23 +55,19 @@ export class PagesController {
     @Query('storeId') storeId?: string,
     @Query('published') published?: string,
   ) {
-    const where: any = {};
+    let resolvedStoreId = storeId;
 
-    if (req.user.role === 'SELLER') {
-      const store = await this.getStoreFromUser(req.user.id);
-      where.storeId = store.id;
-    } else if (storeId) {
-      where.storeId = storeId;
+    if (req.user.role === 'SELLER' && !storeId) {
+      const store = await this.storesService.findFirstByOwner(req.user.id);
+      resolvedStoreId = store.id;
     }
 
-    if (published === 'true') {
-      where.isPublished = true;
-    }
+    const filters = {
+      ...(resolvedStoreId && { storeId: resolvedStoreId }),
+      ...(published === 'true' && { isPublished: true }),
+    };
 
-    return this.prisma.page.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.pagesService.listPages(filters);
   }
 
   @Get(':id')
@@ -79,18 +76,12 @@ export class PagesController {
   @ApiResponse({ status: 200, description: 'Détails de la page' })
   @ApiResponse({ status: 404, description: 'Page non trouvée' })
   async findOne(@Request() req, @Param('id') id: string) {
-    const page = await this.prisma.page.findUnique({
-      where: { id },
-    });
-
-    if (!page) {
-      throw new Error('Page non trouvée');
-    }
+    const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.getStoreFromUser(req.user.id);
+      const store = await this.storesService.findFirstByOwner(req.user.id);
       if (page.storeId !== store.id) {
-        throw new Error('Accès non autorisé');
+        throw new ForbiddenException('Accès non autorisé');
       }
     }
 
@@ -110,16 +101,12 @@ export class PagesController {
     @Query('createVersion') createVersion?: string,
     @Query('note') note?: string,
   ) {
-    const page = await this.prisma.page.findUnique({ where: { id } });
-
-    if (!page) {
-      throw new Error('Page non trouvée');
-    }
+    const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.getStoreFromUser(req.user.id);
+      const store = await this.storesService.findFirstByOwner(req.user.id);
       if (page.storeId !== store.id) {
-        throw new Error('Accès non autorisé');
+        throw new ForbiddenException('Accès non autorisé');
       }
     }
 
@@ -137,23 +124,16 @@ export class PagesController {
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: 200, description: 'Versions de la page' })
   async getVersions(@Request() req, @Param('id') id: string) {
-    const page = await this.prisma.page.findUnique({ where: { id } });
-
-    if (!page) {
-      throw new Error('Page non trouvée');
-    }
+    const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.getStoreFromUser(req.user.id);
+      const store = await this.storesService.findFirstByOwner(req.user.id);
       if (page.storeId !== store.id) {
-        throw new Error('Accès non autorisé');
+        throw new ForbiddenException('Accès non autorisé');
       }
     }
 
-    return this.prisma.pageVersion.findMany({
-      where: { pageId: id },
-      orderBy: { version: 'desc' },
-    });
+    return this.pagesService.getPageVersions(id);
   }
 
   @Post(':id/restore/:version')
@@ -166,31 +146,15 @@ export class PagesController {
     @Param('id') id: string,
     @Param('version') version: string,
   ) {
-    const page = await this.prisma.page.findUnique({ where: { id } });
-
-    if (!page) {
-      throw new Error('Page non trouvée');
-    }
+    const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.getStoreFromUser(req.user.id);
+      const store = await this.storesService.findFirstByOwner(req.user.id);
       if (page.storeId !== store.id) {
-        throw new Error('Accès non autorisé');
+        throw new ForbiddenException('Accès non autorisé');
       }
     }
 
     return this.pagesService.restoreVersion(id, parseInt(version));
-  }
-
-  private async getStoreFromUser(userId: string) {
-    const store = await this.prisma.store.findFirst({
-      where: { ownerId: userId },
-    });
-
-    if (!store) {
-      throw new Error('Aucune boutique trouvée pour cet utilisateur');
-    }
-
-    return store;
   }
 }

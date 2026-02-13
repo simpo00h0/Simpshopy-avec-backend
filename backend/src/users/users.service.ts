@@ -1,56 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import { FindUserUseCase } from './application/find-user.usecase';
+import { UpdateUserUseCase } from './application/update-user.usecase';
+import { UpdateUserData } from './domain/user.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private findUserUseCase: FindUserUseCase,
+    private updateUserUseCase: UpdateUserUseCase,
+  ) {}
 
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        phone: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        status: true,
-        avatar: true,
-        emailVerified: true,
-        phoneVerified: true,
-        createdAt: true,
-        lastLoginAt: true,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException('Utilisateur non trouvé');
-    }
-
-    return user;
+    return this.findUserUseCase.execute(id);
   }
 
-  async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
-  }
-
-  async update(id: string, data: any) {
-    return this.prisma.user.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        email: true,
-        phone: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        status: true,
-        avatar: true,
-      },
-    });
+  async update(id: string, data: UpdateUserData) {
+    return this.updateUserUseCase.execute(id, data);
   }
 }

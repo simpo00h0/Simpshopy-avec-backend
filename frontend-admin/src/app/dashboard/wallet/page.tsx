@@ -61,7 +61,7 @@ export default function WalletPage() {
             <Text size="sm" c="dimmed">
               Solde disponible
             </Text>
-            <Text fluid fw={700}>
+            <Text fw={700}>
               {(balance ?? 0).toLocaleString('fr-FR')} XOF
             </Text>
           </div>

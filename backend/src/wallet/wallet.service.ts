@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreditWalletUseCase } from './application/credit-wallet.usecase';
 import { DebitWalletUseCase } from './application/debit-wallet.usecase';
 import { GetWalletBalanceUseCase } from './application/get-wallet-balance.usecase';
+import { ListTransactionsUseCase } from './application/list-transactions.usecase';
 import { CreditWalletInput, DebitWalletInput } from './domain/wallet.entity';
 
 @Injectable()
@@ -10,7 +11,15 @@ export class WalletService {
     private creditWalletUseCase: CreditWalletUseCase,
     private debitWalletUseCase: DebitWalletUseCase,
     private getWalletBalanceUseCase: GetWalletBalanceUseCase,
+    private listTransactionsUseCase: ListTransactionsUseCase,
   ) {}
+
+  async getTransactions(storeId: string, limit?: number) {
+    return this.listTransactionsUseCase.execute(
+      storeId,
+      limit ? parseInt(limit.toString()) : 50,
+    );
+  }
 
   async credit(input: CreditWalletInput) {
     return this.creditWalletUseCase.execute(input);

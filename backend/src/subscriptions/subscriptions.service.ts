@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, Inject } from '@nestjs/common';
+import { ISubscriptionRepository } from './domain/subscription.repository';
 
 @Injectable()
 export class SubscriptionsService {
-  constructor(private prisma: PrismaService) {}
-
-  // TODO: Implémenter la gestion des abonnements et limites
+  constructor(
+    @Inject('ISubscriptionRepository')
+    private subscriptionRepository: ISubscriptionRepository,
+  ) {}
 }

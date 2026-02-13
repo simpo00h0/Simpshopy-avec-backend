@@ -1,30 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { WalletService } from '../../wallet/wallet.service';
 import { EventsService } from '../../events/events.service';
+import { IOrderRepository } from '../domain/order.repository';
 
 @Injectable()
 export class ConfirmPaymentUseCase {
   constructor(
-    private prisma: PrismaService,
+    @Inject('IOrderRepository')
+    private orderRepository: IOrderRepository,
     private walletService: WalletService,
     private eventsService: EventsService,
   ) {}
 
   async execute(orderId: string, paymentId: string): Promise<void> {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-    });
+    const order =
+      await this.orderRepository.findByIdForPayment(orderId);
 
     if (!order) {
-      throw new Error('Commande introuvable');
+      throw new NotFoundException('Commande introuvable');
     }
 
     if (order.paymentStatus === 'COMPLETED') {
       return;
     }
 
-    await this.updateOrderPayment(orderId, paymentId);
+    await this.orderRepository.updatePaymentStatus(orderId, paymentId);
 
     const sellerAmount = order.total - order.platformFeeAmount;
 
@@ -41,16 +41,5 @@ export class ConfirmPaymentUseCase {
       order.storeId,
       paymentId,
     );
-  }
-
-  private async updateOrderPayment(orderId: string, paymentId: string) {
-    await this.prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paymentStatus: 'COMPLETED',
-        paymentId,
-        status: 'CONFIRMED',
-      },
-    });
   }
 }

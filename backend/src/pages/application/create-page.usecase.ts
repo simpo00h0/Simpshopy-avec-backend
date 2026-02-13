@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, ConflictException } from '@nestjs/common';
 import {
   IPageRepository,
 } from '../domain/page.repository';
@@ -18,7 +18,7 @@ export class CreatePageUseCase {
     );
 
     if (existing) {
-      throw new Error('Une page avec ce slug existe déjà');
+      throw new ConflictException('Une page avec ce slug existe déjà');
     }
 
     return this.pageRepository.create(input);

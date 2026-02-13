@@ -31,7 +31,7 @@ export class ShippingRepository implements IShippingRepository {
     return methods.map((m) => this.mapMethodToEntity(m));
   }
 
-  private mapZoneToEntity(zone: any): ShippingZone {
+  private mapZoneToEntity(zone: { id: string; storeId: string; name: string; countries: string[]; cities: string[]; regions?: string[] | null; isActive: boolean }): ShippingZone {
     return {
       id: zone.id,
       storeId: zone.storeId,
@@ -43,7 +43,7 @@ export class ShippingRepository implements IShippingRepository {
     };
   }
 
-  private mapMethodToEntity(method: any): ShippingMethod {
+  private mapMethodToEntity(method: { id: string; zoneId: string; name: string; price: number; currency: string; minDays: number; maxDays: number; delay?: string | null; minWeight?: number | null; maxWeight?: number | null; isActive: boolean }): ShippingMethod {
     return {
       id: method.id,
       zoneId: method.zoneId,

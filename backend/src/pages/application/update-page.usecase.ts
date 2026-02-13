@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import {
   IPageRepository,
 } from '../domain/page.repository';
@@ -19,7 +19,7 @@ export class UpdatePageUseCase {
     const existingPage = await this.pageRepository.findById(input.id);
 
     if (!existingPage) {
-      throw new Error('Page introuvable');
+      throw new NotFoundException('Page introuvable');
     }
 
     if (createVersion && input.content) {

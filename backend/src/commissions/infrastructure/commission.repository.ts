@@ -2,12 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   ICommissionRepository,
+  StoreWithSubscription,
 } from '../domain/commission.repository';
 import { Commission } from '../domain/commission.entity';
 
 @Injectable()
 export class CommissionRepository implements ICommissionRepository {
   constructor(private prisma: PrismaService) {}
+
+  async findStoreWithSubscription(
+    storeId: string,
+  ): Promise<StoreWithSubscription | null> {
+    const store = await this.prisma.store.findUnique({
+      where: { id: storeId },
+      include: { subscription: true },
+    });
+    if (!store) return null;
+    return {
+      plan: (store.subscription?.plan ?? 'FREE') as StoreWithSubscription['plan'],
+    };
+  }
 
   async findByStoreAndType(
     storeId: string,

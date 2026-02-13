@@ -2,8 +2,8 @@ import { Controller, Get, Post, Body, UseGuards, Request, Query } from '@nestjs/
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SupabaseJwtGuard } from '../../auth/guards/supabase-jwt.guard';
 import { EventsService } from '../events.service';
+import { StoresService } from '../../stores/stores.service';
 import { CreateEventDto } from './dto/create-event.dto';
-import { PrismaService } from '../../prisma/prisma.service';
 
 @ApiTags('events')
 @Controller('events')
@@ -12,7 +12,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class EventsController {
   constructor(
     private readonly eventsService: EventsService,
-    private prisma: PrismaService,
+    private readonly storesService: StoresService,
   ) {}
 
   @Post()
@@ -38,35 +38,17 @@ export class EventsController {
     @Query('type') type?: string,
     @Query('limit') limit?: number,
   ) {
-    const where: any = {};
+    let resolvedStoreId = storeId;
 
     if (req.user.role === 'SELLER' && !storeId) {
-      const store = await this.getStoreFromUser(req.user.id);
-      where.storeId = store.id;
-    } else if (storeId) {
-      where.storeId = storeId;
+      const store = await this.storesService.findFirstByOwner(req.user.id);
+      resolvedStoreId = store.id;
     }
 
-    if (type) {
-      where.type = type;
-    }
-
-    return this.prisma.eventLog.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: limit ? parseInt(limit.toString()) : 50,
+    return this.eventsService.list({
+      storeId: resolvedStoreId,
+      type: type ?? undefined,
+      limit: limit ? parseInt(limit.toString()) : 50,
     });
-  }
-
-  private async getStoreFromUser(userId: string) {
-    const store = await this.prisma.store.findFirst({
-      where: { ownerId: userId },
-    });
-
-    if (!store) {
-      throw new Error('Aucune boutique trouvée pour cet utilisateur');
-    }
-
-    return store;
   }
 }

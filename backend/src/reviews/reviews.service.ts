@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, Inject } from '@nestjs/common';
+import { IReviewRepository } from './domain/review.repository';
 
 @Injectable()
 export class ReviewsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('IReviewRepository')
+    private reviewRepository: IReviewRepository,
+  ) {}
 }
