@@ -894,6 +894,13 @@ function BlockSettings({
         onDrop={async (files) => {
           const file = files[0];
           if (!file) return;
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(new Error('Lecture impossible'));
+            reader.readAsDataURL(file);
+          });
+          updateNested('hero', 'image', dataUrl);
           setHeroUploadLoading(true);
           try {
             const formData = new FormData();
@@ -907,6 +914,7 @@ function BlockSettings({
               ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
               : 'Erreur lors de l\'import';
             notifications.show({ title: 'Erreur', message: String(msg), color: 'red' });
+            updateNested('hero', 'image', '');
           } finally {
             setHeroUploadLoading(false);
           }
