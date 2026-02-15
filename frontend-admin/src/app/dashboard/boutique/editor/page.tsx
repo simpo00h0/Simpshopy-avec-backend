@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { useStoreStore } from '@/stores/storeStore';
-import { useEditorState, useEditorLoad, useEditorSave, useEditorIframe, useEditorDragDrop } from './hooks';
+import { useEditorState, useEditorLoad, useEditorSave, useEditorIframe, useEditorDragDrop, useEditorKeyboardShortcuts } from './hooks';
 import { LeaveConfirmPortal } from './components/LeaveConfirmPortal';
 import { EditorToolbar } from './components/EditorToolbar';
 import { BlockLibrary } from './components/BlockLibrary';
@@ -111,46 +111,22 @@ export default function BoutiqueEditorPage() {
     return () => mq.removeEventListener('change', handler);
   }, [closeLibrary, closeSettings]);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSave();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        e.preventDefault();
-        e.shiftKey ? editorState.redo() : editorState.undo();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-        e.preventDefault();
-        toggleShortcuts();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
-        e.preventDefault();
-        setAddBlockOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [handleSave, editorState.undo, editorState.redo, toggleShortcuts]);
+  useEditorKeyboardShortcuts({
+    handleSave,
+    undo: editorState.undo,
+    redo: editorState.redo,
+    toggleShortcuts,
+    setAddBlockOpen,
+    customization: editorState.customization,
+    lastSavedRef,
+    allowLeaveRef,
+  });
 
   useEffect(() => {
     if (!autoSaveEnabled) return;
     const t = setTimeout(() => handleSave(), 4000);
     return () => clearTimeout(t);
   }, [autoSaveEnabled, editorState.customization, handleSave]);
-
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (allowLeaveRef.current) return;
-      if (JSON.stringify(editorState.customization) !== lastSavedRef.current) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [editorState.customization, lastSavedRef]);
 
   const handleLeaveWithoutSave = useCallback(() => {
     allowLeaveRef.current = true;

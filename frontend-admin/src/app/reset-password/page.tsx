@@ -27,7 +27,7 @@ export default function ResetPasswordPage() {
     try {
       const { error } = await supabase.auth.updateUser({ password: values.password });
       if (error) throw error;
-      notifications.show({ title: 'Mot de passe mis à jour', color: 'green' });
+      notifications.show({ title: 'Mot de passe mis à jour', message: '', color: 'green' });
       router.push('/login');
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message || 'Erreur';

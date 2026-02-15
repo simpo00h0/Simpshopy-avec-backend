@@ -65,7 +65,7 @@ export default function SettingsPage() {
           });
         }
       } catch {
-        notifications.show({ title: 'Erreur de chargement', color: 'red' });
+        notifications.show({ title: 'Erreur de chargement', message: '', color: 'red' });
       } finally {
         setLoading(false);
       }
@@ -75,7 +75,7 @@ export default function SettingsPage() {
 
   const storeMutation = useMutation({
     mutationFn: (values: typeof storeForm.values) => api.patch(`/stores/${currentStore!.id}`, values),
-    onSuccess: () => notifications.show({ title: 'Boutique mise à jour', color: 'green' }),
+    onSuccess: () => notifications.show({ title: 'Boutique mise à jour', message: '', color: 'green' }),
     onError: (err) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur';
       notifications.show({ title: 'Erreur', message: msg, color: 'red' });
@@ -84,7 +84,7 @@ export default function SettingsPage() {
 
   const settingsMutation = useMutation({
     mutationFn: (values: typeof settingsForm.values) => api.patch(`/stores/${currentStore!.id}/settings`, values),
-    onSuccess: () => notifications.show({ title: 'Paramètres mis à jour', color: 'green' }),
+    onSuccess: () => notifications.show({ title: 'Paramètres mis à jour', message: '', color: 'green' }),
     onError: (err) => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur';
       notifications.show({ title: 'Erreur', message: msg, color: 'red' });

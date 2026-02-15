@@ -75,7 +75,7 @@ export default function ProductsPage() {
         old.map((p) => (p.id.startsWith('temp-') ? { ...p, ...created, id: created.id } : p))
       );
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      notifications.show({ title: 'Produit créé', color: 'green' });
+      notifications.show({ title: 'Produit créé', message: '', color: 'green' });
       setModalOpen(false);
       form.reset();
     },

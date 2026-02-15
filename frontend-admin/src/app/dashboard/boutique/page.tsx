@@ -31,9 +31,9 @@ export default function BoutiquePage() {
     const refresh = async () => {
       try {
         const res = await api.get<{ id: string; name: string; slug: string; email: string; status: string; settings?: { themeId?: string | null } }[]>('/stores');
-        const stores = res.data;
-        const updated = stores?.find((s) => s.id === currentStore?.id) ?? stores?.[0];
-        if (updated) setCurrentStore(updated);
+        const stores = (res.data as unknown[]) ?? [];
+        const first = stores[0] as { id: string; name: string; slug: string; email: string; status: string; settings?: { themeId?: string | null } } | undefined;
+        if (first) setCurrentStore(first);
       } catch {
         // ignore
       }

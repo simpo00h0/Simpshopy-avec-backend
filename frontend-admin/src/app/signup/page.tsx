@@ -72,7 +72,7 @@ export default function SignupPage() {
         if (authData.session.access_token) primeTokenCache(authData.session.access_token);
         const { data: userData } = await api.get('/auth/me');
         setUser(userData);
-        notifications.show({ title: 'Compte créé avec succès', color: 'green' });
+        notifications.show({ title: 'Compte créé avec succès', message: '', color: 'green' });
         router.push('/onboarding');
       } else {
         // Email de confirmation envoyé

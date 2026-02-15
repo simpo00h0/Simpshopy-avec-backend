@@ -64,7 +64,7 @@ export default function ProductEditPage() {
           status: data.status || 'DRAFT',
         });
       } catch {
-        notifications.show({ title: 'Produit introuvable', color: 'red' });
+        notifications.show({ title: 'Produit introuvable', message: '', color: 'red' });
         router.push('/dashboard/products');
       } finally {
         setLoading(false);
@@ -90,7 +90,7 @@ export default function ProductEditPage() {
       );
     },
     onSuccess: () => {
-      notifications.show({ title: 'Produit mis à jour', color: 'green' });
+      notifications.show({ title: 'Produit mis à jour', message: '', color: 'green' });
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: (err) => {
