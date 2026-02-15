@@ -16,7 +16,8 @@ import { BlockLibrary } from './components/BlockLibrary';
 import { EditorCanvas } from './components/EditorCanvas';
 import { BlockSettingsPanel } from './components/BlockSettingsPanel';
 import { ShortcutsModal, AddBlockModal } from './components/EditorModals';
-import { EDITOR_CACHED_KEY, DEFAULT_SECTION_ORDER, HOME_BLOCKS, TEMPLATES, LEAVE_FADE_MS } from './editor-constants';
+import { EDITOR_CACHED_KEY, DEFAULT_SECTION_ORDER, TEMPLATES, LEAVE_FADE_MS } from './editor-constants';
+import { getEditorIframeSrc } from './editor-utils';
 import type { BlockId, Template } from './editor-types';
 import styles from './editor.module.css';
 
@@ -73,7 +74,7 @@ export default function BoutiqueEditorPage() {
   );
 
   const iframe = useEditorIframe(
-    slug ? `${process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3002'}/s/${slug}${currentTemplate.path}?editor=1` : '',
+    getEditorIframeSrc(slug, currentTemplate.path),
     editorState.customization,
     previewMode,
     editorState.selectedBlock,
@@ -166,7 +167,7 @@ export default function BoutiqueEditorPage() {
     );
   }
 
-  const iframeSrc = slug ? `${process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3002'}/s/${slug}${currentTemplate.path}?editor=1` : '';
+  const iframeSrc = getEditorIframeSrc(slug, currentTemplate.path);
   const showEditorContent = cachedFromSession || iframe.canvasReady;
 
   return (

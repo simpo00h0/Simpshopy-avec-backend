@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react';
 import type { ThemeCustomization } from '@simpshopy/shared';
-import { api } from '@/lib/api';
 import { useStoreStore, type Store } from '@/stores/storeStore';
 import { DEFAULT_SECTION_ORDER } from '../editor-constants';
+import type { IStoreSettingsRepository } from '../domain/store-settings.port';
+import { defaultStoreSettingsRepository } from '../infrastructure/store-settings.repository';
 
 interface UseEditorLoadParams {
   storeId: string | null;
@@ -13,10 +14,19 @@ interface UseEditorLoadParams {
   setHistory: (h: ThemeCustomization[] | ((prev: ThemeCustomization[]) => ThemeCustomization[])) => void;
   setHistoryIndex: (i: number) => void;
   lastSavedRef: React.MutableRefObject<string>;
+  storeSettingsRepository?: IStoreSettingsRepository;
 }
 
 export function useEditorLoad(params: UseEditorLoadParams): void {
-  const { storeId, slug, setCustomization, setHistory, setHistoryIndex, lastSavedRef } = params;
+  const {
+    storeId,
+    slug,
+    setCustomization,
+    setHistory,
+    setHistoryIndex,
+    lastSavedRef,
+    storeSettingsRepository = defaultStoreSettingsRepository,
+  } = params;
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
 
   useEffect(() => {
@@ -24,18 +34,11 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
 
     const load = async (): Promise<void> => {
       try {
-        const { data } = await api.get<{
-          id: string;
-          name: string;
-          slug: string;
-          settings?: { themeCustomization?: ThemeCustomization | null } | null;
-        }>(`/stores/${storeId}`);
-
+        const store = await storeSettingsRepository.getStoreWithTheme(storeId);
         const cust: ThemeCustomization =
-          (data.settings?.themeCustomization as ThemeCustomization) ?? {};
+          (store.settings?.themeCustomization as ThemeCustomization) ?? {};
 
-        if (data) setCurrentStore(data as Store);
-
+        setCurrentStore(store as Store);
         setCustomization(cust);
         setHistory([cust]);
         setHistoryIndex(0);
@@ -50,5 +53,5 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
     };
 
     load();
-  }, [storeId, slug, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setCurrentStore]);
+  }, [storeId, slug, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setCurrentStore, storeSettingsRepository]);
 }

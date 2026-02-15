@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { api } from '@/lib/api';
 import { useStoreStore, type ThemeCustomization, type Store } from '@/stores/storeStore';
+import type { IStoreSettingsRepository } from '../domain/store-settings.port';
+import { defaultStoreSettingsRepository } from '../infrastructure/store-settings.repository';
 
 export function useEditorSave(
   customization: ThemeCustomization,
-  currentStore: Store | null
+  currentStore: Store | null,
+  storeSettingsRepository: IStoreSettingsRepository = defaultStoreSettingsRepository
 ) {
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
   const [saving, setSaving] = useState(false);
@@ -18,9 +20,8 @@ export function useEditorSave(
     setSaving(true);
     setSaved(false);
     try {
-      const res = await api.patch(`/stores/${currentStore.id}/settings`, { themeCustomization: customization });
-      const updated = res.data as Store | undefined;
-      if (updated) setCurrentStore(updated);
+      const updated = await storeSettingsRepository.saveThemeCustomization(currentStore.id, customization);
+      if (updated) setCurrentStore(updated as Store);
       setSaved(true);
       lastSavedRef.current = JSON.stringify(customization);
       setTimeout(() => setSaved(false), 2000);
@@ -31,7 +32,7 @@ export function useEditorSave(
     } finally {
       setSaving(false);
     }
-  }, [currentStore, customization, setCurrentStore]);
+  }, [currentStore, customization, setCurrentStore, storeSettingsRepository]);
 
   const hasUnsavedChanges =
     lastSavedRef.current !== '' && JSON.stringify(customization) !== lastSavedRef.current;
