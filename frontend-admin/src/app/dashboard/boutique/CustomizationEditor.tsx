@@ -147,7 +147,7 @@ export function CustomizationEditor({
 
   return (
     <Stack gap="lg">
-      <Accordion variant="contained" defaultValue={['header', 'colors', 'hero']}>
+      <Accordion variant="contained" multiple defaultValue={['header', 'colors', 'hero']}>
         <Accordion.Item value="header">
           <Accordion.Control>
             <Title order={5}>En-tête (logo)</Title>

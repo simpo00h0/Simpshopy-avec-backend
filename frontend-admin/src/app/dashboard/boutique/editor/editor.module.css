@@ -103,6 +103,7 @@
   flex-shrink: 0;
 }
 
+
 @media (min-width: 64em) {
   .panelCloseBtn {
     display: none;
