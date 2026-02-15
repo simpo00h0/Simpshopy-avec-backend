@@ -71,6 +71,7 @@ export default function SettingsPage() {
       }
     };
     fetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch only when currentStore.id changes; forms are used for side effect only
   }, [currentStore?.id]);
 
   const storeMutation = useMutation({

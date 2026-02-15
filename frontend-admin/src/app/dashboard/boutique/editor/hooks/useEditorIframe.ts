@@ -11,6 +11,9 @@ import {
   SIMPSHOPY_SELECTED_BLOCK,
   SIMPSHOPY_SCROLL_TO_BLOCK,
 } from '../editor-constants';
+import { getStorefrontOrigin } from '../editor-utils';
+
+const EDITOR_READY_TIMEOUT_MS = 15000;
 
 export function useEditorIframe(
   iframeSrc: string,
@@ -38,7 +41,9 @@ export function useEditorIframe(
 
   useEffect(() => {
     if (!iframeSrc) return;
+    const allowedOrigin = getStorefrontOrigin();
     const handler = (e: MessageEvent) => {
+      if (allowedOrigin && e.origin !== allowedOrigin) return;
       if (e.data?.type === 'simpshopy-editor-ready') {
         setCanvasReady(true);
         try {
@@ -49,7 +54,11 @@ export function useEditorIframe(
       }
     };
     window.addEventListener('message', handler);
-    return () => window.removeEventListener('message', handler);
+    const timeout = setTimeout(() => setCanvasReady(true), EDITOR_READY_TIMEOUT_MS);
+    return () => {
+      window.removeEventListener('message', handler);
+      clearTimeout(timeout);
+    };
   }, [iframeSrc]);
 
   useEffect(() => {
@@ -65,7 +74,9 @@ export function useEditorIframe(
   }, [selectedBlock]);
 
   useEffect(() => {
+    const allowedOrigin = getStorefrontOrigin();
     const handler = (e: MessageEvent) => {
+      if (allowedOrigin && e.origin !== allowedOrigin) return;
       if (e.data?.type === SIMPSHOPY_EDITOR_EVENT && e.data.blockId) selectBlock(e.data.blockId as BlockId);
       if (e.data?.type === SIMPSHOPY_BLOCK_DELETE && typeof e.data.indexInOrder === 'number') removeBlockAtIndex(e.data.indexInOrder);
     };

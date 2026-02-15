@@ -110,7 +110,7 @@ export default function DashboardLayout({
       }
     };
     run();
-  }, [router, logout]);
+  }, [router, logout, setUser]);
 
   useEffect(() => {
     if (hasStore === false) {

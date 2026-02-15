@@ -71,6 +71,7 @@ export default function ProductEditPage() {
       }
     };
     if (id) fetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch only when id changes; form.setValues and router are stable for this use case
   }, [id]);
 
   const updateMutation = useMutation({

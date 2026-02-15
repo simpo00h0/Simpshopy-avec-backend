@@ -3,7 +3,6 @@
 import { useLayoutEffect, useEffect, useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Box, Button, Group, Text, Alert } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -18,7 +17,8 @@ import { BlockSettingsPanel } from './components/BlockSettingsPanel';
 import { ShortcutsModal, AddBlockModal } from './components/EditorModals';
 import { EDITOR_CACHED_KEY, DEFAULT_SECTION_ORDER, TEMPLATES, LEAVE_FADE_MS } from './editor-constants';
 import { getEditorIframeSrc } from './editor-utils';
-import type { BlockId, Template } from './editor-types';
+import { useEditorUIStore } from './editor-ui-store';
+import type { BlockId } from './editor-types';
 import styles from './editor.module.css';
 
 export default function BoutiqueEditorPage() {
@@ -41,20 +41,8 @@ export default function BoutiqueEditorPage() {
     lastSavedRef,
   });
 
-  const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [blockSearch, setBlockSearch] = useState('');
-  const [shortcutsOpen, { open: openShortcuts, close: closeShortcuts, toggle: toggleShortcuts }] = useDisclosure(false);
-  const [currentTemplate, setCurrentTemplate] = useState<Template>(TEMPLATES[0]);
-  const [libraryOpen, { open: openLibrary, close: closeLibrary }] = useDisclosure(false);
-  const [settingsOpen, { open: openSettings, close: closeSettings }] = useDisclosure(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  const ui = useEditorUIStore();
   const [cachedFromSession, setCachedFromSession] = useState(false);
-  const [addBlockOpen, setAddBlockOpen] = useState(false);
-  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
-  const [leaveSaveInProgress, setLeaveSaveInProgress] = useState(false);
-  const [saveAndLeaveFlow, setSaveAndLeaveFlow] = useState(false);
-  const [isLeaving, setIsLeaving] = useState(false);
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
   const allowLeaveRef = useRef(false);
 
   const dragDrop = useEditorDragDrop({
@@ -67,16 +55,16 @@ export default function BoutiqueEditorPage() {
   const selectBlockCore = useCallback(
     (blockId: BlockId) => {
       editorState.setSelectedBlock(blockId);
-      closeLibrary();
-      openSettings();
+      useEditorUIStore.getState().closeLibrary();
+      useEditorUIStore.getState().openSettings();
     },
-    [closeLibrary, openSettings, editorState]
+    [editorState]
   );
 
   const iframe = useEditorIframe(
-    getEditorIframeSrc(slug, currentTemplate.path),
+    getEditorIframeSrc(slug, ui.currentTemplate.path),
     editorState.customization,
-    previewMode,
+    ui.previewMode,
     editorState.selectedBlock,
     selectBlockCore,
     dragDrop.removeBlockAtIndex
@@ -103,58 +91,49 @@ export default function BoutiqueEditorPage() {
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 64em)');
     const handler = () => {
-      if (mq.matches) {
-        closeLibrary();
-        closeSettings();
-      }
+      if (mq.matches) useEditorUIStore.getState().closePanels();
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, [closeLibrary, closeSettings]);
+  }, []);
 
   useEditorKeyboardShortcuts({
     handleSave,
     undo: editorState.undo,
     redo: editorState.redo,
-    toggleShortcuts,
-    setAddBlockOpen,
+    toggleShortcuts: ui.toggleShortcuts,
+    setAddBlockOpen: ui.setAddBlockOpen,
     customization: editorState.customization,
     lastSavedRef,
     allowLeaveRef,
   });
 
   useEffect(() => {
-    if (!autoSaveEnabled) return;
+    if (!ui.autoSaveEnabled) return;
     const t = setTimeout(() => handleSave(), 4000);
     return () => clearTimeout(t);
-  }, [autoSaveEnabled, editorState.customization, handleSave]);
+  }, [ui.autoSaveEnabled, editorState.customization, handleSave]);
 
   const handleLeaveWithoutSave = useCallback(() => {
     allowLeaveRef.current = true;
-    setIsLeaving(true);
+    useEditorUIStore.getState().setIsLeaving(true);
     setTimeout(() => {
       window.location.href = '/dashboard/boutique';
     }, LEAVE_FADE_MS + 20);
   }, []);
 
   const handleSaveAndLeave = useCallback(async () => {
-    setSaveAndLeaveFlow(true);
-    setLeaveSaveInProgress(true);
+    const store = useEditorUIStore.getState();
+    store.setSaveAndLeaveFlow(true);
+    store.setLeaveSaveInProgress(true);
     const ok = await handleSave();
-    setLeaveSaveInProgress(false);
+    store.setLeaveSaveInProgress(false);
     if (ok) handleLeaveWithoutSave();
-    else setSaveAndLeaveFlow(false);
+    else store.setSaveAndLeaveFlow(false);
   }, [handleSave, handleLeaveWithoutSave]);
 
-  const openLibraryOnly = useCallback(() => {
-    closeSettings();
-    openLibrary();
-  }, [closeSettings, openLibrary]);
-
-  const openSettingsOnly = useCallback(() => {
-    closeLibrary();
-    openSettings();
-  }, [closeLibrary, openSettings]);
+  const openLibraryOnly = useCallback(() => useEditorUIStore.getState().openLibrary(), []);
+  const openSettingsOnly = useCallback(() => useEditorUIStore.getState().openSettings(), []);
 
   if (!slug) {
     return (
@@ -167,7 +146,7 @@ export default function BoutiqueEditorPage() {
     );
   }
 
-  const iframeSrc = getEditorIframeSrc(slug, currentTemplate.path);
+  const iframeSrc = getEditorIframeSrc(slug, ui.currentTemplate.path);
   const showEditorContent = cachedFromSession || iframe.canvasReady;
 
   return (
@@ -191,32 +170,32 @@ export default function BoutiqueEditorPage() {
         <EditorToolbar
           className={styles.toolbar}
           currentStoreName={currentStore?.name ?? null}
-          onLeave={() => setLeaveConfirmOpen(true)}
+          onLeave={() => ui.setLeaveConfirmOpen(true)}
           onSave={() => handleSave()}
           saving={saving}
           saved={saved}
           hasUnsavedChanges={hasUnsavedChanges}
-          isLeaving={isLeaving}
+          isLeaving={ui.isLeaving}
           historyIndex={editorState.historyIndex}
           historyLength={editorState.history.length}
           onUndo={editorState.undo}
           onRedo={editorState.redo}
-          onShortcuts={openShortcuts}
-          onAddBlock={() => setAddBlockOpen(true)}
+          onShortcuts={ui.openShortcuts}
+          onAddBlock={() => ui.setAddBlockOpen(true)}
           selectedBlock={editorState.selectedBlock}
           onLibrary={openLibraryOnly}
           onSettings={openSettingsOnly}
-          autoSaveEnabled={autoSaveEnabled}
-          onAutoSaveChange={setAutoSaveEnabled}
-          currentTemplateId={currentTemplate.id}
-          onTemplateChange={(v) => setCurrentTemplate(TEMPLATES.find((t) => t.id === v) ?? TEMPLATES[0])}
-          viewport={viewport}
-          onViewportChange={setViewport}
-          previewMode={previewMode}
-          onPreviewToggle={() => setPreviewMode((p) => !p)}
+          autoSaveEnabled={ui.autoSaveEnabled}
+          onAutoSaveChange={ui.setAutoSaveEnabled}
+          currentTemplateId={ui.currentTemplate.id}
+          onTemplateChange={(v) => ui.setCurrentTemplate(TEMPLATES.find((t) => t.id === v) ?? TEMPLATES[0])}
+          viewport={ui.viewport}
+          onViewportChange={ui.setViewport}
+          previewMode={ui.previewMode}
+          onPreviewToggle={() => ui.setPreviewMode(!ui.previewMode)}
         />
 
-        {hasUnsavedChanges && !isLeaving && (
+        {hasUnsavedChanges && !ui.isLeaving && (
           <Alert
             color="orange"
             variant="light"
@@ -230,10 +209,10 @@ export default function BoutiqueEditorPage() {
 
         <Group align="stretch" className={styles.content} gap={0}>
           <BlockLibrary
-            className={`${styles.sidePanel} ${styles.sidePanelLeft} ${libraryOpen ? styles.sidePanelOpen : styles.sidePanelClosed}`}
+            className={`${styles.sidePanel} ${styles.sidePanelLeft} ${ui.libraryOpen ? styles.sidePanelOpen : styles.sidePanelClosed}`}
             panelCloseClassName={styles.panelCloseBtn}
-            blockSearch={blockSearch}
-            onBlockSearchChange={setBlockSearch}
+            blockSearch={ui.blockSearch}
+            onBlockSearchChange={ui.setBlockSearch}
             selectedBlock={editorState.selectedBlock}
             draggedId={dragDrop.draggedId}
             onSelectBlock={(id) => {
@@ -243,15 +222,15 @@ export default function BoutiqueEditorPage() {
             onLibraryDragStart={dragDrop.handleLibraryDragStart}
             onDragEnd={dragDrop.handleDragEnd}
             onResetOrder={() => editorState.update('sectionOrder', undefined)}
-            onClose={closeLibrary}
+            onClose={ui.closeLibrary}
           />
 
           <EditorCanvas
             className={styles.canvasWrapper}
             iframeRef={iframe.iframeRef}
             iframeSrc={iframeSrc}
-            currentTemplatePath={currentTemplate.path}
-            viewport={viewport}
+            currentTemplatePath={ui.currentTemplate.path}
+            viewport={ui.viewport}
             showCanvasLoader={iframe.showCanvasLoader}
             canvasReady={iframe.canvasReady}
             onIframeLoad={iframe.onIframeLoad}
@@ -263,42 +242,42 @@ export default function BoutiqueEditorPage() {
           />
 
           <BlockSettingsPanel
-            className={`${styles.sidePanel} ${styles.sidePanelRight} ${settingsOpen ? styles.sidePanelOpen : styles.sidePanelClosed}`}
+            className={`${styles.sidePanel} ${styles.sidePanelRight} ${ui.settingsOpen ? styles.sidePanelOpen : styles.sidePanelClosed}`}
             panelCloseClassName={styles.panelCloseBtn}
             selectedBlock={editorState.selectedBlock}
             customization={editorState.customization}
             update={editorState.update}
             updateNested={editorState.updateNested}
             onClose={() => {
-              closeSettings();
+              ui.closeSettings();
               editorState.setSelectedBlock(null);
             }}
             onDeselect={() => editorState.setSelectedBlock(null)}
           />
         </Group>
 
-        {typeof document !== 'undefined' && leaveConfirmOpen && createPortal(
+        {typeof document !== 'undefined' && ui.leaveConfirmOpen && createPortal(
           <LeaveConfirmPortal
             hasUnsavedChanges={hasUnsavedChanges}
-            leaveSaveInProgress={leaveSaveInProgress}
-            showAsUnsaved={hasUnsavedChanges || saveAndLeaveFlow}
-            isLeaving={isLeaving}
-            onClose={() => !leaveSaveInProgress && setLeaveConfirmOpen(false)}
+            leaveSaveInProgress={ui.leaveSaveInProgress}
+            showAsUnsaved={hasUnsavedChanges || ui.saveAndLeaveFlow}
+            isLeaving={ui.isLeaving}
+            onClose={() => !ui.leaveSaveInProgress && ui.setLeaveConfirmOpen(false)}
             onLeaveWithoutSave={handleLeaveWithoutSave}
             onSaveAndLeave={handleSaveAndLeave}
           />,
           document.body
         )}
 
-        <ShortcutsModal opened={shortcutsOpen} onClose={closeShortcuts} />
+        <ShortcutsModal opened={ui.shortcutsOpen} onClose={ui.closeShortcuts} />
 
         <AddBlockModal
-          opened={addBlockOpen}
-          onClose={() => setAddBlockOpen(false)}
+          opened={ui.addBlockOpen}
+          onClose={() => ui.setAddBlockOpen(false)}
           onAddBlock={(blockId) => {
             const currentOrder = editorState.customization.sectionOrder ?? DEFAULT_SECTION_ORDER;
             editorState.update('sectionOrder', [...currentOrder, blockId]);
-            setAddBlockOpen(false);
+            ui.setAddBlockOpen(false);
             selectBlock(blockId);
             iframe.scrollToBlock(blockId);
           }}
