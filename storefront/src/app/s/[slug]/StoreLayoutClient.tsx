@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import type { ThemeCustomization } from '@simpshopy/shared';
 import { ThemeProvider } from '@/themes/ThemeContext';
 import { ThemeLayout } from '@/themes/ThemeLayout';
@@ -134,8 +133,12 @@ export function StoreLayoutClient({ store, slug, children }: { store: StoreData;
 
   const [liveCustomization, setLiveCustomization] = useState<ThemeCustomization | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
-  const searchParams = useSearchParams();
-  const isEditor = searchParams.get('editor') === '1';
+  const [isEditor, setIsEditor] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setIsEditor(new URLSearchParams(window.location.search).get('editor') === '1');
+  }, []);
 
   useEffect(() => {
     if (!isEditor) return;
