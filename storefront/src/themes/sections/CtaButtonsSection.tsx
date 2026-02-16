@@ -45,8 +45,8 @@ export function CtaButtonsSection() {
               variant="outline"
               size="lg"
               style={{ borderColor: theme.colors.primary, color: theme.colors.primary }}
-              target={cta.secondaryHref.startsWith('http') ? '_blank' : undefined}
-              rel={cta.secondaryHref.startsWith('http') ? 'noopener noreferrer' : undefined}
+              target={secondaryHref.startsWith('http') ? '_blank' : undefined}
+              rel={secondaryHref.startsWith('http') ? 'noopener noreferrer' : undefined}
             >
               {cta.secondaryText}
             </Button>

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useTheme } from '../ThemeContext';
-import type { MockProduct } from '../data';
+import type { MockProduct } from '../theme-types';
 
 interface ProductCardProps {
   product: MockProduct;

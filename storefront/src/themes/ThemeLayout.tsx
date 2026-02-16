@@ -83,14 +83,11 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
                 <Image src={logo} alt={storeName} width={120} height={36} style={{ objectFit: 'contain' }} unoptimized />
               </Link>
             ) : (
-              <Title
-                order={3}
-                component={Link}
-                href={basePath}
-                style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}
-              >
-                {storeName}
-              </Title>
+              <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}>
+                <Title order={3} component="span">
+                  {storeName}
+                </Title>
+              </Link>
             )}
             <Group gap="lg" visibleFrom="sm">
               <NavContent />
