@@ -41,7 +41,7 @@ export function useEditorIframe(
 
   useEffect(() => {
     if (!iframeSrc) return;
-    const allowedOrigin = getStorefrontOrigin();
+    const allowedOrigin = getStorefrontOrigin(iframeSrc);
     const handler = (e: MessageEvent) => {
       if (allowedOrigin && e.origin !== allowedOrigin) return;
       if (e.data?.type === 'simpshopy-editor-ready') {
@@ -74,7 +74,7 @@ export function useEditorIframe(
   }, [selectedBlock]);
 
   useEffect(() => {
-    const allowedOrigin = getStorefrontOrigin();
+    const allowedOrigin = getStorefrontOrigin(iframeSrc);
     const handler = (e: MessageEvent) => {
       if (allowedOrigin && e.origin !== allowedOrigin) return;
       if (e.data?.type === SIMPSHOPY_EDITOR_EVENT && e.data.blockId) selectBlock(e.data.blockId as BlockId);

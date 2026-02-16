@@ -7,10 +7,10 @@ import { useTheme } from '@/themes/ThemeContext';
 
 export default function StoreProductPage() {
   const params = useParams();
-  const productId = params.id as string;
+  const productSlug = params.productSlug as string;
   const { theme, basePath } = useTheme();
 
-  const product = theme.products.find((p) => p.id === productId);
+  const product = theme.products.find((p) => p.slug === productSlug || p.id === productSlug);
 
   if (!product) {
     return (

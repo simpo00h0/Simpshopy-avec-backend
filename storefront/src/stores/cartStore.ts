@@ -10,31 +10,31 @@ export interface CartItem {
   imageUrl?: string;
   imagePlaceholder: string;
   quantity: number;
-  storeSlug: string;
+  storeSubdomain: string;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: MockProduct, quantity: number, storeSlug: string) => void;
-  removeItem: (productId: string, storeSlug: string) => void;
-  updateQuantity: (productId: string, quantity: number, storeSlug: string) => void;
-  clear: (storeSlug: string) => void;
-  getItems: (storeSlug: string) => CartItem[];
+  addItem: (product: MockProduct, quantity: number, storeSubdomain: string) => void;
+  removeItem: (productId: string, storeSubdomain: string) => void;
+  updateQuantity: (productId: string, quantity: number, storeSubdomain: string) => void;
+  clear: (storeSubdomain: string) => void;
+  getItems: (storeSubdomain: string) => CartItem[];
 }
 
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (product, quantity, storeSlug) => {
+      addItem: (product, quantity, storeSubdomain) => {
         set((state) => {
           const existing = state.items.find(
-            (i) => i.productId === product.id && i.storeSlug === storeSlug
+            (i) => i.productId === product.id && i.storeSubdomain === storeSubdomain
           );
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === product.id && i.storeSlug === storeSlug
+                i.productId === product.id && i.storeSubdomain === storeSubdomain
                   ? { ...i, quantity: i.quantity + quantity }
                   : i
               ),
@@ -51,39 +51,39 @@ export const useCartStore = create<CartState>()(
                 imageUrl: product.imageUrl,
                 imagePlaceholder: product.imagePlaceholder,
                 quantity,
-                storeSlug,
+                storeSubdomain,
               },
             ],
           };
         });
       },
-      removeItem: (productId, storeSlug) => {
+      removeItem: (productId, storeSubdomain) => {
         set((state) => ({
           items: state.items.filter(
-            (i) => !(i.productId === productId && i.storeSlug === storeSlug)
+            (i) => !(i.productId === productId && i.storeSubdomain === storeSubdomain)
           ),
         }));
       },
-      updateQuantity: (productId, quantity, storeSlug) => {
+      updateQuantity: (productId, quantity, storeSubdomain) => {
         if (quantity <= 0) {
-          get().removeItem(productId, storeSlug);
+          get().removeItem(productId, storeSubdomain);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.productId === productId && i.storeSlug === storeSlug
+            i.productId === productId && i.storeSubdomain === storeSubdomain
               ? { ...i, quantity }
               : i
           ),
         }));
       },
-      clear: (storeSlug) => {
+      clear: (storeSubdomain) => {
         set((state) => ({
-          items: state.items.filter((i) => i.storeSlug !== storeSlug),
+          items: state.items.filter((i) => i.storeSubdomain !== storeSubdomain),
         }));
       },
-      getItems: (storeSlug) =>
-        get().items.filter((i) => i.storeSlug === storeSlug),
+      getItems: (storeSubdomain) =>
+        get().items.filter((i) => i.storeSubdomain === storeSubdomain),
     }),
     { name: 'simpshopy-cart' }
   )

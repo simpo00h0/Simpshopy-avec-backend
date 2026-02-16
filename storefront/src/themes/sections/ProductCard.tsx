@@ -8,11 +8,17 @@ import { useTheme } from '../ThemeContext';
 import type { MockProduct } from '../theme-types';
 
 interface ProductCardProps {
-  product: MockProduct;
+  product: MockProduct | (Omit<MockProduct, 'slug'> & { slug?: string });
   basePath: string;
 }
 
+function getProductHref(product: ProductCardProps['product'], basePath: string): string {
+  const slug = product.slug ?? product.id;
+  return `${basePath}/products/${slug}`;
+}
+
 export function ProductCard({ product, basePath }: ProductCardProps) {
+  const productHref = getProductHref(product, basePath);
   const [hovered, setHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
   const { theme } = useTheme();
@@ -38,7 +44,7 @@ export function ProductCard({ product, basePath }: ProductCardProps) {
       onMouseLeave={() => setHovered(false)}
     >
       <Card.Section>
-        <Link href={`${basePath}/products/${product.id}`}>
+        <Link href={productHref}>
           <Box
             style={{
               height: 200,
@@ -66,7 +72,7 @@ export function ProductCard({ product, basePath }: ProductCardProps) {
           </Box>
         </Link>
       </Card.Section>
-      <Link href={`${basePath}/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <Link href={productHref} style={{ textDecoration: 'none', color: 'inherit' }}>
         <Title order={4} mt="md" style={{ color: colors.text }}>
           {product.name}
         </Title>
@@ -79,7 +85,7 @@ export function ProductCard({ product, basePath }: ProductCardProps) {
       </Text>
       <Button
         component={Link}
-        href={`${basePath}/products/${product.id}`}
+        href={productHref}
         fullWidth
         mt="md"
         radius="md"

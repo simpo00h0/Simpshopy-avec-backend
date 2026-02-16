@@ -1,13 +1,13 @@
-const STOREFRONT_BASE = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3002';
+import { getStoreUrl } from '@/lib/storefront-url';
 
-export function getEditorIframeSrc(slug: string, templatePath: string): string {
-  if (!slug) return '';
-  return `${STOREFRONT_BASE}/s/${slug}${templatePath}?editor=1`;
+export function getEditorIframeSrc(subdomain: string, templatePath: string): string {
+  if (!subdomain) return '';
+  return `${getStoreUrl(subdomain)}${templatePath}?editor=1`;
 }
 
-export function getStorefrontOrigin(): string {
+export function getStorefrontOrigin(iframeSrc: string): string {
   try {
-    return new URL(STOREFRONT_BASE).origin;
+    return iframeSrc ? new URL(iframeSrc).origin : '';
   } catch {
     return '';
   }

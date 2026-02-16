@@ -12,9 +12,9 @@ import { Store, StorePublic, StoreCustomer } from '../domain/store.entity';
 export class StoreRepository implements IStoreRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findBySlug(slug: string): Promise<Store | null> {
+  async findBySubdomain(subdomain: string): Promise<Store | null> {
     const store = await this.prisma.store.findUnique({
-      where: { slug },
+      where: { subdomain },
     });
     return store as Store | null;
   }
@@ -23,7 +23,7 @@ export class StoreRepository implements IStoreRepository {
     const store = await this.prisma.store.create({
       data: {
         name: data.name,
-        slug: data.slug,
+        subdomain: data.subdomain,
         email: data.email,
         phone: data.phone,
         city: data.city,
@@ -56,9 +56,9 @@ export class StoreRepository implements IStoreRepository {
     return store as Store | null;
   }
 
-  async findBySlugPublic(slug: string): Promise<StorePublic | null> {
+  async findBySubdomainPublic(subdomain: string): Promise<StorePublic | null> {
     const store = await this.prisma.store.findFirst({
-      where: { slug, status: { in: ['ACTIVE', 'DRAFT'] } },
+      where: { subdomain, status: { in: ['ACTIVE', 'DRAFT'] } },
       include: {
         settings: { select: { themeId: true, themeCustomization: true } },
         products: {
@@ -79,7 +79,7 @@ export class StoreRepository implements IStoreRepository {
     return {
       id: store.id,
       name: store.name,
-      slug: store.slug,
+      subdomain: store.subdomain,
       description: store.description,
       logo: store.logo,
       banner: store.banner,

@@ -3,7 +3,7 @@ import type { ThemeCustomization } from '@simpshopy/shared';
 export interface StoreWithTheme {
   id: string;
   name: string;
-  slug: string;
+  subdomain: string;
   email?: string;
   status?: string;
   settings?: { themeCustomization?: ThemeCustomization | null } | null;

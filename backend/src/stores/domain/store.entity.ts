@@ -1,7 +1,7 @@
 export interface Store {
   id: string;
   name: string;
-  slug: string;
+  subdomain: string;
   description?: string | null;
   logo?: string | null;
   banner?: string | null;
@@ -21,7 +21,7 @@ export interface Store {
 export interface StorePublic {
   id: string;
   name: string;
-  slug: string;
+  subdomain: string;
   description?: string | null;
   logo?: string | null;
   banner?: string | null;

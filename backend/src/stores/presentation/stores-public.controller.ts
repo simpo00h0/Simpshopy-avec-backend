@@ -7,12 +7,12 @@ import { StoresService } from '../stores.service';
 export class StoresPublicController {
   constructor(private readonly storesService: StoresService) {}
 
-  @Get(':slug')
+  @Get(':subdomain')
   @ApiOperation({
-    summary: "Données publiques d'une boutique (par slug/sous-domaine)",
+    summary: "Données publiques d'une boutique (par sous-domaine)",
   })
-  async findBySlug(@Param('slug') slug: string) {
-    const store = await this.storesService.findBySlugPublic(slug);
+  async findBySubdomain(@Param('subdomain') subdomain: string) {
+    const store = await this.storesService.findBySubdomainPublic(subdomain);
     if (!store) {
       throw new NotFoundException('Boutique introuvable');
     }

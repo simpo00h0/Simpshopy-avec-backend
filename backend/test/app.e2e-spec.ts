@@ -38,7 +38,7 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  describe('GET /storefront/:slug', () => {
+  describe('GET /storefront/:subdomain', () => {
     it('retourne 404 pour une boutique inexistante', () => {
       return request(app.getHttpServer())
         .get(`/${apiPrefix}/storefront/boutique-inexistante-123`)

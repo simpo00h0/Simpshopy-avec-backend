@@ -9,7 +9,7 @@ import { defaultStoreSettingsRepository } from '../infrastructure/store-settings
 
 interface UseEditorLoadParams {
   storeId: string | null;
-  slug: string;
+  subdomain: string;
   setCustomization: (c: ThemeCustomization | ((prev: ThemeCustomization) => ThemeCustomization)) => void;
   setHistory: (h: ThemeCustomization[] | ((prev: ThemeCustomization[]) => ThemeCustomization[])) => void;
   setHistoryIndex: (i: number) => void;
@@ -20,7 +20,7 @@ interface UseEditorLoadParams {
 export function useEditorLoad(params: UseEditorLoadParams): void {
   const {
     storeId,
-    slug,
+    subdomain,
     setCustomization,
     setHistory,
     setHistoryIndex,
@@ -30,7 +30,7 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
 
   useEffect(() => {
-    if (!storeId || !slug) return;
+    if (!storeId || !subdomain) return;
 
     const load = async (): Promise<void> => {
       try {
@@ -53,5 +53,5 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
     };
 
     load();
-  }, [storeId, slug, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setCurrentStore, storeSettingsRepository]);
+  }, [storeId, subdomain, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setCurrentStore, storeSettingsRepository]);
 }

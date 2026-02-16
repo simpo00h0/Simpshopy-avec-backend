@@ -4,8 +4,8 @@ import { Store } from '../domain/store.entity';
 import { StorePolicy } from '../domain/store.policy';
 
 export interface CreateStoreInput
-  extends Omit<CreateStoreData, 'slug' | 'ownerId'> {
-  slug?: string;
+  extends Omit<CreateStoreData, 'subdomain' | 'ownerId'> {
+  subdomain?: string;
 }
 
 @Injectable()
@@ -16,18 +16,18 @@ export class CreateStoreUseCase {
   ) {}
 
   async execute(ownerId: string, input: CreateStoreInput): Promise<Store> {
-    const slug = input.slug || StorePolicy.slugify(input.name);
+    const subdomain = input.subdomain || StorePolicy.subdomainFromName(input.name);
 
-    const existing = await this.storeRepository.findBySlug(slug);
+    const existing = await this.storeRepository.findBySubdomain(subdomain);
     if (existing) {
       throw new ConflictException(
-        `Le slug "${slug}" est déjà pris. Choisissez un autre ou laissez-le vide pour le générer.`,
+        `Le sous-domaine "${subdomain}" est déjà pris. Choisissez un autre nom de boutique.`,
       );
     }
 
     return this.storeRepository.create({
       ...input,
-      slug,
+      subdomain,
       ownerId,
       city: input.city || 'Dakar',
       country: input.country || 'SN',

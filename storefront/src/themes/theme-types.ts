@@ -1,5 +1,7 @@
 export interface MockProduct {
   id: string;
+  /** Slug pour l'URL (ex: produit-premium). Fallback sur id si absent (thèmes preview). */
+  slug?: string;
   name: string;
   price: number;
   priceLabel: string;

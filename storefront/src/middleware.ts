@@ -12,16 +12,37 @@ function getSubdomain(host: string): string | null {
   return subdomain;
 }
 
+function getBaseDomain(): string {
+  return process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN || 'localhost:3002';
+}
+
+function buildSubdomainUrl(slug: string, pathname: string): string {
+  const base = getBaseDomain();
+  const isLocalhost = base.includes('localhost');
+  const protocol = isLocalhost ? 'http' : 'https';
+  const path = pathname === '/' ? '' : pathname;
+  return `${protocol}://${slug}.${base}${path}`;
+}
+
 export function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
-  const subdomain = getSubdomain(host);
+  const pathname = request.nextUrl.pathname;
 
+  const sMatch = pathname.match(/^\/s\/([^/]+)(\/.*)?$/);
+  if (sMatch) {
+    const slug = sMatch[1];
+    const rest = sMatch[2] || '';
+    const search = request.nextUrl.search;
+    const redirectUrl = buildSubdomainUrl(slug, rest || '/') + search;
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  const subdomain = getSubdomain(host);
   if (!subdomain) {
     return NextResponse.next();
   }
 
-  const pathname = request.nextUrl.pathname;
-  if (pathname.startsWith('/s/') || pathname.startsWith('/preview/') || pathname.startsWith('/_next')) {
+  if (pathname.startsWith('/preview/') || pathname.startsWith('/_next')) {
     return NextResponse.next();
   }
 

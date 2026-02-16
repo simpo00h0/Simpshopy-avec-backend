@@ -21,7 +21,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import { checkHasStores, createStore } from '@/lib/store-service';
 
-function slugify(name: string): string {
+function subdomainFromName(name: string): string {
   return name
     .toLowerCase()
     .normalize('NFD')
@@ -41,7 +41,6 @@ export default function OnboardingPage() {
   const form = useForm({
     initialValues: {
       name: '',
-      slug: '',
       email: '',
       phone: '',
       city: 'Dakar',
@@ -54,7 +53,7 @@ export default function OnboardingPage() {
     },
   });
 
-  const generatedSlug = form.values.name ? slugify(form.values.name) : '';
+  const generatedSubdomain = form.values.name ? subdomainFromName(form.values.name) : '';
 
   useEffect(() => {
     const run = async () => {
@@ -85,10 +84,8 @@ export default function OnboardingPage() {
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
-    const slugToUse = values.slug?.trim() || slugify(values.name);
     const result = await createStore({
       name: values.name,
-      slug: slugToUse,
       email: values.email,
       phone: values.phone,
       city: values.city,
@@ -142,24 +139,17 @@ export default function OnboardingPage() {
                     label="Nom de votre boutique"
                     placeholder="Ma Boutique Africaine"
                     {...form.getInputProps('name')}
-                    onChange={(e) => {
-                      form.setFieldValue('name', e.target.value);
-                      if (!form.values.slug) form.setFieldValue('slug', slugify(e.target.value));
-                    }}
                   />
                   <Box>
                     <Text size="sm" fw={500} mb={4}>
-                      Votre URL
+                      Votre boutique sera accessible à
                     </Text>
                     <Text size="sm" c="dimmed">
-                      simpshopy.com/{form.values.slug || generatedSlug || 'ma-boutique'}
+                      {(generatedSubdomain || 'ma-boutique')}.simpshopy.com
                     </Text>
-                    <TextInput
-                      mt="xs"
-                      label="Personnaliser l&apos;URL (optionnel)"
-                      placeholder={generatedSlug}
-                      {...form.getInputProps('slug')}
-                    />
+                    <Text size="xs" c="dimmed" mt={4}>
+                      Généré automatiquement à partir du nom (comme Shopify)
+                    </Text>
                   </Box>
                   <Button type="submit" color="green" fullWidth>
                     Continuer

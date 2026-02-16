@@ -3,13 +3,13 @@ import { IStoreRepository } from '../domain/store.repository';
 import { StorePublic } from '../domain/store.entity';
 
 @Injectable()
-export class FindStoreBySlugPublicUseCase {
+export class FindStoreBySubdomainPublicUseCase {
   constructor(
     @Inject('IStoreRepository')
     private storeRepository: IStoreRepository,
   ) {}
 
-  async execute(slug: string): Promise<StorePublic | null> {
-    return this.storeRepository.findBySlugPublic(slug);
+  async execute(subdomain: string): Promise<StorePublic | null> {
+    return this.storeRepository.findBySubdomainPublic(subdomain);
   }
 }

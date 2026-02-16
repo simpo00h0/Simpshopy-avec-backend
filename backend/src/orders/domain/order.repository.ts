@@ -57,7 +57,7 @@ export interface OrderWithDetails {
   status: string;
   total: number;
   items: unknown[];
-  store: { id: string; name: string; slug: string };
+  store: { id: string; name: string; subdomain: string };
   customer?: { id: string; firstName: string; lastName: string; email: string };
 }
 

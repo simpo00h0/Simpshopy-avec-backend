@@ -26,7 +26,7 @@ type DashboardShellProps = {
   navBottom: NavItem[];
   onNavClick: (href: string) => void;
   userFirstName?: string;
-  storeSlug?: string;
+  storeSubdomain?: string;
   onLogout: () => void;
   children: React.ReactNode;
   isEditorPath: boolean;
@@ -41,7 +41,7 @@ export function DashboardShell({
   navBottom,
   onNavClick,
   userFirstName,
-  storeSlug,
+  storeSubdomain,
   onLogout,
   children,
   isEditorPath,
@@ -72,10 +72,10 @@ export function DashboardShell({
                 <IconBell size={20} />
               </ActionIcon>
             </Tooltip>
-            {storeSlug && (
+            {storeSubdomain && (
               <Button
                 component="a"
-                href={getStoreUrl(storeSlug)}
+                href={getStoreUrl(storeSubdomain)}
                 target="_blank"
                 rel="noopener noreferrer"
                 variant="subtle"

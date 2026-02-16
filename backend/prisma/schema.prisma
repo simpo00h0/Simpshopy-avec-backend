@@ -74,7 +74,7 @@ enum StoreStatus {
 model Store {
   id              String       @id @default(uuid())
   name            String
-  slug            String       @unique // URL-friendly
+  subdomain       String       @unique // Sous-domaine (ex: maboutique.simpshopy.com)
   description     String?
   logo            String?
   banner          String?
@@ -127,7 +127,7 @@ model Store {
   publishedAt     DateTime?
 
   @@index([ownerId])
-  @@index([slug])
+  @@index([subdomain])
   @@index([status])
   @@map("stores")
 }

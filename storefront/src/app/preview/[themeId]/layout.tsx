@@ -27,7 +27,7 @@ export default function PreviewLayout({
   const basePath = `/preview/${themeId}`;
 
   return (
-    <ThemeProvider theme={theme} basePath={basePath} storeSlug="preview" isPreview isEditor={false}>
+    <ThemeProvider theme={theme} basePath={basePath} storeSubdomain="preview" isPreview isEditor={false}>
       <ThemeLayout>{children}</ThemeLayout>
     </ThemeProvider>
   );

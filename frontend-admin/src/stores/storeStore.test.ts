@@ -12,7 +12,7 @@ describe('storeStore', () => {
     const store = {
       id: 's1',
       name: 'Ma Boutique',
-      slug: 'ma-boutique',
+      subdomain: 'ma-boutique',
       email: 'contact@boutique.com',
       status: 'ACTIVE',
     };
@@ -29,7 +29,7 @@ describe('storeStore', () => {
       useStoreStore.getState().setCurrentStore({
         id: 's1',
         name: 'Test',
-        slug: 'test',
+        subdomain: 'test',
         email: 'a@b.com',
         status: 'ACTIVE',
       });

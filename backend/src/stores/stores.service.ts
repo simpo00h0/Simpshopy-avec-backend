@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateStoreUseCase } from './application/create-store.usecase';
 import { FindStoresByOwnerUseCase } from './application/find-stores-by-owner.usecase';
 import { FindFirstStoreByOwnerUseCase } from './application/find-first-store-by-owner.usecase';
-import { FindStoreBySlugPublicUseCase } from './application/find-store-by-slug-public.usecase';
+import { FindStoreBySubdomainPublicUseCase } from './application/find-store-by-subdomain-public.usecase';
 import { FindStoreUseCase } from './application/find-store.usecase';
 import { UpdateStoreUseCase } from './application/update-store.usecase';
 import { UpdateStoreSettingsUseCase } from './application/update-store-settings.usecase';
@@ -19,7 +19,7 @@ export class StoresService {
     private createStoreUseCase: CreateStoreUseCase,
     private findStoresByOwnerUseCase: FindStoresByOwnerUseCase,
     private findFirstStoreByOwnerUseCase: FindFirstStoreByOwnerUseCase,
-    private findStoreBySlugPublicUseCase: FindStoreBySlugPublicUseCase,
+    private findStoreBySubdomainPublicUseCase: FindStoreBySubdomainPublicUseCase,
     private findStoreUseCase: FindStoreUseCase,
     private updateStoreUseCase: UpdateStoreUseCase,
     private updateStoreSettingsUseCase: UpdateStoreSettingsUseCase,
@@ -38,8 +38,8 @@ export class StoresService {
     return this.findFirstStoreByOwnerUseCase.execute(ownerId);
   }
 
-  async findBySlugPublic(slug: string) {
-    return this.findStoreBySlugPublicUseCase.execute(slug);
+  async findBySubdomainPublic(subdomain: string) {
+    return this.findStoreBySubdomainPublicUseCase.execute(subdomain);
   }
 
   async findOne(id: string, ownerId: string) {

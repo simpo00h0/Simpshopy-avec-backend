@@ -16,7 +16,7 @@ interface ProductTemplateProps {
 export function ProductTemplate({ product }: ProductTemplateProps) {
   const [imgError, setImgError] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const { theme, basePath, storeSlug } = useTheme();
+  const { theme, basePath, storeSubdomain } = useTheme();
   const addItem = useCartStore((s) => s.addItem);
   const { colors } = theme;
   const showImage = product.imageUrl && !imgError;
@@ -102,7 +102,7 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
             size="lg"
             style={{ backgroundColor: colors.primary }}
             fullWidth
-            onClick={() => addItem(product, quantity, storeSlug)}
+            onClick={() => addItem(product, quantity, storeSubdomain)}
           >
             Ajouter au panier
           </Button>

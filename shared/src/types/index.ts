@@ -17,7 +17,7 @@ export interface User {
 export interface Store {
   id: string;
   name: string;
-  slug: string;
+  subdomain: string;
   description?: string;
   logo?: string;
   banner?: string;

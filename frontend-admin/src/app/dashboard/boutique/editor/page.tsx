@@ -25,7 +25,7 @@ export default function BoutiqueEditorPage() {
   const searchParams = useSearchParams();
   const storeId = searchParams.get('storeId');
   const currentStore = useStoreStore((s) => s.currentStore);
-  const slug = currentStore?.slug ?? searchParams.get('slug') ?? '';
+  const subdomain = currentStore?.subdomain ?? searchParams.get('subdomain') ?? '';
 
   const editorState = useEditorState();
   const { handleSave, saving, saved, lastSavedRef, hasUnsavedChanges } = useEditorSave(
@@ -34,7 +34,7 @@ export default function BoutiqueEditorPage() {
   );
   useEditorLoad({
     storeId,
-    slug,
+    subdomain,
     setCustomization: editorState.setCustomization,
     setHistory: editorState.setHistory,
     setHistoryIndex: editorState.setHistoryIndex,
@@ -62,7 +62,7 @@ export default function BoutiqueEditorPage() {
   );
 
   const iframe = useEditorIframe(
-    getEditorIframeSrc(slug, ui.currentTemplate.path),
+    getEditorIframeSrc(subdomain, ui.currentTemplate.path),
     editorState.customization,
     ui.previewMode,
     editorState.selectedBlock,
@@ -135,7 +135,7 @@ export default function BoutiqueEditorPage() {
   const openLibraryOnly = useCallback(() => useEditorUIStore.getState().openLibrary(), []);
   const openSettingsOnly = useCallback(() => useEditorUIStore.getState().openSettings(), []);
 
-  if (!slug) {
+  if (!subdomain) {
     return (
       <Box p="xl">
         <Text c="dimmed">Chargement...</Text>
@@ -146,7 +146,7 @@ export default function BoutiqueEditorPage() {
     );
   }
 
-  const iframeSrc = getEditorIframeSrc(slug, ui.currentTemplate.path);
+  const iframeSrc = getEditorIframeSrc(subdomain, ui.currentTemplate.path);
   const showEditorContent = cachedFromSession || iframe.canvasReady;
 
   return (

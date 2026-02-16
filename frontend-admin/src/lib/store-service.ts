@@ -32,7 +32,7 @@ export async function loadStores(): Promise<LoadStoresResult> {
 
 export interface CreateStoreParams {
   name: string;
-  slug: string;
+  subdomain?: string;
   email: string;
   phone: string;
   city: string;

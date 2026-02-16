@@ -6,7 +6,7 @@ import type { ThemeConfig } from './theme-types';
 interface ThemeContextValue {
   theme: ThemeConfig;
   basePath: string;
-  storeSlug: string;
+  storeSubdomain: string;
   isPreview: boolean;
   isEditor: boolean;
   /** En mode éditeur : true = masquer bordures/labels pour voir l’aperçu propre */
@@ -18,7 +18,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({
   theme,
   basePath,
-  storeSlug = 'preview',
+  storeSubdomain = 'preview',
   isPreview,
   isEditor,
   isPreviewMode,
@@ -26,7 +26,7 @@ export function ThemeProvider({
 }: {
   theme: ThemeConfig;
   basePath: string;
-  storeSlug?: string;
+  storeSubdomain?: string;
   isPreview?: boolean;
   isEditor?: boolean;
   isPreviewMode?: boolean;
@@ -37,7 +37,7 @@ export function ThemeProvider({
       value={{
         theme,
         basePath,
-        storeSlug,
+        storeSubdomain,
         isPreview: isPreview ?? false,
         isEditor: isEditor ?? false,
         isPreviewMode: isPreviewMode ?? false,

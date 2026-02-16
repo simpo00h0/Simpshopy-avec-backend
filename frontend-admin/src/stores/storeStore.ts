@@ -6,7 +6,7 @@ export type { ThemeCustomization };
 export interface Store {
   id: string;
   name: string;
-  slug: string;
+  subdomain: string;
   email: string;
   status: string;
   settings?: {

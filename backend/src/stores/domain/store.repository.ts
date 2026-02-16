@@ -2,7 +2,7 @@ import { Store, StorePublic, StoreCustomer } from './store.entity';
 
 export interface CreateStoreData {
   name: string;
-  slug: string;
+  subdomain: string;
   email: string;
   phone: string;
   city?: string;
@@ -34,7 +34,7 @@ export interface UpdateStoreSettingsData {
 }
 
 export interface IStoreRepository {
-  findBySlug(slug: string): Promise<Store | null>;
+  findBySubdomain(subdomain: string): Promise<Store | null>;
 
   create(data: CreateStoreData): Promise<Store>;
 
@@ -42,7 +42,7 @@ export interface IStoreRepository {
 
   findFirstByOwner(ownerId: string): Promise<Store | null>;
 
-  findBySlugPublic(slug: string): Promise<StorePublic | null>;
+  findBySubdomainPublic(subdomain: string): Promise<StorePublic | null>;
 
   findById(id: string): Promise<Store | null>;
 

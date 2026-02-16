@@ -60,7 +60,7 @@ export default function ThemesPage() {
       setActiveTheme(themeId); // Feedback immédiat
     },
     onSuccess: async (_, themeId) => {
-      const storesRes = await api.get<{ id: string; name: string; slug: string; email: string; status: string; settings?: { themeId?: string | null } }[]>('/stores');
+      const storesRes = await api.get<{ id: string; name: string; subdomain: string; email: string; status: string; settings?: { themeId?: string | null } }[]>('/stores');
       const stores = storesRes.data;
       const updated = stores?.find((s) => s.id === currentStore?.id) ?? stores?.[0];
       if (updated) setCurrentStore(updated);

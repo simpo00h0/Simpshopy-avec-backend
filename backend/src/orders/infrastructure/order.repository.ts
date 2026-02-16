@@ -113,7 +113,7 @@ export class OrderRepository implements IOrderRepository {
       where,
       include: {
         items: { include: { product: true, variant: true } },
-        store: { select: { id: true, name: true, slug: true } },
+        store: { select: { id: true, name: true, subdomain: true } },
         customer: {
           select: { id: true, firstName: true, lastName: true, email: true },
         },

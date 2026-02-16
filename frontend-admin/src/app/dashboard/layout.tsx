@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       navBottom={navBottom}
       onNavClick={setNavigatingTo}
       userFirstName={user?.firstName}
-      storeSlug={currentStore?.slug}
+      storeSubdomain={currentStore?.subdomain}
       onLogout={handleLogout}
       isEditorPath={pathname?.includes('/boutique/editor') ?? false}
       styles={{ editorMain: styles.editorMain, appShellMain: styles.appShellMain }}

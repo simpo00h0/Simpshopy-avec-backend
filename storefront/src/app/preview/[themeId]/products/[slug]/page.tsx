@@ -12,7 +12,7 @@ export default function PreviewProductPage() {
 
   if (!theme) return null;
 
-  const product = theme.products.find((p) => p.id === slug);
+  const product = theme.products.find((p) => p.slug === slug || p.id === slug);
 
   if (!product) {
     return (

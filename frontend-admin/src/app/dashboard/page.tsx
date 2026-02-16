@@ -118,7 +118,7 @@ export default function DashboardPage() {
           {currentStore && (
             <Button
               component="a"
-              href={getStoreUrl(currentStore.slug)}
+              href={getStoreUrl(currentStore.subdomain)}
               target="_blank"
               rel="noopener noreferrer"
               variant="light"

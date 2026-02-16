@@ -6,7 +6,7 @@ import { StoresPublicController } from './presentation/stores-public.controller'
 import { CreateStoreUseCase } from './application/create-store.usecase';
 import { FindStoresByOwnerUseCase } from './application/find-stores-by-owner.usecase';
 import { FindFirstStoreByOwnerUseCase } from './application/find-first-store-by-owner.usecase';
-import { FindStoreBySlugPublicUseCase } from './application/find-store-by-slug-public.usecase';
+import { FindStoreBySubdomainPublicUseCase } from './application/find-store-by-subdomain-public.usecase';
 import { FindStoreUseCase } from './application/find-store.usecase';
 import { UpdateStoreUseCase } from './application/update-store.usecase';
 import { UpdateStoreSettingsUseCase } from './application/update-store-settings.usecase';
@@ -22,7 +22,7 @@ import { IStoreRepository } from './domain/store.repository';
     CreateStoreUseCase,
     FindStoresByOwnerUseCase,
     FindFirstStoreByOwnerUseCase,
-    FindStoreBySlugPublicUseCase,
+    FindStoreBySubdomainPublicUseCase,
     FindStoreUseCase,
     UpdateStoreUseCase,
     UpdateStoreSettingsUseCase,

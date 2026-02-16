@@ -16,13 +16,13 @@ export class CreateStoreDto {
 
   @ApiProperty({ example: 'ma-boutique-africaine', required: false })
   @IsOptional()
-  @ValidateIf((o) => o.slug != null && o.slug !== '')
+  @ValidateIf((o) => o.subdomain != null && o.subdomain !== '')
   @IsString()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
     message:
-      'Le slug doit être en minuscules, tirets uniquement (ex: ma-boutique)',
+      'Le sous-domaine doit être en minuscules, tirets uniquement (ex: ma-boutique)',
   })
-  slug?: string;
+  subdomain?: string;
 
   @ApiProperty({ example: 'contact@maboutique.sn' })
   @IsEmail({}, { message: 'Email de contact invalide' })

@@ -20,13 +20,13 @@ import { useTheme } from '../ThemeContext';
 import { useCartStore } from '@/stores/cartStore';
 
 export function CartTemplate() {
-  const { theme, basePath, storeSlug } = useTheme();
+  const { theme, basePath, storeSubdomain } = useTheme();
   const { colors } = theme;
   const getItems = useCartStore((s) => s.getItems);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
 
-  const items = getItems(storeSlug);
+  const items = getItems(storeSubdomain);
   const cartEmpty = items.length === 0;
 
   if (cartEmpty) {
@@ -85,7 +85,7 @@ export function CartTemplate() {
               </Table.Thead>
               <Table.Tbody>
                 {items.map((item) => (
-                  <Table.Tr key={`${item.productId}-${item.storeSlug}`}>
+                  <Table.Tr key={`${item.productId}-${item.storeSubdomain}`}>
                     <Table.Td>
                       <Group>
                         <Box
@@ -134,7 +134,7 @@ export function CartTemplate() {
                           updateQuantity(
                             item.productId,
                             typeof v === 'string' ? 1 : (v ?? 1),
-                            storeSlug
+                            storeSubdomain
                           )
                         }
                         w={80}
@@ -148,7 +148,7 @@ export function CartTemplate() {
                       <ActionIcon
                         variant="subtle"
                         color="red"
-                        onClick={() => removeItem(item.productId, storeSlug)}
+                        onClick={() => removeItem(item.productId, storeSubdomain)}
                         aria-label="Supprimer"
                       >
                         <IconTrash size={16} />

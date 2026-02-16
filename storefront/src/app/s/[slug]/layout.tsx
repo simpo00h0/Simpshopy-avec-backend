@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation';
 import { StoreLayoutClient } from './StoreLayoutClient';
 import { API_BASE_URL } from '@/lib/constants';
 
-async function getStore(slug: string) {
+async function getStore(subdomain: string) {
   try {
-    const res = await fetch(`${API_BASE_URL}/storefront/${slug}`, {
+    const res = await fetch(`${API_BASE_URL}/storefront/${subdomain}`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;
@@ -31,7 +31,7 @@ export default async function StoreLayout({
 
   return (
     <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div>}>
-      <StoreLayoutClient store={store} slug={slug}>{children}</StoreLayoutClient>
+      <StoreLayoutClient store={store} subdomain={slug}>{children}</StoreLayoutClient>
     </Suspense>
   );
 }

@@ -10,7 +10,7 @@ import type { ThemeConfig, MockProduct } from '@/themes/data';
 interface StoreData {
   id: string;
   name: string;
-  slug: string;
+  subdomain: string;
   description?: string;
   logo?: string | null;
   themeId: string;
@@ -29,6 +29,7 @@ interface StoreData {
 function mapProducts(products: StoreData['products']): MockProduct[] {
   return products.map((p) => ({
     id: p.id,
+    slug: p.slug,
     name: p.name,
     price: p.price,
     priceLabel: `${p.price.toLocaleString('fr-FR')} XOF`,
@@ -127,7 +128,7 @@ function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null |
 const SIMPSHOPY_THEME_UPDATE = 'simpshopy-theme-update';
 const SIMPSHOPY_PREVIEW_MODE = 'simpshopy-preview-mode';
 
-export function StoreLayoutClient({ store, slug, children }: { store: StoreData; slug: string; children: React.ReactNode }) {
+export function StoreLayoutClient({ store, subdomain, children }: { store: StoreData; subdomain: string; children: React.ReactNode }) {
   const baseTheme = themesData[store.themeId] ?? themesData.classique;
   const products = mapProducts(store.products || []);
 
@@ -170,13 +171,13 @@ export function StoreLayoutClient({ store, slug, children }: { store: StoreData;
   };
   theme = applyCustomization(theme, effectiveCustomization);
 
-  const basePath = `/s/${slug}`;
+  const basePath = '';
 
   return (
     <ThemeProvider
       theme={theme}
       basePath={basePath}
-      storeSlug={slug}
+      storeSubdomain={subdomain}
       isPreview={false}
       isEditor={isEditor}
       isPreviewMode={isEditor && previewMode}

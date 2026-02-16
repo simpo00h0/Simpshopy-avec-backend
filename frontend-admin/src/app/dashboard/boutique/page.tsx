@@ -49,12 +49,10 @@ export default function BoutiquePage() {
   }
 
   const themeName = THEME_NAMES[themeId] ?? themeId;
-  const storeSlug = currentStore?.slug ?? '';
-  const storeUrl = getStoreUrl(storeSlug);
+  const subdomain = currentStore?.subdomain ?? '';
+  const storeUrl = getStoreUrl(subdomain);
   const storefrontDomain = process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN || 'localhost:3002';
-  const storeDisplayUrl = storefrontDomain.includes('localhost')
-    ? `${storeSlug}.${storefrontDomain}`
-    : `${storeSlug}.${storefrontDomain}`;
+  const storeDisplayUrl = `${subdomain}.${storefrontDomain}`;
   const previewUrl = `${storefrontUrl}/preview/${themeId}`;
 
   return (
