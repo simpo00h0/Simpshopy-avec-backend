@@ -7,15 +7,8 @@ jest.mock('@mantine/notifications', () => ({
 }));
 
 describe('reportError', () => {
-  const originalEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.NODE_ENV = 'test';
-  });
-
-  afterAll(() => {
-    process.env.NODE_ENV = originalEnv;
   });
 
   it('extrait le message depuis err.message', () => {

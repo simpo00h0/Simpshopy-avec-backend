@@ -206,6 +206,14 @@ npm run dev:all
 - **Performance** : Temps de chargement < 2s
 - **Satisfaction** : Score NPS > 50
 
+## 🧪 Tests
+
+Voir [TESTING.md](./TESTING.md) pour la documentation complète des tests automatisés.
+
+```bash
+npm run test
+```
+
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! Veuillez lire le guide de contribution avant de soumettre une PR.

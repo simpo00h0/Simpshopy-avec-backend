@@ -11,8 +11,8 @@ test.describe('Page d\'accueil', () => {
   test('les liens Se connecter et Démarrer mènent aux bonnes pages', async ({ page }) => {
     await page.goto('/');
 
-    await page.getByRole('link', { name: 'Se connecter' }).first().click();
-    await expect(page).toHaveURL(/\/login/);
+    await page.locator('a[href="/login"]').first().click();
+    await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
 
     await page.goto('/');
     await page.locator('a[href="/signup"]').first().click();

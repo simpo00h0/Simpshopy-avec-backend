@@ -21,7 +21,7 @@ export function useEditorState() {
     if (isUndoRedoRef.current) return;
     setHistory((h) => {
       const next = [...h.slice(0, historyIndex + 1), JSON.parse(JSON.stringify(cust))].slice(-50);
-      queueMicrotask(() => setHistoryIndex(next.length - 1));
+      setHistoryIndex(next.length - 1);
       return next;
     });
   }, [historyIndex]);
