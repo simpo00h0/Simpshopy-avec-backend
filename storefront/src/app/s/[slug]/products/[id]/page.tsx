@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ProductTemplate } from '@/themes/templates/ProductTemplate';
 import { useTheme } from '@/themes/ThemeContext';
@@ -15,7 +16,7 @@ export default function StoreProductPage() {
     return (
       <div style={{ padding: 40, textAlign: 'center' }}>
         <h2>Produit introuvable</h2>
-        <a href={`${basePath}/products`}>Retour aux produits</a>
+        <Link href={`${basePath}/products`}>Retour aux produits</Link>
       </div>
     );
   }

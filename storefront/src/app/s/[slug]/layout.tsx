@@ -6,7 +6,7 @@ import { API_BASE_URL } from '@/lib/constants';
 async function getStore(slug: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/storefront/${slug}`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
     });
     if (!res.ok) return null;
     return res.json();
