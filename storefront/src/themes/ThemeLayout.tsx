@@ -15,7 +15,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { label: 'Accueil', href: basePath },
-    { label: 'Produits', href: `${basePath}/products` },
+    { label: 'Produits', href: `${basePath}/collections/all` },
     { label: 'À propos', href: `${basePath}/about` },
     { label: 'Contact', href: `${basePath}/contact` },
     { label: 'Panier', href: `${basePath}/cart` },

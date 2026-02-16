@@ -45,7 +45,7 @@ export const HOME_PALETTE = HOME_BLOCKS.filter(
 
 export const TEMPLATES = [
   { id: 'home', label: 'Accueil', path: '' },
-  { id: 'products', label: 'Produits', path: '/products' },
+  { id: 'products', label: 'Produits', path: '/collections/all' },
   { id: 'about', label: 'À propos', path: '/about' },
   { id: 'contact', label: 'Contact', path: '/contact' },
 ] as const;

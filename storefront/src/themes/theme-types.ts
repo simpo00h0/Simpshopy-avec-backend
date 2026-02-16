@@ -1,7 +1,7 @@
 export interface MockProduct {
   id: string;
-  /** Slug pour l'URL (ex: produit-premium). Fallback sur id si absent (thèmes preview). */
-  slug?: string;
+  /** Slug pour l'URL et les liens internes (ex: produit-premium). Requis, comme Shopify. */
+  slug: string;
   name: string;
   price: number;
   priceLabel: string;
@@ -31,7 +31,7 @@ export interface ThemeConfig {
   contactPhone?: string;
   colors: { primary: string; secondary: string; accent: string; bg: string; text: string };
   products: MockProduct[];
-  collections?: { id: string; name: string; productIds: string[] }[];
+  collections?: { id: string; slug: string; name: string; productIds: string[] }[];
   footerTagline: string;
   footerLinks?: { label: string; href: string }[];
   featuredCarouselTitle?: string;

@@ -8,17 +8,12 @@ import { useTheme } from '../ThemeContext';
 import type { MockProduct } from '../theme-types';
 
 interface ProductCardProps {
-  product: MockProduct | (Omit<MockProduct, 'slug'> & { slug?: string });
+  product: MockProduct;
   basePath: string;
 }
 
-function getProductHref(product: ProductCardProps['product'], basePath: string): string {
-  const slug = product.slug ?? product.id;
-  return `${basePath}/products/${slug}`;
-}
-
 export function ProductCard({ product, basePath }: ProductCardProps) {
-  const productHref = getProductHref(product, basePath);
+  const productHref = `${basePath}/products/${product.slug}`;
   const [hovered, setHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
   const { theme } = useTheme();

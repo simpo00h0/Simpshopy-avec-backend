@@ -6,8 +6,8 @@ import { CollectionTemplate } from '@/themes/templates/CollectionTemplate';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
-  const collectionId = searchParams.get('collection') ?? undefined;
-  return <CollectionTemplate collectionId={collectionId} />;
+  const collectionSlug = searchParams.get('collection') ?? 'all';
+  return <CollectionTemplate collectionSlug={collectionSlug} />;
 }
 
 export default function PreviewProductsPage() {

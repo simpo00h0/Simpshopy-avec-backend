@@ -10,13 +10,13 @@ export default function StoreProductPage() {
   const productSlug = params.productSlug as string;
   const { theme, basePath } = useTheme();
 
-  const product = theme.products.find((p) => p.slug === productSlug || p.id === productSlug);
+  const product = theme.products.find((p) => p.slug === productSlug);
 
   if (!product) {
     return (
       <div style={{ padding: 40, textAlign: 'center' }}>
         <h2>Produit introuvable</h2>
-        <Link href={`${basePath}/products`}>Retour aux produits</Link>
+        <Link href={`${basePath}/collections/all`}>Retour aux produits</Link>
       </div>
     );
   }

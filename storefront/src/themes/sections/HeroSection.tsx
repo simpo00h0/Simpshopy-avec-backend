@@ -86,7 +86,7 @@ export function HeroSection() {
         {heroCta && (
           <Button
             component={Link}
-            href={`${basePath}/products`}
+            href={`${basePath}/collections/all`}
             variant="white"
             color="dark"
             size="lg"

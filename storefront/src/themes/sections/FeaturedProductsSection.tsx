@@ -3,16 +3,17 @@
 import { Container, Title, Grid } from '@mantine/core';
 import { useTheme } from '../ThemeContext';
 import { ProductCard } from './ProductCard';
+import type { MockProduct } from '../theme-types';
 
 interface FeaturedProductsSectionProps {
-  products?: { id: string; name: string; price: number; priceLabel: string; description: string; imagePlaceholder: string }[];
+  products?: MockProduct[];
   title?: string;
   limit?: number;
 }
 
 export function FeaturedProductsSection({ products: propProducts, title = 'Nos produits', limit = 6 }: FeaturedProductsSectionProps) {
   const { theme, basePath } = useTheme();
-  const products = propProducts ?? theme.products.slice(0, limit);
+  const products = (propProducts ?? theme.products.slice(0, limit)).filter((p): p is MockProduct => !!p.slug);
 
   return (
     <section

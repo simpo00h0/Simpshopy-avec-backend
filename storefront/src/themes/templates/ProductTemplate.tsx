@@ -25,7 +25,7 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
 
   const breadcrumbItems = [
     { title: 'Accueil', href: basePath },
-    { title: 'Produits', href: `${basePath}/products` },
+    { title: 'Produits', href: `${basePath}/collections/all` },
     { title: product.name, href: '#' },
   ];
 
@@ -121,7 +121,7 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
 
           <Button
             component={Link}
-            href={`${basePath}/products`}
+            href={`${basePath}/collections/all`}
             variant="subtle"
             mt="xl"
           >

@@ -6,15 +6,18 @@ import { useTheme } from '../ThemeContext';
 import { ProductCard } from '../sections/ProductCard';
 
 interface CollectionTemplateProps {
-  collectionId?: string;
+  /** Slug de la collection (ex: all, best-sellers, vetements). Style Shopify. */
+  collectionSlug?: string;
 }
 
-export function CollectionTemplate({ collectionId }: CollectionTemplateProps) {
+const DEFAULT_COLLECTION = { id: 'all', slug: 'all', name: 'Tous les produits', productIds: [] as string[] };
+
+export function CollectionTemplate({ collectionSlug }: CollectionTemplateProps) {
   const router = useRouter();
   const { theme, basePath } = useTheme();
-  const collections = theme.collections ?? [{ id: 'all', name: 'Tous les produits', productIds: theme.products.map((p) => p.id) }];
-  const currentCollection = collectionId
-    ? collections.find((c) => c.id === collectionId) ?? collections[0]
+  const collections = theme.collections ?? [{ ...DEFAULT_COLLECTION, productIds: theme.products.map((p) => p.id) }];
+  const currentCollection = collectionSlug
+    ? collections.find((c) => c.slug === collectionSlug || c.id === collectionSlug) ?? collections[0]
     : collections[0];
 
   const products = currentCollection
@@ -30,10 +33,10 @@ export function CollectionTemplate({ collectionId }: CollectionTemplateProps) {
         <Select
           label="Collection"
           placeholder="Choisir"
-          data={collections.map((c) => ({ value: c.id, label: c.name }))}
-          value={currentCollection?.id}
+          data={collections.map((c) => ({ value: c.slug, label: c.name }))}
+          value={currentCollection?.slug}
           onChange={(v) => {
-            if (v) router.push(`${basePath}/products?collection=${v}`);
+            if (v) router.push(`${basePath}/collections/${v}`);
           }}
           mb="xl"
           style={{ maxWidth: 300 }}

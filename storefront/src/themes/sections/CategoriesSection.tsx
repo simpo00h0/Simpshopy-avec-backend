@@ -6,7 +6,7 @@ import { useTheme } from '../ThemeContext';
 
 export function CategoriesSection() {
   const { theme, basePath } = useTheme();
-  const collections = theme.collections ?? [{ id: 'all', name: 'Tous les produits', productIds: [] }];
+  const collections = theme.collections ?? [{ id: 'all', slug: 'all', name: 'Tous les produits', productIds: [] }];
   const limit = theme.categoriesLimit;
   const displayCollections = limit != null ? collections.slice(0, limit) : collections;
   const title = theme.categoriesTitle ?? 'Parcourir par catégorie';
@@ -29,7 +29,7 @@ export function CategoriesSection() {
             <Card
               key={col.id}
               component={Link}
-              href={`${basePath}/products?collection=${col.id}`}
+              href={`${basePath}/collections/${col.slug}`}
               shadow="sm"
               padding="lg"
               radius="md"
