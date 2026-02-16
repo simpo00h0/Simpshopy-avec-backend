@@ -16,6 +16,8 @@ import {
 import { IconShoppingCart } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { EmptyState } from '@/components/EmptyState';
+import { ORDER_STATUS_COLORS } from '@/lib/constants';
 
 interface Order {
   id: string;
@@ -34,15 +36,6 @@ export default function OrdersPage() {
     queryFn: () => api.get<Order[]>('/orders', { params: statusFilter ? { status: statusFilter } : {} }).then((r) => r.data || []),
     staleTime: 30_000,
   });
-
-  const statusColor: Record<string, string> = {
-    PENDING: 'yellow',
-    CONFIRMED: 'blue',
-    PROCESSING: 'cyan',
-    SHIPPED: 'teal',
-    DELIVERED: 'green',
-    CANCELLED: 'red',
-  };
 
   return (
     <Container fluid py="xl">
@@ -68,19 +61,11 @@ export default function OrdersPage() {
       {loading ? (
         <LoadingScreen />
       ) : orders.length === 0 ? (
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <Group justify="center" py={60}>
-            <div style={{ textAlign: 'center' }}>
-              <IconShoppingCart size={48} stroke={1.5} color="var(--mantine-color-gray-4)" />
-              <Text size="lg" fw={500} mt="md">
-                Aucune commande
-              </Text>
-              <Text size="sm" c="dimmed" mt="xs">
-                Vos commandes apparaîtront ici une fois que vous aurez des ventes
-              </Text>
-            </div>
-          </Group>
-        </Card>
+        <EmptyState
+          icon={IconShoppingCart}
+          title="Aucune commande"
+          description="Vos commandes apparaîtront ici une fois que vous aurez des ventes"
+        />
       ) : (
         <Card shadow="sm" padding="0" radius="md" withBorder>
           <Table striped highlightOnHover>
@@ -105,7 +90,7 @@ export default function OrdersPage() {
                     <Text size="sm">{new Date(o.createdAt).toLocaleDateString('fr-FR')}</Text>
                   </Table.Td>
                   <Table.Td>
-                    <Badge color={statusColor[o.status] || 'gray'} size="sm">
+                    <Badge color={ORDER_STATUS_COLORS[o.status] || 'gray'} size="sm">
                       {o.status}
                     </Badge>
                   </Table.Td>

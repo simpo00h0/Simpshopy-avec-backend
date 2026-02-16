@@ -5,6 +5,7 @@ import { Container, Title, Text, Card, Table } from '@mantine/core';
 import { IconUsers } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { EmptyState } from '@/components/EmptyState';
 
 interface CustomerRow {
   customer: { id: string; firstName: string; lastName: string; email: string };
@@ -27,17 +28,11 @@ export default function CustomersPage() {
       {loading ? (
         <LoadingScreen />
       ) : customers.length === 0 ? (
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <div style={{ textAlign: 'center', padding: 60 }}>
-            <IconUsers size={48} stroke={1.5} color="var(--mantine-color-gray-4)" />
-            <Text size="lg" fw={500} mt="md">
-              Aucun client
-            </Text>
-            <Text size="sm" c="dimmed" mt="xs">
-              Vos clients apparaîtront ici après leurs achats
-            </Text>
-          </div>
-        </Card>
+        <EmptyState
+          icon={IconUsers}
+          title="Aucun client"
+          description="Vos clients apparaîtront ici après leurs achats"
+        />
       ) : (
         <Card shadow="sm" padding="0" radius="md" withBorder>
           <Table striped highlightOnHover>

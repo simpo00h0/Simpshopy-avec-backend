@@ -1,144 +1,31 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import styles from './layout.module.css';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { AppShell, Group, Title, Text, Button, Burger, NavLink, Stack, Divider, TextInput, ActionIcon } from '@mantine/core';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { AppShell, Group, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import {
-  IconLogout,
-  IconHome2,
-  IconPackage,
-  IconShoppingCart,
-  IconUsers,
-  IconChartBar,
-  IconSettings,
-  IconWallet,
-  IconBuildingStore,
-  IconDiscount2,
-  IconSearch,
-  IconBell,
-  IconShoppingBag,
-  IconPalette,
-} from '@tabler/icons-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreStore } from '@/stores/storeStore';
 import { supabase } from '@/lib/supabase';
-import { api, primeTokenCache } from '@/lib/api';
-import { getStoreUrl } from '@/lib/storefront-url';
-import {
-  prefetchDashboardStats,
-  prefetchProducts,
-  prefetchOrders,
-  prefetchCustomers,
-  prefetchStores,
-} from '@/lib/prefetch';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { useDashboardAuth } from './hooks/useDashboardAuth';
+import { useDashboardNavigation } from './hooks/useDashboardNavigation';
+import { useDashboardPrefetch } from './hooks/useDashboardPrefetch';
+import { getNavItems, getNavBottom } from './dashboard-nav-config';
+import { DashboardShell } from './components/DashboardShell';
+import styles from './layout.module.css';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
-  const { user, logout, setUser } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const currentStore = useStoreStore((s) => s.currentStore);
+  const { hasSession, hasStore } = useDashboardAuth();
+  const { setNavigatingTo, showNavLoader, navigatingTo } = useDashboardNavigation();
   const [opened, { toggle }] = useDisclosure();
-  const [hasStore, setHasStore] = useState<boolean | null>(null);
-  const [hasSession, setHasSession] = useState<boolean | null>(null);
-  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
-  const [showNavLoader, setShowNavLoader] = useState(false);
-  const navigatingToRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    if (navigatingTo && (pathname === navigatingTo || pathname.startsWith(navigatingTo + '/'))) {
-      navigatingToRef.current = null;
-      setNavigatingTo(null);
-      setShowNavLoader(false);
-    }
-  }, [navigatingTo, pathname]);
-
-  useEffect(() => {
-    if (!navigatingTo) return;
-    navigatingToRef.current = navigatingTo;
-    setShowNavLoader(false);
-    const t = setTimeout(() => {
-      if (navigatingToRef.current) setShowNavLoader(true);
-    }, 150);
-    return () => {
-      clearTimeout(t);
-    };
-  }, [navigatingTo]);
-
-  useEffect(() => {
-    const run = async () => {
-      let session;
-      try {
-        const { data } = await supabase.auth.getSession();
-        session = data.session;
-      } catch {
-        await supabase.auth.signOut();
-        logout();
-        setHasSession(false);
-        router.replace('/login');
-        return;
-      }
-      if (!session) {
-        setHasSession(false);
-        router.replace('/login');
-        return;
-      }
-      if (session.access_token) primeTokenCache(session.access_token);
-      setHasSession(true);
-      try {
-        const [storesRes, meRes] = await Promise.all([
-          api.get<{ id: string; name: string; slug: string; email: string; status: string }[]>('/stores'),
-          api.get('/auth/me').catch(() => null),
-        ]);
-        const stores = storesRes.data;
-        queueMicrotask(() => {
-          if (meRes?.data) setUser(meRes.data);
-          setHasStore(stores != null && stores.length > 0);
-          if (stores?.length) useStoreStore.getState().setCurrentStore(stores[0]);
-        });
-      } catch {
-        queueMicrotask(() => setHasStore(false));
-      }
-    };
-    run();
-  }, [router, logout, setUser]);
-
-  useEffect(() => {
-    if (hasStore === false) {
-      router.replace('/onboarding');
-    }
-  }, [hasStore, router]);
-
-  useEffect(() => {
-    if (hasSession !== true) return;
-    router.prefetch('/dashboard');
-    router.prefetch('/dashboard/boutique');
-    router.prefetch('/dashboard/boutique/editor');
-    router.prefetch('/dashboard/themes');
-    router.prefetch('/dashboard/orders');
-    router.prefetch('/dashboard/products');
-    router.prefetch('/dashboard/customers');
-    router.prefetch('/dashboard/settings');
-    router.prefetch('/dashboard/discounts');
-    router.prefetch('/dashboard/analytics');
-    router.prefetch('/dashboard/wallet');
-  }, [hasSession, router]);
-
-  useEffect(() => {
-    if (hasStore !== true) return;
-    prefetchOrders(queryClient);
-    prefetchProducts(queryClient);
-    prefetchCustomers(queryClient);
-  }, [hasStore, queryClient]);
+  useDashboardPrefetch(hasSession ?? false, hasStore ?? false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -146,35 +33,16 @@ export default function DashboardLayout({
     router.replace('/');
   };
 
-  const prefetchRoute = (href: string) => {
-    router.prefetch(href);
-  };
+  const prefetchRoute = (href: string) => router.prefetch(href);
+  const navItems = getNavItems(prefetchRoute, queryClient);
+  const navBottom = getNavBottom(prefetchRoute);
 
-  const navItems = [
-    { href: '/dashboard', label: 'Accueil', icon: IconHome2, onPrefetch: () => { prefetchRoute('/dashboard'); prefetchDashboardStats(queryClient); } },
-    {
-      href: '/dashboard/boutique',
-      label: 'Boutique',
-      icon: IconShoppingBag,
-      onPrefetch: () => {
-        prefetchRoute('/dashboard/boutique');
-        prefetchRoute('/dashboard/boutique/editor');
-        prefetchStores(queryClient);
-      },
-    },
-    { href: '/dashboard/themes', label: 'Thèmes', icon: IconPalette, onPrefetch: () => { prefetchRoute('/dashboard/themes'); prefetchStores(queryClient); } },
-    { href: '/dashboard/orders', label: 'Commandes', icon: IconShoppingCart, onPrefetch: () => { prefetchRoute('/dashboard/orders'); prefetchOrders(queryClient); } },
-    { href: '/dashboard/products', label: 'Produits', icon: IconPackage, onPrefetch: () => { prefetchRoute('/dashboard/products'); prefetchProducts(queryClient); } },
-    { href: '/dashboard/customers', label: 'Clients', icon: IconUsers, onPrefetch: () => { prefetchRoute('/dashboard/customers'); prefetchCustomers(queryClient); } },
-    { href: '/dashboard/discounts', label: 'Réductions', icon: IconDiscount2, onPrefetch: () => prefetchRoute('/dashboard/discounts') },
-    { href: '/dashboard/analytics', label: 'Analytiques', icon: IconChartBar, onPrefetch: () => prefetchRoute('/dashboard/analytics') },
-    { href: '/dashboard/wallet', label: 'Portefeuille', icon: IconWallet, onPrefetch: () => prefetchRoute('/dashboard/wallet') },
-  ];
-
-  const navBottom = [
-    { href: '/dashboard/settings', label: 'Paramètres', icon: IconSettings, onPrefetch: () => prefetchRoute('/dashboard/settings') },
-    { href: '/', label: 'Retour au site', icon: IconBuildingStore, onPrefetch: () => prefetchRoute('/') },
-  ];
+  const mainContent =
+    hasStore === null || hasStore === false
+      ? <LoadingScreen />
+      : showNavLoader && navigatingTo
+        ? <LoadingScreen />
+        : children;
 
   if (!hasSession) {
     return (
@@ -191,114 +59,21 @@ export default function DashboardLayout({
     );
   }
 
-  const mainContent = hasStore === null || hasStore === false
-    ? <LoadingScreen />
-    : (showNavLoader && navigatingTo ? <LoadingScreen /> : children);
-
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 260,
-        breakpoint: 'sm',
-        collapsed: { mobile: !opened },
-      }}
-      padding="md"
+    <DashboardShell
+      opened={opened}
+      onToggle={toggle}
+      pathname={pathname}
+      navItems={navItems}
+      navBottom={navBottom}
+      onNavClick={setNavigatingTo}
+      userFirstName={user?.firstName}
+      storeSlug={currentStore?.slug}
+      onLogout={handleLogout}
+      isEditorPath={pathname?.includes('/boutique/editor') ?? false}
+      styles={{ editorMain: styles.editorMain, appShellMain: styles.appShellMain }}
     >
-      <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between" wrap="nowrap">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Group gap="md" wrap="nowrap" style={{ flex: 1 }}>
-            <Link href="/dashboard" style={{ textDecoration: 'none' }}>
-              <Title order={4} c="green.7">
-                Simpshopy
-              </Title>
-            </Link>
-            <TextInput
-              placeholder="Rechercher commandes, produits..."
-              leftSection={<IconSearch size={16} />}
-              size="xs"
-              style={{ maxWidth: 280 }}
-              visibleFrom="md"
-            />
-          </Group>
-          <Group gap="xs" wrap="nowrap">
-            <ActionIcon variant="subtle" size="lg">
-              <IconBell size={20} />
-            </ActionIcon>
-            {currentStore && (
-              <Button
-                component="a"
-                href={getStoreUrl(currentStore.slug)}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="subtle"
-                size="xs"
-                leftSection={<IconBuildingStore size={16} />}
-              >
-                Voir ma boutique
-              </Button>
-            )}
-            <Text size="sm" c="dimmed">
-              {user?.firstName}
-            </Text>
-            <Button
-              variant="subtle"
-              size="xs"
-              leftSection={<IconLogout size={16} />}
-              onClick={handleLogout}
-            >
-              Déconnexion
-            </Button>
-          </Group>
-        </Group>
-      </AppShell.Header>
-      <AppShell.Navbar p="md">
-        <AppShell.Section grow>
-          <Stack gap={4}>
-            {navItems.map((item) => (
-              <NavLink
-                key={item.href}
-                component={Link}
-                href={item.href}
-                prefetch={false}
-                label={item.label}
-                leftSection={<item.icon size={20} stroke={1.5} />}
-                active={pathname === item.href || (item.href !== '/dashboard' && item.href !== '/' && pathname.startsWith(item.href + '/'))}
-                variant="subtle"
-                onMouseEnter={item.onPrefetch}
-                onClick={() => setNavigatingTo(item.href)}
-              />
-            ))}
-          </Stack>
-        </AppShell.Section>
-        <Divider my="sm" />
-        <AppShell.Section>
-          <Stack gap={4}>
-            {navBottom.map((item) => (
-              <NavLink
-                key={item.href}
-                component={Link}
-                href={item.href}
-                prefetch={false}
-                label={item.label}
-                leftSection={<item.icon size={20} stroke={1.5} />}
-                active={pathname === item.href || (item.href !== '/dashboard' && item.href !== '/' && pathname.startsWith(item.href + '/'))}
-                variant="subtle"
-                onMouseEnter={item.onPrefetch}
-                onClick={() => setNavigatingTo(item.href)}
-              />
-            ))}
-          </Stack>
-        </AppShell.Section>
-      </AppShell.Navbar>
-      <AppShell.Main
-        p={pathname?.includes('/boutique/editor') ? 0 : 'md'}
-        className={pathname?.includes('/boutique/editor') ? styles.editorMain : styles.appShellMain}
-        style={pathname?.includes('/boutique/editor') ? { overflow: 'hidden' } : undefined}
-      >
-        {mainContent}
-      </AppShell.Main>
-    </AppShell>
+      {mainContent}
+    </DashboardShell>
   );
 }

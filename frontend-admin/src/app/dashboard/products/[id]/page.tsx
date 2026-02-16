@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Title,
-  Text,
   Button,
   Card,
   Group,
@@ -21,6 +20,8 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
+import { getApiErrorMessage } from '@/lib/api-utils';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 interface Product {
   id: string;
@@ -29,6 +30,9 @@ interface Product {
   price: number;
   status: string;
   inventoryQty?: number;
+  description?: string;
+  compareAtPrice?: number;
+  sku?: string;
 }
 
 export default function ProductEditPage() {
@@ -36,7 +40,6 @@ export default function ProductEditPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const id = params.id as string;
-  const [loading, setLoading] = useState(true);
 
   const form = useForm({
     initialValues: {
@@ -50,29 +53,34 @@ export default function ProductEditPage() {
     },
   });
 
+  const { data: product, isLoading, isError } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => api.get<Product>(`/products/${id}`).then((r) => r.data),
+    enabled: !!id,
+    staleTime: 30_000,
+  });
+
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const { data } = await api.get(`/products/${id}`);
-        form.setValues({
-          name: data.name,
-          description: data.description || '',
-          price: data.price,
-          compareAtPrice: data.compareAtPrice?.toString() || '',
-          inventoryQty: data.inventoryQty ?? 0,
-          sku: data.sku || '',
-          status: data.status || 'DRAFT',
-        });
-      } catch {
-        notifications.show({ title: 'Produit introuvable', message: '', color: 'red' });
-        router.push('/dashboard/products');
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (id) fetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch only when id changes; form.setValues and router are stable for this use case
-  }, [id]);
+    if (product) {
+      form.setValues({
+        name: product.name,
+        description: product.description || '',
+        price: product.price,
+        compareAtPrice: product.compareAtPrice?.toString() || '',
+        inventoryQty: product.inventoryQty ?? 0,
+        sku: product.sku || '',
+        status: product.status || 'DRAFT',
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form.setValues when product loads
+  }, [product]);
+
+  useEffect(() => {
+    if (isError) {
+      notifications.show({ title: 'Produit introuvable', message: '', color: 'red' });
+      router.push('/dashboard/products');
+    }
+  }, [isError, router]);
 
   const updateMutation = useMutation({
     mutationFn: (values: typeof form.values) =>
@@ -87,16 +95,20 @@ export default function ProductEditPage() {
       }),
     onMutate: (values) => {
       queryClient.setQueryData<Product[]>(['products'], (old = []) =>
-        old.map((p) => (p.id === id ? { ...p, name: values.name, price: values.price, status: values.status, inventoryQty: values.inventoryQty } : p))
+        old.map((p) =>
+          p.id === id
+            ? { ...p, name: values.name, price: values.price, status: values.status, inventoryQty: values.inventoryQty }
+            : p
+        )
       );
     },
     onSuccess: () => {
       notifications.show({ title: 'Produit mis à jour', message: '', color: 'green' });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product', id] });
     },
     onError: (err) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur';
-      notifications.show({ title: 'Erreur', message: msg, color: 'red' });
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
     },
   });
 
@@ -104,12 +116,17 @@ export default function ProductEditPage() {
     updateMutation.mutate(values);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Container fluid py="xl">
-        <Text c="dimmed">Chargement...</Text>
+        <Title order={2} mb="xl">Produits</Title>
+        <LoadingScreen />
       </Container>
     );
+  }
+
+  if (isError) {
+    return null;
   }
 
   return (
@@ -120,9 +137,7 @@ export default function ProductEditPage() {
         </Button>
       </Group>
       <Card shadow="sm" padding="xl" radius="md" withBorder>
-        <Title order={3} mb="lg">
-          Modifier le produit
-        </Title>
+        <Title order={3} mb="lg">Modifier le produit</Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="md">
             <TextInput label="Nom" required {...form.getInputProps('name')} />

@@ -1,11 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Container, Title, Text, Button, Card, Group, Stack, Badge, Table } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Card,
+  Group,
+  Stack,
+  Badge,
+  Table,
+} from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { ORDER_STATUS_COLORS } from '@/lib/constants';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 interface Order {
   id: string;
@@ -19,45 +31,38 @@ interface Order {
   currency: string;
   createdAt: string;
   shippingAddress?: { name?: string; address?: string; city?: string; phone?: string };
-  items?: { quantity: number; price: number; total: number; product?: { name: string } }[];
+  items?: { quantity: number; price: number; total: number; product?: { name: string; id?: string } }[];
 }
 
 export default function OrderDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const { data } = await api.get(`/orders/${id}`);
-        setOrder(data);
-      } catch {
-        setOrder(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (id) fetch();
-  }, [id]);
+  const { data: order, isLoading, isError } = useQuery({
+    queryKey: ['order', id],
+    queryFn: () => api.get<Order>(`/orders/${id}`).then((r) => r.data),
+    enabled: !!id,
+    staleTime: 30_000,
+  });
 
-  if (loading || !order) {
+  if (isLoading) {
     return (
       <Container fluid py="xl">
-        {!loading && !order && (
-          <Text c="dimmed">Commande introuvable. <Link href="/dashboard/orders">Retour aux commandes</Link></Text>
-        )}
-        {loading && <Text c="dimmed">Chargement...</Text>}
+        <Title order={2} mb="xl">Commandes</Title>
+        <LoadingScreen />
       </Container>
     );
   }
 
-  const statusColor: Record<string, string> = {
-    PENDING: 'yellow', CONFIRMED: 'blue', PROCESSING: 'cyan',
-    SHIPPED: 'teal', DELIVERED: 'green', CANCELLED: 'red',
-  };
+  if (isError || !order) {
+    return (
+      <Container fluid py="xl">
+        <Text c="dimmed">
+          Commande introuvable. <Link href="/dashboard/orders">Retour aux commandes</Link>
+        </Text>
+      </Container>
+    );
+  }
 
   return (
     <Container fluid py="xl">
@@ -71,7 +76,7 @@ export default function OrderDetailPage() {
           <Group justify="space-between" mb="md">
             <Title order={3}>Commande {order.orderNumber}</Title>
             <Group>
-              <Badge color={statusColor[order.status] || 'gray'}>{order.status}</Badge>
+              <Badge color={ORDER_STATUS_COLORS[order.status] || 'gray'}>{order.status}</Badge>
               <Badge color={order.paymentStatus === 'COMPLETED' ? 'green' : 'yellow'}>
                 {order.paymentStatus === 'COMPLETED' ? 'Payé' : order.paymentStatus}
               </Badge>
@@ -94,7 +99,7 @@ export default function OrderDetailPage() {
             </Table.Thead>
             <Table.Tbody>
               {(order.items || []).map((item, i) => (
-                <Table.Tr key={i}>
+                <Table.Tr key={item.product?.id ?? `item-${i}`}>
                   <Table.Td>{item.product?.name || 'Produit'}</Table.Td>
                   <Table.Td>{item.quantity}</Table.Td>
                   <Table.Td>{item.price?.toLocaleString('fr-FR')} {order.currency}</Table.Td>

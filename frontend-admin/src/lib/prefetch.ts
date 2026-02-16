@@ -45,6 +45,16 @@ export function prefetchCustomers(queryClient: QueryClient) {
   });
 }
 
-export function prefetchStores(queryClient: QueryClient) {
-  queryClient.prefetchQuery({ queryKey: ['stores'], queryFn: () => api.get('/stores').then((r) => r.data) });
+export function prefetchWallet(queryClient: QueryClient) {
+  queryClient.prefetchQuery({
+    queryKey: ['wallet'],
+    queryFn: async () => {
+      const [b, t] = await Promise.all([
+        api.get<{ balance: number }>('/wallet/balance'),
+        api.get<unknown[]>('/wallet/transactions', { params: { limit: 20 } }),
+      ]);
+      return { balance: b.data?.balance ?? 0, transactions: t.data || [] };
+    },
+    staleTime: 30_000,
+  });
 }

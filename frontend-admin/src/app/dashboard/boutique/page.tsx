@@ -7,18 +7,7 @@ import Link from 'next/link';
 import { useStoreStore } from '@/stores/storeStore';
 import { api } from '@/lib/api';
 import { getStoreUrl } from '@/lib/storefront-url';
-
-const themeNames: Record<string, string> = {
-  classique: 'Classique',
-  mode: 'Mode',
-  tech: 'Tech',
-  food: 'Saveurs',
-  beaute: 'Beauté',
-  artisanat: 'Artisanat',
-  sante: 'Bien-être',
-  luxe: 'Luxe',
-  minimal: 'Minimal',
-};
+import { THEME_NAMES } from '@/lib/constants';
 
 export default function BoutiquePage() {
   const currentStore = useStoreStore((s) => s.currentStore);
@@ -67,7 +56,7 @@ export default function BoutiquePage() {
     );
   }
 
-  const themeName = themeNames[themeId] ?? themeId;
+  const themeName = THEME_NAMES[themeId] ?? themeId;
   const storeSlug = currentStore?.slug ?? '';
   const storeUrl = getStoreUrl(storeSlug);
   const storefrontDomain = process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN || 'localhost:3002';

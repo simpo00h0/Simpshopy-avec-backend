@@ -22,6 +22,8 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { EmptyState } from '@/components/EmptyState';
+import { getApiErrorMessage } from '@/lib/api-utils';
 
 interface Product {
   id: string;
@@ -79,10 +81,9 @@ export default function ProductsPage() {
       setModalOpen(false);
       form.reset();
     },
-    onError: (_err, _values, ctx) => {
+    onError: (err, _values, ctx) => {
       if (ctx?.prev != null) queryClient.setQueryData(['products'], ctx.prev);
-      const msg = (_err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur';
-      notifications.show({ title: 'Erreur', message: msg, color: 'red' });
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
     },
   });
 
@@ -116,22 +117,16 @@ export default function ProductsPage() {
       {loading ? (
         <LoadingScreen />
       ) : products.length === 0 ? (
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <Group justify="center" py={60}>
-            <div style={{ textAlign: 'center' }}>
-              <IconPackage size={48} stroke={1.5} color="var(--mantine-color-gray-4)" />
-              <Text size="lg" fw={500} mt="md">
-                Aucun produit pour le moment
-              </Text>
-              <Text size="sm" c="dimmed" mt="xs">
-                Ajoutez votre premier produit pour commencer à vendre
-              </Text>
-              <Button color="green" mt="md" onClick={() => setModalOpen(true)}>
-                Ajouter un produit
-              </Button>
-            </div>
-          </Group>
-        </Card>
+        <EmptyState
+          icon={IconPackage}
+          title="Aucun produit pour le moment"
+          description="Ajoutez votre premier produit pour commencer à vendre"
+          action={
+            <Button color="green" onClick={() => setModalOpen(true)}>
+              Ajouter un produit
+            </Button>
+          }
+        />
       ) : (
         <Card shadow="sm" padding="0" radius="md" withBorder>
           <Table striped highlightOnHover>
