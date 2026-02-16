@@ -176,6 +176,7 @@ export function StoreLayoutClient({ store, slug, children }: { store: StoreData;
     <ThemeProvider
       theme={theme}
       basePath={basePath}
+      storeSlug={slug}
       isPreview={false}
       isEditor={isEditor}
       isPreviewMode={isEditor && previewMode}

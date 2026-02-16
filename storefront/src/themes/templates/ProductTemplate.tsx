@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useTheme } from '../ThemeContext';
+import { useCartStore } from '@/stores/cartStore';
 import { ProductCard } from '../sections/ProductCard';
 import type { MockProduct } from '../theme-types';
 
@@ -14,7 +15,9 @@ interface ProductTemplateProps {
 
 export function ProductTemplate({ product }: ProductTemplateProps) {
   const [imgError, setImgError] = useState(false);
-  const { theme, basePath } = useTheme();
+  const [quantity, setQuantity] = useState(1);
+  const { theme, basePath, storeSlug } = useTheme();
+  const addItem = useCartStore((s) => s.addItem);
   const { colors } = theme;
   const showImage = product.imageUrl && !imgError;
 
@@ -90,7 +93,8 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
             label="Quantité"
             placeholder="1"
             min={1}
-            defaultValue={1}
+            value={quantity}
+            onChange={(v) => setQuantity(typeof v === 'string' ? 1 : (v ?? 1))}
             mb="lg"
           />
 
@@ -98,6 +102,7 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
             size="lg"
             style={{ backgroundColor: colors.primary }}
             fullWidth
+            onClick={() => addItem(product, quantity, storeSlug)}
           >
             Ajouter au panier
           </Button>

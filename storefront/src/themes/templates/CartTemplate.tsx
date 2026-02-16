@@ -1,15 +1,33 @@
 'use client';
 
-import { Container, Title, Text, Button, Card, Group, Box, Table, Grid } from '@mantine/core';
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Card,
+  Group,
+  Box,
+  Table,
+  Grid,
+  NumberInput,
+  ActionIcon,
+} from '@mantine/core';
+import { IconTrash } from '@tabler/icons-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from '../ThemeContext';
+import { useCartStore } from '@/stores/cartStore';
 
 export function CartTemplate() {
-  const { theme, basePath } = useTheme();
-  const { colors, products } = theme;
+  const { theme, basePath, storeSlug } = useTheme();
+  const { colors } = theme;
+  const getItems = useCartStore((s) => s.getItems);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
 
-  const cartEmpty = true;
+  const items = getItems(storeSlug);
+  const cartEmpty = items.length === 0;
 
   if (cartEmpty) {
     return (
@@ -44,7 +62,8 @@ export function CartTemplate() {
     );
   }
 
-  const sampleProduct = products[0];
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const subtotalLabel = `${subtotal.toLocaleString('fr-FR')} XOF`;
 
   return (
     <Container size="lg" py="xl">
@@ -61,44 +80,82 @@ export function CartTemplate() {
                   <Table.Th>Prix</Table.Th>
                   <Table.Th>Qté</Table.Th>
                   <Table.Th>Total</Table.Th>
+                  <Table.Th />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                <Table.Tr>
-                  <Table.Td>
-                    <Group>
-                      <Box
-                        w={60}
-                        h={60}
-                        style={{
-                          position: 'relative',
-                          borderRadius: 4,
-                          overflow: 'hidden',
-                          flexShrink: 0,
-                          background: `linear-gradient(145deg, ${colors.primary}20, ${colors.accent}30)`,
-                        }}
+                {items.map((item) => (
+                  <Table.Tr key={`${item.productId}-${item.storeSlug}`}>
+                    <Table.Td>
+                      <Group>
+                        <Box
+                          w={60}
+                          h={60}
+                          style={{
+                            position: 'relative',
+                            borderRadius: 4,
+                            overflow: 'hidden',
+                            flexShrink: 0,
+                            background: `linear-gradient(145deg, ${colors.primary}20, ${colors.accent}30)`,
+                          }}
+                        >
+                          {item.imageUrl ? (
+                            <Image
+                              src={item.imageUrl}
+                              alt={item.name}
+                              fill
+                              sizes="60px"
+                              style={{ objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <Box
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 24,
+                              }}
+                            >
+                              {item.imagePlaceholder}
+                            </Box>
+                          )}
+                        </Box>
+                        <Text fw={500}>{item.name}</Text>
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>{item.priceLabel}</Table.Td>
+                    <Table.Td>
+                      <NumberInput
+                        min={1}
+                        value={item.quantity}
+                        onChange={(v) =>
+                          updateQuantity(
+                            item.productId,
+                            typeof v === 'string' ? 1 : (v ?? 1),
+                            storeSlug
+                          )
+                        }
+                        w={80}
+                        size="xs"
+                      />
+                    </Table.Td>
+                    <Table.Td>
+                      {(item.price * item.quantity).toLocaleString('fr-FR')} XOF
+                    </Table.Td>
+                    <Table.Td>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => removeItem(item.productId, storeSlug)}
+                        aria-label="Supprimer"
                       >
-                        {sampleProduct.imageUrl ? (
-                          <Image
-                            src={sampleProduct.imageUrl}
-                            alt={sampleProduct.name}
-                            fill
-                            sizes="60px"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <Box style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>
-                            {sampleProduct.imagePlaceholder}
-                          </Box>
-                        )}
-                      </Box>
-                      <Text fw={500}>{sampleProduct.name}</Text>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>{sampleProduct.priceLabel}</Table.Td>
-                  <Table.Td>1</Table.Td>
-                  <Table.Td>{sampleProduct.priceLabel}</Table.Td>
-                </Table.Tr>
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
               </Table.Tbody>
             </Table>
           </Card>
@@ -110,7 +167,7 @@ export function CartTemplate() {
             </Text>
             <Group justify="space-between" mb="xs">
               <Text size="sm">Sous-total</Text>
-              <Text size="sm">{sampleProduct.priceLabel}</Text>
+              <Text size="sm">{subtotalLabel}</Text>
             </Group>
             <Group justify="space-between" mb="md">
               <Text size="sm">Livraison</Text>
@@ -119,7 +176,7 @@ export function CartTemplate() {
             <Group justify="space-between" mb="lg">
               <Text fw={700}>Total</Text>
               <Text fw={700} style={{ color: colors.accent }}>
-                {sampleProduct.priceLabel}
+                {subtotalLabel}
               </Text>
             </Group>
             <Button

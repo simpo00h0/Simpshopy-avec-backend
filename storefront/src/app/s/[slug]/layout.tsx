@@ -1,16 +1,19 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { StoreLayoutClient } from './StoreLayoutClient';
+import { API_BASE_URL } from '@/lib/constants';
 
 async function getStore(slug: string) {
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}/storefront/${slug}`,
-      { cache: 'no-store' }
-    );
+    const res = await fetch(`${API_BASE_URL}/storefront/${slug}`, {
+      cache: 'no-store',
+    });
     if (!res.ok) return null;
     return res.json();
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[Storefront] Erreur chargement boutique:', err);
+    }
     return null;
   }
 }
