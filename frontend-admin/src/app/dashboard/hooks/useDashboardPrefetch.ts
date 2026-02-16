@@ -3,12 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  prefetchProducts,
-  prefetchOrders,
-  prefetchCustomers,
-  prefetchWallet,
-} from '@/lib/prefetch';
+import { prefetchAll } from '@/lib/prefetch';
 
 const DASHBOARD_ROUTES = [
   '/dashboard',
@@ -35,9 +30,6 @@ export function useDashboardPrefetch(hasSession: boolean, hasStore: boolean): vo
 
   useEffect(() => {
     if (hasStore !== true) return;
-    prefetchOrders(queryClient);
-    prefetchProducts(queryClient);
-    prefetchCustomers(queryClient);
-    prefetchWallet(queryClient);
+    prefetchAll(queryClient);
   }, [hasStore, queryClient]);
 }

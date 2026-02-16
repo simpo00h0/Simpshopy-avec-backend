@@ -6,26 +6,8 @@ import { Container, Title, Text, Grid, Card, Group, Button, SimpleGrid, Box } fr
 import { IconShoppingBag, IconPackage, IconCurrencyDollar, IconUsers, IconCheck } from '@tabler/icons-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreStore } from '@/stores/storeStore';
-import { api } from '@/lib/api';
+import { fetchDashboardStats } from '@/lib/prefetch';
 import { getStoreUrl } from '@/lib/storefront-url';
-
-async function fetchDashboardStats() {
-  const [productsRes, ordersRes, walletRes, customersRes] = await Promise.all([
-    api.get<unknown[]>('/products').catch(() => ({ data: [] })),
-    api.get<unknown[]>('/orders').catch(() => ({ data: [] })),
-    api.get<{ balance: number }>('/wallet/balance').catch(() => ({ data: { balance: 0 } })),
-    api.get<unknown[]>('/stores/customers').catch(() => ({ data: [] })),
-  ]);
-  const products = (productsRes.data || []) as unknown[];
-  const orders = (ordersRes.data || []) as unknown[];
-  const customers = (customersRes.data || []) as unknown[];
-  return {
-    products: products.length,
-    orders: orders.length,
-    revenue: walletRes.data?.balance ?? 0,
-    customers: customers.length,
-  };
-}
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
