@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Text, Loader, Stack } from '@mantine/core';
 import { supabase } from '@/lib/supabase';
-import { useAuthStore } from '@/stores/authStore';
-import { api, primeTokenCache } from '@/lib/api';
+import { useAuthStore, type User } from '@/stores/authStore';
+import { primeTokenCache } from '@/lib/api';
+import { fetchAuthMe } from '@/lib/auth-service';
 
 /**
  * Page de callback après confirmation d'email Supabase.
@@ -26,12 +27,8 @@ export default function AuthCallbackPage() {
       }
       if (session) {
         if (session.access_token) primeTokenCache(session.access_token);
-        try {
-          const { data } = await api.get('/auth/me');
-          setUser(data);
-        } catch {
-          // User pas encore créé côté backend, sera créé au premier appel /me
-        }
+        const { user } = await fetchAuthMe();
+        if (user) setUser(user as User);
         router.replace('/onboarding');
       } else {
         router.replace('/login');

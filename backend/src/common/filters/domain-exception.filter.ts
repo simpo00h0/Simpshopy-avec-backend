@@ -9,19 +9,22 @@ import {
   InsufficientBalanceException,
   InvalidAmountException,
   NotFoundException as DomainNotFoundException,
+  ConflictException,
 } from '../domain/exceptions';
 
 @Catch(
   InsufficientBalanceException,
   InvalidAmountException,
   DomainNotFoundException,
+  ConflictException,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(
     exception:
       | InsufficientBalanceException
       | InvalidAmountException
-      | DomainNotFoundException,
+      | DomainNotFoundException
+      | ConflictException,
     host: ArgumentsHost,
   ): void {
     const ctx = host.switchToHttp();
@@ -30,13 +33,21 @@ export class DomainExceptionFilter implements ExceptionFilter {
     const status =
       exception instanceof DomainNotFoundException
         ? HttpStatus.NOT_FOUND
-        : HttpStatus.BAD_REQUEST;
+        : exception instanceof ConflictException
+          ? HttpStatus.CONFLICT
+          : HttpStatus.BAD_REQUEST;
+
+    const errorLabel =
+      status === HttpStatus.NOT_FOUND
+        ? 'Not Found'
+        : status === HttpStatus.CONFLICT
+          ? 'Conflict'
+          : 'Bad Request';
 
     response.status(status).json({
       statusCode: status,
       message: exception.message,
-      error:
-        status === HttpStatus.NOT_FOUND ? 'Not Found' : 'Bad Request',
+      error: errorLabel,
     });
   }
 }

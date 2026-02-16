@@ -1,5 +1,6 @@
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import { supabase } from './supabase';
+import { reportError } from './error-handler';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
@@ -58,13 +59,16 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// Sur 401, invalider le cache pour forcer un refresh au prochain appel
 api.interceptors.response.use(
   (r) => r,
-  (err) => {
+  (err: AxiosError) => {
     if (err?.response?.status === 401) tokenCache = null;
+    const skipNotification = err.config?.skipErrorNotification;
+    if (typeof window !== 'undefined') {
+      reportError(err, { showNotification: !skipNotification, context: 'api' });
+    }
     return Promise.reject(err);
-  }
+  },
 );
 
 export default api;

@@ -5,11 +5,15 @@ import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { DomainExceptionFilter } from './common/filters/domain-exception.filter';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalFilters(new DomainExceptionFilter());
+  app.useGlobalFilters(
+    new DomainExceptionFilter(),
+    new GlobalExceptionFilter(),
+  );
 
   const serveStatic = require('serve-static');
   app.use('/uploads', serveStatic(join(process.cwd(), 'uploads')));

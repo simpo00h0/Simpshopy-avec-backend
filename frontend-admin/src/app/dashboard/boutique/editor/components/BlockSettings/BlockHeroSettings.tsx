@@ -5,7 +5,7 @@ import { Group, Select, Stack, Text, TextInput } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { api, UPLOAD_BASE_URL } from '@/lib/api';
+import { uploadImage } from '@/lib/upload-service';
 import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockHeroSettings({ customization, update, updateNested }: BlockSettingsProps) {
@@ -22,21 +22,14 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
     });
     updateNested('hero', 'image', dataUrl);
     setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const { data } = await api.post<{ url: string }>('/upload/image', formData);
-      const fullUrl = data.url.startsWith('http') ? data.url : `${UPLOAD_BASE_URL}${data.url}`;
-      updateNested('hero', 'image', fullUrl);
+    const result = await uploadImage(file);
+    setLoading(false);
+
+    if (result.success && result.url) {
+      updateNested('hero', 'image', result.url);
       notifications.show({ title: 'Image importée', message: '', color: 'green' });
-    } catch (err: unknown) {
-      const msg = err && typeof err === 'object' && 'response' in err
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        : "Erreur lors de l'import";
-      notifications.show({ title: 'Erreur', message: String(msg ?? 'Erreur inconnue'), color: 'red' });
+    } else {
       updateNested('hero', 'image', '');
-    } finally {
-      setLoading(false);
     }
   };
 

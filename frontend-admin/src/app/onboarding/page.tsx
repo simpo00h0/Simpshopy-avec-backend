@@ -19,7 +19,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
-import { api } from '@/lib/api';
+import { checkHasStores, createStore } from '@/lib/store-service';
 
 function slugify(name: string): string {
   return name
@@ -66,17 +66,12 @@ export default function OnboardingPage() {
         return;
       }
       setHasSession(true);
-      try {
-        const { data } = await api.get<unknown[]>('/stores');
-        if (data && data.length > 0) {
-          router.replace('/dashboard');
-          return;
-        }
-      } catch {
-        // Pas de stores ou erreur
-      } finally {
-        setChecking(false);
+      const { hasStores } = await checkHasStores();
+      if (hasStores) {
+        router.replace('/dashboard');
+        return;
       }
+      setChecking(false);
     };
     run();
   }, [router]);
@@ -90,26 +85,21 @@ export default function OnboardingPage() {
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
-    try {
-      const slugToUse = values.slug?.trim() || slugify(values.name);
-      await api.post('/stores', {
-        name: values.name,
-        slug: slugToUse,
-        email: values.email,
-        phone: values.phone,
-        city: values.city,
-        country: values.country,
-      });
-      notifications.show({ title: 'Boutique créée !', message: 'Votre boutique a été créée avec succès.', color: 'green' });
-      router.push('/dashboard');
-    } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Erreur lors de la création';
-      notifications.show({ title: 'Erreur', message: msg, color: 'red' });
-    } finally {
-      setLoading(false);
-    }
+    const slugToUse = values.slug?.trim() || slugify(values.name);
+    const result = await createStore({
+      name: values.name,
+      slug: slugToUse,
+      email: values.email,
+      phone: values.phone,
+      city: values.city,
+      country: values.country,
+    });
+    setLoading(false);
+
+    if (!result.success) return;
+
+    notifications.show({ title: 'Boutique créée !', message: 'Votre boutique a été créée avec succès.', color: 'green' });
+    router.push('/dashboard');
   };
 
   if (checking || !hasSession) {

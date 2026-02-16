@@ -16,9 +16,8 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useAuthStore } from '@/stores/authStore';
-import { supabase } from '@/lib/supabase';
-import { api, primeTokenCache } from '@/lib/api';
+import { useAuthStore, type User } from '@/stores/authStore';
+import { signUp } from '@/lib/auth-service';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -34,65 +33,50 @@ export default function SignupPage() {
       phone: '',
     },
     validate: {
-      email: (v) => (!v ? 'Email requis' : /^\S+@\S+$/.test(v) ? null : 'Email invalide'),
-      firstName: (v) => (!v || v.length < 2 ? 'Prénom requis (2 caractères min)' : null),
-      lastName: (v) => (!v || v.length < 2 ? 'Nom requis (2 caractères min)' : null),
-      password: (v) => (!v || v.length < 8 ? 'Mot de passe requis (8 caractères min)' : null),
+      email: (v: string) => (!v ? 'Email requis' : /^\S+@\S+$/.test(v) ? null : 'Email invalide'),
+      firstName: (v: string) => (!v || v.length < 2 ? 'Prénom requis (2 caractères min)' : null),
+      lastName: (v: string) => (!v || v.length < 2 ? 'Nom requis (2 caractères min)' : null),
+      password: (v: string) => (!v || v.length < 8 ? 'Mot de passe requis (8 caractères min)' : null),
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
-    try {
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            firstName: values.firstName,
-            lastName: values.lastName,
-            ...(values.phone && { phone: values.phone }),
-          },
-          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
-        },
+    const result = await signUp({
+      email: values.email,
+      password: values.password,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phone: values.phone || undefined,
+    });
+    setLoading(false);
+
+    if (!result.success) return;
+
+    if (result.accountExists) {
+      notifications.show({
+        title: 'Compte existant',
+        message: 'Un compte avec cet email existe déjà. Connectez-vous.',
+        color: 'yellow',
       });
-      if (error) throw error;
-
-      if (authData.user && !authData.user.identities?.length) {
-        notifications.show({
-          title: 'Compte existant',
-          message: 'Un compte avec cet email existe déjà. Connectez-vous.',
-          color: 'yellow',
-        });
-        router.push('/login');
-        return;
-      }
-
-      if (authData.session) {
-        if (authData.session.access_token) primeTokenCache(authData.session.access_token);
-        const { data: userData } = await api.get('/auth/me');
-        setUser(userData);
-        notifications.show({ title: 'Compte créé avec succès', message: '', color: 'green' });
-        router.push('/onboarding');
-      } else {
-        // Email de confirmation envoyé
-        notifications.show({
-          title: 'Vérifiez votre email',
-          message: 'Un lien de confirmation a été envoyé à votre adresse email.',
-          color: 'green',
-          autoClose: 8000,
-        });
-        router.push('/login');
-      }
-    } catch (err: unknown) {
-      const msg =
-        (err as { message?: string })?.message ||
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        "Erreur lors de l'inscription";
-      notifications.show({ title: 'Erreur', message: msg, color: 'red' });
-    } finally {
-      setLoading(false);
+      router.push('/login');
+      return;
     }
+
+    if (result.user) {
+      setUser(result.user as User);
+      notifications.show({ title: 'Compte créé avec succès', message: '', color: 'green' });
+      router.push('/onboarding');
+      return;
+    }
+
+    notifications.show({
+      title: 'Vérifiez votre email',
+      message: 'Un lien de confirmation a été envoyé à votre adresse email.',
+      color: 'green',
+      autoClose: 8000,
+    });
+    router.push('/login');
   };
 
   return (

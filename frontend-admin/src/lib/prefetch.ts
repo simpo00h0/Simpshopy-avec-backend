@@ -1,16 +1,25 @@
 import { QueryClient } from '@tanstack/react-query';
 import type { Product, Order } from '@simpshopy/shared';
 import { api } from './api';
+import { reportError } from './error-handler';
 
 const STALE_TIME = 30_000;
 
 async function fetchCoreData() {
+  const handleErr = <T>(err: unknown, fallback: T): { data: T } => {
+    reportError(err, { showNotification: false, context: 'prefetch' });
+    return { data: fallback };
+  };
+
   const [p, o, w, c, t] = await Promise.all([
-    api.get<Product[]>('/products').catch(() => ({ data: [] })),
-    api.get<Order[]>('/orders').catch(() => ({ data: [] })),
-    api.get<{ balance: number }>('/wallet/balance').catch(() => ({ data: { balance: 0 } })),
-    api.get<unknown[]>('/stores/customers').catch(() => ({ data: [] })),
-    api.get<unknown[]>('/wallet/transactions', { params: { limit: 20 } }).catch(() => ({ data: [] })),
+    api.get<Product[]>('/products').catch((e) => handleErr(e, [] as Product[])),
+    api.get<Order[]>('/orders').catch((e) => handleErr(e, [] as Order[])),
+    api.get<{ balance: number }>('/wallet/balance').catch((e) => handleErr(e, { balance: 0 })),
+    api.get<unknown[]>('/stores/customers').catch((e) => handleErr(e, [] as unknown[])),
+    api.get<unknown[]>(
+      '/wallet/transactions',
+      { params: { limit: 20 } },
+    ).catch((e) => handleErr(e, [] as unknown[])),
   ]);
   const products = p.data || [];
   const orders = o.data || [];

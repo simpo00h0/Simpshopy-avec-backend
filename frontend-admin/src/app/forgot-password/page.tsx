@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Container, Title, Text, TextInput, Button, Stack, Paper, Group } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { supabase } from '@/lib/supabase';
+import { resetPassword } from '@/lib/auth-service';
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -20,23 +20,17 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/reset-password`,
-      });
-      if (error) throw error;
-      setSent(true);
-      notifications.show({
-        title: 'Email envoyé',
-        message: 'Vérifiez votre boîte de réception pour réinitialiser votre mot de passe.',
-        color: 'green',
-      });
-    } catch (err: unknown) {
-      const msg = (err as { message?: string })?.message || 'Erreur lors de l\'envoi';
-      notifications.show({ title: 'Erreur', message: msg, color: 'red' });
-    } finally {
-      setLoading(false);
-    }
+    const result = await resetPassword(values.email);
+    setLoading(false);
+
+    if (!result.success) return;
+
+    setSent(true);
+    notifications.show({
+      title: 'Email envoyé',
+      message: 'Vérifiez votre boîte de réception pour réinitialiser votre mot de passe.',
+      color: 'green',
+    });
   };
 
   return (

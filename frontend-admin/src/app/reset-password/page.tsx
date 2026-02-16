@@ -6,7 +6,7 @@ import { Container, Title, Text, PasswordInput, Button, Stack, Paper } from '@ma
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { updatePassword } from '@/lib/auth-service';
 
 /**
  * Page de réinitialisation du mot de passe.
@@ -24,17 +24,13 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: values.password });
-      if (error) throw error;
-      notifications.show({ title: 'Mot de passe mis à jour', message: '', color: 'green' });
-      router.push('/login');
-    } catch (err: unknown) {
-      const msg = (err as { message?: string })?.message || 'Erreur';
-      notifications.show({ title: 'Erreur', message: msg, color: 'red' });
-    } finally {
-      setLoading(false);
-    }
+    const result = await updatePassword(values.password);
+    setLoading(false);
+
+    if (!result.success) return;
+
+    notifications.show({ title: 'Mot de passe mis à jour', message: '', color: 'green' });
+    router.push('/login');
   };
 
   return (

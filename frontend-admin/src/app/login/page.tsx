@@ -6,21 +6,18 @@ import { useRouter } from 'next/navigation';
 import { Container, Title, Text, TextInput, PasswordInput, Button, Stack, Paper, Group } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore, type User } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
-import { api, primeTokenCache } from '@/lib/api';
+import { signIn } from '@/lib/auth-service';
 
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuthStore();
   const [loading, setLoading] = useState(false);
 
-  // Redirection si déjà connecté : aller au dashboard (qui redirigera vers onboarding si pas de boutique)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.replace('/dashboard');
-      }
+      if (session) router.replace('/dashboard');
     });
   }, [router]);
 
@@ -34,33 +31,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
-    try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
-      if (error) throw error;
-      if (!authData.session) throw new Error('Session non créée');
-      if (authData.session.access_token) primeTokenCache(authData.session.access_token);
+    const result = await signIn(values.email, values.password);
+    setLoading(false);
 
-      const [userRes, storesRes] = await Promise.all([
-        api.get('/auth/me'),
-        api.get<unknown[]>('/stores').catch(() => ({ data: [] })),
-      ]);
-      setUser(userRes.data);
-      const hasStores = Array.isArray(storesRes.data) && storesRes.data.length > 0;
+    if (!result.success) return;
 
-      notifications.show({ title: 'Connexion réussie', message: 'Bienvenue.', color: 'green' });
-      router.push(hasStores ? '/dashboard' : '/onboarding');
-    } catch (err: unknown) {
-      const msg =
-        (err as { message?: string })?.message ||
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Erreur de connexion';
-      notifications.show({ title: 'Erreur', message: msg, color: 'red' });
-    } finally {
-      setLoading(false);
-    }
+    setUser(result.user as User);
+    notifications.show({ title: 'Connexion réussie', message: 'Bienvenue.', color: 'green' });
+    router.push(result.hasStores ? '/dashboard' : '/onboarding');
   };
 
   return (

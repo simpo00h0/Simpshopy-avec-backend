@@ -4,8 +4,8 @@ import { useEffect } from 'react';
 import { Container, Title, Text, Card, Group, Button, Box, Badge, Stack, Tabs } from '@mantine/core';
 import { IconShoppingBag, IconEye, IconPalette, IconSettings } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useStoreStore } from '@/stores/storeStore';
-import { api } from '@/lib/api';
+import { useStoreStore, type Store } from '@/stores/storeStore';
+import { loadStores } from '@/lib/store-service';
 import { getStoreUrl } from '@/lib/storefront-url';
 import { THEME_NAMES } from '@/lib/constants';
 
@@ -17,17 +17,9 @@ export default function BoutiquePage() {
 
   useEffect(() => {
     if (currentStore != null) return;
-    const refresh = async () => {
-      try {
-        const res = await api.get<{ id: string; name: string; slug: string; email: string; status: string; settings?: { themeId?: string | null } }[]>('/stores');
-        const stores = (res.data as unknown[]) ?? [];
-        const first = stores[0] as { id: string; name: string; slug: string; email: string; status: string; settings?: { themeId?: string | null } } | undefined;
-        if (first) setCurrentStore(first);
-      } catch {
-        // ignore
-      }
-    };
-    refresh();
+    loadStores().then(({ first }) => {
+      if (first) setCurrentStore(first as Store);
+    });
   }, [currentStore, setCurrentStore]);
 
   if (!themeId) {
