@@ -32,7 +32,7 @@ export function BlockFooterSettings({ customization, update }: BlockSettingsProp
             style={{ minWidth: 0, flex: 1 }}
           />
           <TextInput
-            placeholder="/products"
+            placeholder="/collections/all"
             size="xs"
             value={link.href}
             onChange={(e) => {

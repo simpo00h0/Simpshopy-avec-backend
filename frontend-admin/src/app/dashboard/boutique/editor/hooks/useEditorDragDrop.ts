@@ -28,11 +28,9 @@ export function useEditorDragDrop(params: UseEditorDragDropParams) {
     (index: number) => {
       const order = [...orderedHomeBlocks];
       if (index < 0 || index >= order.length) return;
-      order.splice(index, 1);
+      const [removed] = order.splice(index, 1);
       update('sectionOrder', order);
-      if (selectedBlock && order[index] === selectedBlock) {
-        setSelectedBlock(null);
-      }
+      if (removed === selectedBlock) setSelectedBlock(null);
     },
     [orderedHomeBlocks, update, selectedBlock, setSelectedBlock]
   );

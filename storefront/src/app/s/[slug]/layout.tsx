@@ -3,10 +3,12 @@ import { notFound } from 'next/navigation';
 import { StoreLayoutClient } from './StoreLayoutClient';
 import { API_BASE_URL } from '@/lib/constants';
 
+export const dynamic = 'force-dynamic';
+
 async function getStore(subdomain: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/storefront/${subdomain}`, {
-      next: { revalidate: 60 },
+      cache: 'no-store',
     });
     if (!res.ok) return null;
     return res.json();

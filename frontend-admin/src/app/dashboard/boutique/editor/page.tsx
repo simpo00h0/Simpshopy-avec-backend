@@ -30,7 +30,9 @@ export default function BoutiqueEditorPage() {
   const editorState = useEditorState();
   const { handleSave, saving, saved, lastSavedRef, hasUnsavedChanges } = useEditorSave(
     editorState.customization,
-    currentStore
+    currentStore,
+    undefined,
+    editorState.setCustomization
   );
   useEditorLoad({
     storeId,
@@ -138,7 +140,7 @@ export default function BoutiqueEditorPage() {
   if (!subdomain) {
     return (
       <Box p="xl">
-        <Text c="dimmed">Chargement...</Text>
+        <Text c="dimmed">{storeId ? 'Chargement de la boutique...' : 'Aucune boutique sélectionnée. Retournez à la boutique pour en choisir une.'}</Text>
         <Button component={Link} href="/dashboard/boutique" variant="subtle" mt="md">
           Retour à la boutique
         </Button>

@@ -30,7 +30,7 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
 
   useEffect(() => {
-    if (!storeId || !subdomain) return;
+    if (!storeId) return;
 
     const load = async (): Promise<void> => {
       try {
@@ -53,5 +53,5 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
     };
 
     load();
-  }, [storeId, subdomain, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setCurrentStore, storeSettingsRepository]);
+  }, [storeId, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setCurrentStore, storeSettingsRepository]);
 }

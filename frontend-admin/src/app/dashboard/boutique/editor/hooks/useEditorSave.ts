@@ -8,7 +8,8 @@ import { defaultStoreSettingsRepository } from '../infrastructure/store-settings
 export function useEditorSave(
   customization: ThemeCustomization,
   currentStore: Store | null,
-  storeSettingsRepository: IStoreSettingsRepository = defaultStoreSettingsRepository
+  storeSettingsRepository: IStoreSettingsRepository = defaultStoreSettingsRepository,
+  setCustomization?: (c: ThemeCustomization | ((prev: ThemeCustomization) => ThemeCustomization)) => void
 ) {
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
   const [saving, setSaving] = useState(false);
@@ -21,9 +22,15 @@ export function useEditorSave(
     setSaved(false);
     try {
       const updated = await storeSettingsRepository.saveThemeCustomization(currentStore.id, customization);
-      if (updated) setCurrentStore(updated as Store);
+      if (updated) {
+        setCurrentStore(updated as Store);
+        const savedCust = (updated as Store).settings?.themeCustomization ?? customization;
+        if (setCustomization) setCustomization(savedCust as ThemeCustomization);
+        lastSavedRef.current = JSON.stringify(savedCust);
+      } else {
+        lastSavedRef.current = JSON.stringify(customization);
+      }
       setSaved(true);
-      lastSavedRef.current = JSON.stringify(customization);
       setTimeout(() => setSaved(false), 2000);
       return true;
     } catch {
@@ -32,7 +39,7 @@ export function useEditorSave(
     } finally {
       setSaving(false);
     }
-  }, [currentStore, customization, setCurrentStore, storeSettingsRepository]);
+  }, [currentStore, customization, setCurrentStore, setCustomization, storeSettingsRepository]);
 
   const hasUnsavedChanges =
     lastSavedRef.current !== '' && JSON.stringify(customization) !== lastSavedRef.current;

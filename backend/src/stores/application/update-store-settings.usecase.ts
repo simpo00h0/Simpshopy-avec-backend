@@ -51,13 +51,14 @@ export class UpdateStoreSettingsUseCase {
     }
 
     let themeCustomizationData: object | undefined;
-    if (data.themeCustomization != null && store.settings) {
-      const existing = (store.settings as { themeCustomization?: object })
-        .themeCustomization as Record<string, unknown> | null;
-      themeCustomizationData = this.deepMerge(
-        existing ?? {},
-        data.themeCustomization as Record<string, unknown>,
-      );
+    if (data.themeCustomization != null) {
+      const existing = store.settings
+        ? ((store.settings as { themeCustomization?: object })
+            .themeCustomization as Record<string, unknown> | null)
+        : null;
+      themeCustomizationData = existing != null
+        ? this.deepMerge(existing, data.themeCustomization as Record<string, unknown>)
+        : (data.themeCustomization as Record<string, unknown>);
     }
 
     const settingsData: UpdateStoreSettingsData = { ...data };

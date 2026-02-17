@@ -12,7 +12,7 @@ export function BlockImageTextSettings({ customization, update }: BlockSettingsP
       <Textarea label="Contenu" placeholder="Texte..." rows={3} value={img?.content ?? ''} onChange={(e) => update('imageText', { ...img, content: e.target.value })} />
       <Select label="Position image" data={[{ value: 'left', label: 'Gauche' }, { value: 'right', label: 'Droite' }]} value={img?.position ?? 'left'} onChange={(v) => update('imageText', { ...img, position: (v as 'left' | 'right') ?? 'left' })} />
       <TextInput label="Texte bouton (optionnel)" value={img?.ctaText ?? ''} onChange={(e) => update('imageText', { ...img, ctaText: e.target.value })} />
-      <TextInput label="Lien bouton" placeholder="/products" value={img?.ctaHref ?? ''} onChange={(e) => update('imageText', { ...img, ctaHref: e.target.value })} />
+      <TextInput label="Lien bouton" placeholder="/collections/all" value={img?.ctaHref ?? ''} onChange={(e) => update('imageText', { ...img, ctaHref: e.target.value })} />
     </Stack>
   );
 }
