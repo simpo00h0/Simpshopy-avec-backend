@@ -15,7 +15,7 @@ import { BlockLibrary } from './components/BlockLibrary';
 import { EditorCanvas } from './components/EditorCanvas';
 import { BlockSettingsPanel } from './components/BlockSettingsPanel';
 import { ShortcutsModal, AddBlockModal } from './components/EditorModals';
-import { EDITOR_CACHED_KEY, DEFAULT_SECTION_ORDER, TEMPLATES, LEAVE_FADE_MS } from './editor-constants';
+import { EDITOR_CACHED_KEY, TEMPLATES, LEAVE_FADE_MS } from './editor-constants';
 import { getEditorIframeSrc } from './editor-utils';
 import { useEditorUIStore } from './editor-ui-store';
 import type { BlockId } from './editor-types';
@@ -56,6 +56,12 @@ export default function BoutiqueEditorPage() {
     [editorState]
   );
 
+  const handleLogoSelect = useCallback(() => {
+    const instanceId = editorState.ensureLogoBlock();
+    selectBlockCore(instanceId);
+    useEditorUIStore.getState().openSettings();
+  }, [editorState, selectBlockCore]);
+
   const dragDrop = useEditorDragDrop({
     orderedHomeBlocks: editorState.orderedHomeBlocks,
     selectedBlock: editorState.selectedBlock,
@@ -63,11 +69,7 @@ export default function BoutiqueEditorPage() {
     removeBlock: editorState.removeBlock,
     reorderBlocks: editorState.reorderBlocks,
     setSelectedBlock: editorState.setSelectedBlock,
-    onLogoBlockSelect: () => {
-      const instanceId = editorState.ensureLogoBlock();
-      selectBlockCore(instanceId);
-      useEditorUIStore.getState().openSettings();
-    },
+    onLogoBlockSelect: handleLogoSelect,
   });
 
   const iframe = useEditorIframe(
@@ -225,9 +227,7 @@ export default function BoutiqueEditorPage() {
             draggedId={dragDrop.draggedId}
             onSelectBlock={(id) => {
               if (id === 'logo') {
-                const instanceId = editorState.ensureLogoBlock();
-                selectBlockCore(instanceId);
-                useEditorUIStore.getState().openSettings();
+                handleLogoSelect();
                 return;
               }
               const instanceId = id.startsWith('b-') ? id : editorState.addBlock(id as BlockId);
@@ -294,10 +294,8 @@ export default function BoutiqueEditorPage() {
           onClose={() => ui.setAddBlockOpen(false)}
           onAddBlock={(typeId) => {
             if (typeId === 'logo') {
-              const instanceId = editorState.ensureLogoBlock();
               ui.setAddBlockOpen(false);
-              selectBlockCore(instanceId);
-              useEditorUIStore.getState().openSettings();
+              handleLogoSelect();
               return;
             }
             const instanceId = editorState.addBlock(typeId);

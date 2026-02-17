@@ -127,14 +127,12 @@ export function BlockSettingsPanel({
             Modifier : {blockLabel}
           </Text>
           <Box style={{ flex: '1 1 0', minHeight: 0, overflowY: 'scroll', overflowX: 'hidden', scrollbarGutter: 'stable' }}>
-            {effectiveProps && (
-              <BlockSettings
+            <BlockSettings
                 selectedBlock={settingsBlockId}
                 customization={effectiveProps.customization}
                 update={effectiveProps.update}
                 updateNested={effectiveProps.updateNested}
               />
-            )}
           </Box>
           <Button size="xs" variant="subtle" mt="md" fullWidth onClick={onDeselect}>
             Désélectionner

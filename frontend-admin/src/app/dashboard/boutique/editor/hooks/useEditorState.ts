@@ -134,25 +134,6 @@ export function useEditorState() {
     return instanceId;
   }, [pushHistory]);
 
-  const addBlock = useCallback(
-    (typeId: BlockId) => {
-      const instanceId = genBlockId();
-      setCustomization((prev) => {
-        const blocks = prev.blocks ?? {};
-        const order = prev.sectionOrder ?? [];
-        const next = {
-          ...prev,
-          blocks: { ...blocks, [instanceId]: { type: typeId, data: {} } },
-          sectionOrder: [...order, instanceId],
-        };
-        pushHistory(next);
-        return next;
-      });
-      return instanceId;
-    },
-    [pushHistory]
-  );
-
   const addBlockAt = useCallback(
     (typeId: BlockId, insertIndex: number) => {
       const instanceId = genBlockId();
@@ -171,6 +152,11 @@ export function useEditorState() {
       return instanceId;
     },
     [pushHistory]
+  );
+
+  const addBlock = useCallback(
+    (typeId: BlockId) => addBlockAt(typeId, orderedHomeBlocks.length),
+    [addBlockAt, orderedHomeBlocks.length]
   );
 
   const removeBlock = useCallback(
