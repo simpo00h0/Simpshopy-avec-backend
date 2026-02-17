@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Select, Stack, Text } from '@mantine/core';
+import { SegmentedControl, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { uploadImage } from '@/lib/upload-service';
 import type { BlockSettingsProps } from '../../editor-types';
@@ -102,20 +102,24 @@ export function BlockLogoSettings({ customization, update }: BlockSettingsProps)
         accept={LOGO_FAVICON_MIME}
       />
 
-      <Select
-        label="Position du logo dans l'en-tête"
-        data={[
-          { value: 'left', label: 'Gauche' },
-          { value: 'center', label: 'Centre' },
-          { value: 'right', label: 'Droite' },
-        ]}
-        value={logoAlignment}
-        allowDeselect={false}
-        onChange={(v) => {
-          const val = (v as 'left' | 'center' | 'right') || 'left';
-          update('logoAlignment', val);
-        }}
-      />
+      <div style={{ position: 'relative', zIndex: 1, pointerEvents: 'auto' }}>
+        <Text size="sm" fw={500} mb={4}>
+          Position du logo dans l&apos;en-tête
+        </Text>
+        <SegmentedControl
+          value={logoAlignment}
+          onChange={(v) => {
+            const val = (v as 'left' | 'center' | 'right') || 'left';
+            update('logoAlignment', val);
+          }}
+          data={[
+            { value: 'left', label: 'Gauche' },
+            { value: 'center', label: 'Centre' },
+            { value: 'right', label: 'Droite' },
+          ]}
+          fullWidth
+        />
+      </div>
     </Stack>
   );
 }
