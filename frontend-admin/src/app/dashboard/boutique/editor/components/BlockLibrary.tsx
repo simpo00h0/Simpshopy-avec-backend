@@ -65,18 +65,18 @@ export function BlockLibrary(props: BlockLibraryProps) {
               p="xs"
               radius="sm"
               style={{
-                cursor: 'grab',
+                cursor: b.id === 'logo' ? 'pointer' : 'grab',
                 border: '1px solid var(--mantine-color-gray-2)',
                 backgroundColor: draggedId === b.id ? 'var(--mantine-color-gray-1)' : undefined,
                 opacity: draggedId === b.id ? 0.7 : 1,
               }}
               onClick={() => onSelectBlock(b.id as BlockId)}
-              draggable
-              onDragStart={(e) => onLibraryDragStart(e, b.id)}
-              onDragEnd={onDragEnd}
+              draggable={b.id !== 'logo'}
+              onDragStart={b.id === 'logo' ? undefined : (e) => onLibraryDragStart(e, b.id)}
+              onDragEnd={b.id === 'logo' ? undefined : onDragEnd}
             >
               <Group gap="xs" wrap="nowrap">
-                <IconGripVertical size={14} style={{ color: 'var(--mantine-color-gray-5)' }} />
+                {b.id !== 'logo' && <IconGripVertical size={14} style={{ color: 'var(--mantine-color-gray-5)' }} />}
                 <Text size="sm" style={{ flex: 1 }} truncate>
                   {b.label}
                 </Text>

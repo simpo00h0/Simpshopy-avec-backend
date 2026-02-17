@@ -12,7 +12,8 @@ import { BlockFaqSettings } from './BlockFaqSettings';
 import { BlockFeaturedCarouselSettings } from './BlockFeaturedCarouselSettings';
 import { BlockFeaturedProductsSettings } from './BlockFeaturedProductsSettings';
 import { BlockFooterSettings } from './BlockFooterSettings';
-import { BlockHeaderSettings } from './BlockHeaderSettings';
+import { BlockLogoSettings } from './BlockLogoSettings';
+import { BlockHeaderPlaceholder } from './BlockHeaderPlaceholder';
 import { BlockHeroSettings } from './BlockHeroSettings';
 import { BlockImageTextSettings } from './BlockImageTextSettings';
 import { BlockNewsletterSettings } from './BlockNewsletterSettings';
@@ -25,7 +26,8 @@ import { BlockTrustBadgesSettings } from './BlockTrustBadgesSettings';
 import { BlockVideoSettings } from './BlockVideoSettings';
 
 const BLOCK_SETTINGS_MAP: Partial<Record<BlockId, React.ComponentType<BlockSettingsProps>>> = {
-  header: BlockHeaderSettings,
+  logo: BlockLogoSettings,
+  header: BlockHeaderPlaceholder,
   promoBanner: BlockPromoBannerSettings,
   hero: BlockHeroSettings,
   richText: BlockRichTextSettings,

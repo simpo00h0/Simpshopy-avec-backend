@@ -22,7 +22,9 @@ export function useEditorState() {
   const migrated = customization.blocks ? customization : migrateToBlockInstances(customization);
   const blocks = migrated.blocks ?? {};
   const sectionOrder = migrated.sectionOrder ?? [];
-  const orderedHomeBlocks = sectionOrder.filter((id) => blocks[id]);
+  const orderedHomeBlocks = sectionOrder.filter((id) => blocks[id] && blocks[id].type !== 'logo');
+  const blocksRef = useRef(blocks);
+  blocksRef.current = blocks;
 
   const pushHistory = useCallback((cust: ThemeCustomization) => {
     if (isUndoRedoRef.current) return;
@@ -115,6 +117,23 @@ export function useEditorState() {
     [pushHistory]
   );
 
+  const ensureLogoBlock = useCallback(() => {
+    const blks = blocksRef.current;
+    const existing = Object.entries(blks).find(([, b]) => b.type === 'logo');
+    if (existing) return existing[0];
+    const instanceId = genBlockId();
+    setCustomization((prev) => {
+      const prevBlocks = prev.blocks ?? {};
+      const next = {
+        ...prev,
+        blocks: { ...prevBlocks, [instanceId]: { type: 'logo' as const, data: {} } },
+      };
+      pushHistory(next);
+      return next;
+    });
+    return instanceId;
+  }, [pushHistory]);
+
   const addBlock = useCallback(
     (typeId: BlockId) => {
       const instanceId = genBlockId();
@@ -190,6 +209,7 @@ export function useEditorState() {
     selectedBlock,
     setSelectedBlock,
     customization,
+    ensureLogoBlock,
     setCustomization,
     history,
     setHistory,

@@ -28,7 +28,6 @@ import {
   IconPlus,
 } from '@tabler/icons-react';
 import { TEMPLATES } from '../editor-constants';
-import type { BlockId } from '../editor-types';
 
 interface EditorToolbarProps {
   className?: string;
@@ -45,7 +44,7 @@ interface EditorToolbarProps {
   onRedo: () => void;
   onShortcuts: () => void;
   onAddBlock: () => void;
-  selectedBlock: BlockId | null;
+  selectedBlock: string | null;
   onLibrary: () => void;
   onSettings: () => void;
   autoSaveEnabled: boolean;

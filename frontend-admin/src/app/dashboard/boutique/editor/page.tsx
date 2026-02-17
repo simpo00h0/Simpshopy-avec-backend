@@ -47,15 +47,6 @@ export default function BoutiqueEditorPage() {
   const [cachedFromSession, setCachedFromSession] = useState(false);
   const allowLeaveRef = useRef(false);
 
-  const dragDrop = useEditorDragDrop({
-    orderedHomeBlocks: editorState.orderedHomeBlocks,
-    selectedBlock: editorState.selectedBlock,
-    addBlockAt: editorState.addBlockAt,
-    removeBlock: editorState.removeBlock,
-    reorderBlocks: editorState.reorderBlocks,
-    setSelectedBlock: editorState.setSelectedBlock,
-  });
-
   const selectBlockCore = useCallback(
     (blockId: string) => {
       editorState.setSelectedBlock(blockId);
@@ -64,6 +55,20 @@ export default function BoutiqueEditorPage() {
     },
     [editorState]
   );
+
+  const dragDrop = useEditorDragDrop({
+    orderedHomeBlocks: editorState.orderedHomeBlocks,
+    selectedBlock: editorState.selectedBlock,
+    addBlockAt: editorState.addBlockAt,
+    removeBlock: editorState.removeBlock,
+    reorderBlocks: editorState.reorderBlocks,
+    setSelectedBlock: editorState.setSelectedBlock,
+    onLogoBlockSelect: () => {
+      const instanceId = editorState.ensureLogoBlock();
+      selectBlockCore(instanceId);
+      useEditorUIStore.getState().openSettings();
+    },
+  });
 
   const iframe = useEditorIframe(
     getEditorIframeSrc(subdomain, ui.currentTemplate.path),
@@ -219,6 +224,12 @@ export default function BoutiqueEditorPage() {
             onBlockSearchChange={ui.setBlockSearch}
             draggedId={dragDrop.draggedId}
             onSelectBlock={(id) => {
+              if (id === 'logo') {
+                const instanceId = editorState.ensureLogoBlock();
+                selectBlockCore(instanceId);
+                useEditorUIStore.getState().openSettings();
+                return;
+              }
               const instanceId = id.startsWith('b-') ? id : editorState.addBlock(id as BlockId);
               selectBlock(instanceId);
               iframe.scrollToBlock(instanceId);
@@ -282,6 +293,13 @@ export default function BoutiqueEditorPage() {
           opened={ui.addBlockOpen}
           onClose={() => ui.setAddBlockOpen(false)}
           onAddBlock={(typeId) => {
+            if (typeId === 'logo') {
+              const instanceId = editorState.ensureLogoBlock();
+              ui.setAddBlockOpen(false);
+              selectBlockCore(instanceId);
+              useEditorUIStore.getState().openSettings();
+              return;
+            }
             const instanceId = editorState.addBlock(typeId);
             ui.setAddBlockOpen(false);
             selectBlock(instanceId);

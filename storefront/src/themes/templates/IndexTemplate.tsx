@@ -86,6 +86,7 @@ export function IndexTemplate() {
         {order.map((instanceId) => {
           const block = blocks[instanceId];
           if (!block || !isVisible(instanceId)) return null;
+          if (block.type === 'logo') return null;
           const Section = TYPE_TO_SECTION[block.type];
           if (!Section) return null;
           const overrides = blockDataToThemeOverrides(block, theme);

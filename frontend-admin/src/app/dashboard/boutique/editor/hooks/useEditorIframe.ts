@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ThemeCustomization } from '@simpshopy/shared';
-import type { BlockId } from '../editor-types';
 import {
   EDITOR_CACHED_KEY,
   SIMPSHOPY_EDITOR_EVENT,
@@ -19,8 +18,8 @@ export function useEditorIframe(
   iframeSrc: string,
   customization: ThemeCustomization,
   previewMode: boolean,
-  selectedBlock: BlockId | null,
-  selectBlock: (id: BlockId) => void,
+  selectedBlock: string | null,
+  selectBlock: (id: string) => void,
   removeBlock: (instanceId: string) => void
 ) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -77,14 +76,14 @@ export function useEditorIframe(
     const allowedOrigin = getStorefrontOrigin(iframeSrc);
     const handler = (e: MessageEvent) => {
       if (allowedOrigin && e.origin !== allowedOrigin) return;
-      if (e.data?.type === SIMPSHOPY_EDITOR_EVENT && e.data.blockId) selectBlock(e.data.blockId as BlockId);
+      if (e.data?.type === SIMPSHOPY_EDITOR_EVENT && e.data.blockId) selectBlock(e.data.blockId as string);
       if (e.data?.type === SIMPSHOPY_BLOCK_DELETE && e.data.blockId) removeBlock(e.data.blockId as string);
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, [selectBlock, removeBlock]);
 
-  const scrollToBlock = (blockId: BlockId) => {
+  const scrollToBlock = (blockId: string) => {
     iframeRef.current?.contentWindow?.postMessage({ type: SIMPSHOPY_SCROLL_TO_BLOCK, blockId }, '*');
   };
 

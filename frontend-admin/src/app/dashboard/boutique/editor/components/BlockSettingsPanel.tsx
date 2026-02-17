@@ -9,7 +9,7 @@ import type { BlockSettingsProps } from '../editor-types';
 import { BlockSettings } from './BlockSettings';
 
 interface BlockSettingsPanelProps extends BlockSettingsProps {
-  selectedBlock: BlockId | null;
+  selectedBlock: string | null;
   updateBlockData?: (instanceId: string, data: Record<string, unknown>) => void;
   updateBlockNested?: (instanceId: string, subKey: string, value: string | number) => void;
   blocks?: Record<string, { type: string; data: Record<string, unknown> }>;
@@ -49,9 +49,16 @@ function buildBlockAdapter(
     newsletterTitle: blockType === 'newsletter' ? (blockData.title as string) : undefined,
     heroAlignment: (blockData.heroAlignment as ThemeCustomization['heroAlignment']) ?? undefined,
     heroHeight: (blockData.heroHeight as ThemeCustomization['heroHeight']) ?? undefined,
-  };
+    logo: blockType === 'logo' ? (blockData.logoUrl as string) : undefined,
+    favicon: blockType === 'logo' ? (blockData.faviconUrl as string) : undefined,
+    logoAlignment: blockType === 'logo' ? (blockData.logoAlignment as 'left' | 'center' | 'right') : undefined,
+  } as ThemeCustomization;
   const update: BlockSettingsProps['update'] = (key, value) => {
-    if (key === 'promoBanner' && typeof value === 'string') {
+    if (blockType === 'logo') {
+      const map: Record<string, string> = { logo: 'logoUrl', favicon: 'faviconUrl', logoAlignment: 'logoAlignment' };
+      const dataKey = map[key] ?? key;
+      updateBlockData(instanceId, { [dataKey]: value });
+    } else if (key === 'promoBanner' && typeof value === 'string') {
       updateBlockData(instanceId, { text: value });
     } else if (key === 'newsletterTitle' && typeof value === 'string') {
       updateBlockData(instanceId, { title: value });

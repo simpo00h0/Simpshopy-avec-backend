@@ -7,11 +7,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from './ThemeContext';
 import { BlockWrapper } from './BlockWrapper';
+import { FaviconUpdater } from './FaviconUpdater';
 
 export function ThemeLayout({ children }: { children: React.ReactNode }) {
   const [opened, setOpened] = useState(false);
   const { theme, basePath, isPreview } = useTheme();
-  const { storeName, logo, footerTagline, footerLinks, colors } = theme;
+  const { storeName, logo, logoAlignment, logoBlockId, footerTagline, footerLinks, colors } = theme;
+  const logoAlign = logoAlignment ?? 'left';
 
   const navLinks = [
     { label: 'Accueil', href: basePath },
@@ -46,6 +48,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
         color: colors.text,
       }}
     >
+      <FaviconUpdater />
       <style>{`.skip-link { position: absolute; left: -9999px; z-index: 9999; padding: 8px 12px; color: white; border-radius: 4px; }.skip-link:focus { left: 16px; top: 16px; }`}</style>
       <a
         href="#main-content"
@@ -55,7 +58,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
         Aller au contenu principal
       </a>
       {/* Header */}
-      <BlockWrapper blockId="header" label="En-tête & logo">
+      <BlockWrapper blockId={logoBlockId ?? 'header'} label="Logo & favicon">
       <Box
         component="header"
         py="md"
@@ -69,7 +72,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
         }}
       >
         <Container size="xl">
-          <Group justify="space-between">
+          <Group justify="space-between" wrap="nowrap">
             <Burger
               opened={opened}
               onClick={() => setOpened((o) => !o)}
@@ -78,17 +81,25 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
               aria-label="Menu"
               hiddenFrom="sm"
             />
-            {logo ? (
-              <Link href={basePath} style={{ display: 'flex', alignItems: 'center' }}>
-                <Image src={logo} alt={storeName} width={120} height={36} style={{ objectFit: 'contain' }} unoptimized />
-              </Link>
-            ) : (
-              <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}>
-                <Title order={3} component="span">
-                  {storeName}
-                </Title>
-              </Link>
-            )}
+            <Box
+              style={{
+                flex: 1,
+                display: 'flex',
+                justifyContent: logoAlign === 'left' ? 'flex-start' : logoAlign === 'center' ? 'center' : 'flex-end',
+              }}
+            >
+              {logo ? (
+                <Link href={basePath} style={{ display: 'flex', alignItems: 'center' }}>
+                  <Image src={logo} alt={storeName} width={120} height={36} style={{ objectFit: 'contain' }} unoptimized />
+                </Link>
+              ) : (
+                <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}>
+                  <Title order={3} component="span">
+                    {storeName}
+                  </Title>
+                </Link>
+              )}
+            </Box>
             <Group gap="lg" visibleFrom="sm">
               <NavContent />
               <Button

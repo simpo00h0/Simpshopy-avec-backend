@@ -17,6 +17,8 @@ export interface ThemeConfig {
   niche: string;
   storeName: string;
   logo?: string;
+  favicon?: string;
+  logoAlignment?: 'left' | 'center' | 'right';
   heroTitle: string;
   heroSubtitle: string;
   heroImage?: string;
@@ -63,4 +65,7 @@ export interface ThemeConfig {
   sectionVisibility?: Record<string, boolean>;
   /** Blocs par instance (chaque bloc a son propre ID et données) */
   blocks?: Record<string, { type: string; data: Record<string, unknown> }>;
+  favicon?: string;
+  logoAlignment?: 'left' | 'center' | 'right';
+  logoBlockId?: string;
 }

@@ -16,7 +16,14 @@ function isLegacyFormat(cust: ThemeCustomization): boolean {
 
 /** Migre l'ancien format vers blocks + sectionOrder (IDs instance) */
 export function migrateToBlockInstances(cust: ThemeCustomization): ThemeCustomization {
-  if (cust.blocks && Object.keys(cust.blocks).length > 0) return cust;
+  if (cust.blocks && Object.keys(cust.blocks).length > 0) {
+    const order = cust.sectionOrder ?? [];
+    const filteredOrder = order.filter((id) => cust.blocks![id]?.type !== 'logo');
+    if (filteredOrder.length !== order.length) {
+      return { ...cust, sectionOrder: filteredOrder };
+    }
+    return cust;
+  }
   if (!isLegacyFormat(cust)) return cust;
 
   const order = cust.sectionOrder ?? DEFAULT_SECTION_ORDER;
@@ -33,7 +40,12 @@ export function migrateToBlockInstances(cust: ThemeCustomization): ThemeCustomiz
     newOrder.push(instanceId);
   }
 
-  const { blocks: _b, sectionOrder: _s, ...rest } = cust;
+  if (cust.logo && !Object.values(blocks).some((b) => b.type === 'logo')) {
+    const logoId = genId();
+    blocks[logoId] = { type: 'logo', data: { logoUrl: cust.logo } };
+  }
+
+  const { blocks: _b, sectionOrder: _s, logo: _logo, ...rest } = cust;
   return {
     ...rest,
     blocks,

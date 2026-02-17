@@ -5,7 +5,9 @@ import {
   CANVAS_SOURCE_INDEX_KEY,
   DRAG_SOURCE_LIBRARY,
   DRAG_SOURCE_CANVAS,
+  LOGO_BLOCK_ID,
 } from '../editor-constants';
+import type { BlockId } from '../editor-types';
 
 const DRAG_BLOCK_ID_KEY = 'application/x-simpshopy-block-id';
 const DRAG_SOURCE_KEY = 'application/x-simpshopy-drag-source';
@@ -13,14 +15,15 @@ const DRAG_SOURCE_KEY = 'application/x-simpshopy-drag-source';
 interface UseEditorDragDropParams {
   orderedHomeBlocks: string[];
   selectedBlock: string | null;
-  addBlockAt: (typeId: string, insertIndex: number) => string;
+  addBlockAt: (typeId: BlockId, insertIndex: number) => string;
   removeBlock: (instanceId: string) => void;
   reorderBlocks: (newOrder: string[]) => void;
   setSelectedBlock: React.Dispatch<React.SetStateAction<string | null>>;
+  onLogoBlockSelect?: () => void;
 }
 
 export function useEditorDragDrop(params: UseEditorDragDropParams) {
-  const { orderedHomeBlocks, selectedBlock, addBlockAt, removeBlock, reorderBlocks, setSelectedBlock } = params;
+  const { orderedHomeBlocks, selectedBlock, addBlockAt, removeBlock, reorderBlocks, setSelectedBlock, onLogoBlockSelect } = params;
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropOverIndex, setDropOverIndex] = useState<number | null>(null);
 
@@ -52,7 +55,7 @@ export function useEditorDragDrop(params: UseEditorDragDropParams) {
       setDraggedId(null);
       setDropOverIndex(null);
 
-      const blockId = e.dataTransfer.getData(DRAG_BLOCK_ID_KEY) as BlockId | '';
+      const blockId = e.dataTransfer.getData(DRAG_BLOCK_ID_KEY) as string;
       const source = e.dataTransfer.getData(DRAG_SOURCE_KEY);
       const sourceIndexRaw = e.dataTransfer.getData(CANVAS_SOURCE_INDEX_KEY);
 
@@ -71,10 +74,14 @@ export function useEditorDragDrop(params: UseEditorDragDropParams) {
       }
 
       if (blockId && source === DRAG_SOURCE_LIBRARY) {
-        addBlockAt(blockId, insertIndex);
+        if (blockId === LOGO_BLOCK_ID && onLogoBlockSelect) {
+          onLogoBlockSelect();
+          return;
+        }
+        addBlockAt(blockId as BlockId, insertIndex);
       }
     },
-    [orderedHomeBlocks, addBlockAt, reorderBlocks]
+    [orderedHomeBlocks, addBlockAt, reorderBlocks, onLogoBlockSelect]
   );
 
   return {

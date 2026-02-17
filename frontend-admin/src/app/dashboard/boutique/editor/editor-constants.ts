@@ -15,8 +15,11 @@ export const DEFAULT_SECTION_ORDER = [
   'socialLinks', 'trustBadges', 'newsletter',
 ];
 
+export const LOGO_BLOCK_ID = 'logo';
+
 export const HOME_BLOCKS = [
-  { id: 'header', label: 'En-tête & logo', template: 'all', category: 'header' as const },
+  { id: LOGO_BLOCK_ID, label: 'Logo & favicon', template: 'home', category: 'header' as const },
+  { id: 'header', label: 'En-tête (zone cliquable)', template: 'all', category: 'header' as const },
   { id: 'promoBanner', label: 'Bannière promo', template: 'home', category: 'content' as const },
   { id: 'hero', label: 'Bannière principale', template: 'home', category: 'content' as const },
   { id: 'richText', label: 'Texte enrichi', template: 'home', category: 'content' as const },

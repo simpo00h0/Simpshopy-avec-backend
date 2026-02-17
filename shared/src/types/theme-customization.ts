@@ -5,6 +5,8 @@ export interface ThemeCustomization {
   /** Blocs par instance (chaque bloc canvas a son propre ID et données) */
   blocks?: BlocksMap;
   logo?: string;
+  favicon?: string;
+  logoAlignment?: 'left' | 'center' | 'right';
   colors?: {
     primary?: string;
     secondary?: string;

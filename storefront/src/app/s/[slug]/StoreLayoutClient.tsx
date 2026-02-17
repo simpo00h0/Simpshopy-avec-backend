@@ -47,10 +47,32 @@ function mapProducts(products: StoreData['products']): MockProduct[] {
   }));
 }
 
+function extractLogoFromBlocks(blocks: ThemeCustomization['blocks']): { logo?: string; favicon?: string; logoAlignment?: 'left' | 'center' | 'right'; logoBlockId?: string } {
+  if (!blocks) return {};
+  const entry = Object.entries(blocks).find(([, b]) => b.type === 'logo');
+  if (!entry) return {};
+  const [id, block] = entry;
+  const d = block.data as Record<string, unknown>;
+  return {
+    logo: (d.logoUrl as string) || undefined,
+    favicon: (d.faviconUrl as string) || undefined,
+    logoAlignment: (d.logoAlignment as 'left' | 'center' | 'right') || undefined,
+    logoBlockId: id,
+  };
+}
+
 function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null | undefined): ThemeConfig {
   if (!cust) return base;
   const result = { ...base };
-  if (cust.logo) result.logo = cust.logo;
+  const logoData = extractLogoFromBlocks(cust.blocks);
+  if (logoData.logoBlockId) {
+    result.logo = logoData.logo ?? undefined;
+    result.favicon = logoData.favicon ?? undefined;
+    result.logoAlignment = logoData.logoAlignment ?? undefined;
+    result.logoBlockId = logoData.logoBlockId;
+  } else if (cust.logo) {
+    result.logo = cust.logo;
+  }
   if (cust.colors) {
     result.colors = { ...base.colors };
     if (cust.colors.primary) result.colors.primary = cust.colors.primary;
