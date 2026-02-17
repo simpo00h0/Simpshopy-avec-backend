@@ -14,7 +14,7 @@ import { SupabaseJwtGuard } from '../auth/guards/supabase-jwt.guard';
 import { UploadService } from './upload.service';
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/x-icon', 'image/vnd.microsoft.icon'];
 
 @ApiTags('upload')
 @Controller('upload')
@@ -42,7 +42,7 @@ export class UploadController {
     file: Express.Multer.File,
   ): Promise<{ url: string }> {
     if (!file || !ALLOWED_MIMES.includes(file.mimetype)) {
-      throw new BadRequestException('Type de fichier non autorisé. Utilisez JPEG, PNG, GIF ou WebP.');
+      throw new BadRequestException('Type de fichier non autorisé. Utilisez JPEG, PNG, GIF, WebP, SVG ou ICO.');
     }
     const url = await this.uploadService.saveImage(file);
     return { url };

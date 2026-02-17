@@ -1,15 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Group, Select, Stack, Text, TextInput } from '@mantine/core';
-import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { IconPhoto, IconUpload } from '@tabler/icons-react';
+import { Select, Stack, Text, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { uploadImage } from '@/lib/upload-service';
 import type { BlockSettingsProps } from '../../editor-types';
+import { ImageDropzone } from './ImageDropzone';
 
 export function BlockHeroSettings({ customization, update, updateNested }: BlockSettingsProps) {
   const [loading, setLoading] = useState(false);
+  const heroImage = customization.hero?.image ?? '';
 
   const handleDrop = async (files: File[]) => {
     const file = files[0];
@@ -50,27 +50,18 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
       <Text size="sm" fw={500}>
         Image bannière
       </Text>
-      <Dropzone onDrop={handleDrop} maxSize={5 * 1024 * 1024} accept={IMAGE_MIME_TYPE} loading={loading} maxFiles={1}>
-        <Group justify="center" gap="xl" mih={80} style={{ pointerEvents: 'none' }}>
-          <Dropzone.Accept>
-            <IconUpload size={40} color="var(--mantine-color-blue-6)" stroke={1.5} />
-          </Dropzone.Accept>
-          <Dropzone.Reject>
-            <IconUpload size={40} color="var(--mantine-color-red-6)" stroke={1.5} />
-          </Dropzone.Reject>
-          <Dropzone.Idle>
-            <IconPhoto size={40} color="var(--mantine-color-dimmed)" stroke={1.5} />
-          </Dropzone.Idle>
-          <div>
-            <Text size="sm" inline>
-              Glissez une image ici ou cliquez pour choisir
-            </Text>
-            <Text size="xs" c="dimmed" inline mt={4} display="block">
-              JPEG, PNG, GIF ou WebP — max 5 Mo
-            </Text>
-          </div>
-        </Group>
-      </Dropzone>
+      <Text size="xs" c="dimmed" mb={4}>
+        JPEG, PNG, GIF ou WebP — max 5 Mo
+      </Text>
+      <ImageDropzone
+        imageUrl={heroImage}
+        onDrop={handleDrop}
+        onRemove={() => updateNested('hero', 'image', '')}
+        loading={loading}
+        placeholder="Glissez une image ici ou cliquez pour choisir"
+        imageStyle={{ maxWidth: 280, maxHeight: 120, objectFit: 'contain' }}
+        maxSize={5 * 1024 * 1024}
+      />
       <TextInput
         label="Texte du bouton"
         placeholder="Voir les produits"

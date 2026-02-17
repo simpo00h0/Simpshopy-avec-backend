@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ActionIcon, Box, Group, Select, Stack, Text } from '@mantine/core';
-import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { IconPhoto, IconTrash, IconUpload } from '@tabler/icons-react';
+import { Select, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { uploadImage } from '@/lib/upload-service';
 import type { BlockSettingsProps } from '../../editor-types';
+import { ImageDropzone, LOGO_FAVICON_MIME } from './ImageDropzone';
 
 const LOGO_SIZE_HINT = 'Recommandé : 120–400 px de large, PNG ou SVG';
 const FAVICON_SIZE_HINT = 'Recommandé : 32×32 ou 64×64 px, format carré (ICO, PNG)';
@@ -22,6 +21,13 @@ export function BlockLogoSettings({ customization, update }: BlockSettingsProps)
   const handleLogoDrop = async (files: File[]) => {
     const file = files[0];
     if (!file) return;
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Lecture impossible'));
+      reader.readAsDataURL(file);
+    });
+    update('logo', dataUrl);
     setLogoLoading(true);
     const result = await uploadImage(file);
     setLogoLoading(false);
@@ -29,6 +35,7 @@ export function BlockLogoSettings({ customization, update }: BlockSettingsProps)
       update('logo', result.url);
       notifications.show({ title: 'Logo importé', message: LOGO_SIZE_HINT, color: 'green' });
     } else {
+      update('logo', '');
       notifications.show({ title: 'Échec de l\'import', message: 'Réessayez ou utilisez une autre image.', color: 'red' });
     }
   };
@@ -36,6 +43,13 @@ export function BlockLogoSettings({ customization, update }: BlockSettingsProps)
   const handleFaviconDrop = async (files: File[]) => {
     const file = files[0];
     if (!file) return;
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Lecture impossible'));
+      reader.readAsDataURL(file);
+    });
+    update('favicon', dataUrl);
     setFaviconLoading(true);
     const result = await uploadImage(file);
     setFaviconLoading(false);
@@ -43,6 +57,7 @@ export function BlockLogoSettings({ customization, update }: BlockSettingsProps)
       update('favicon', result.url);
       notifications.show({ title: 'Favicon importé', message: FAVICON_SIZE_HINT, color: 'green' });
     } else {
+      update('favicon', '');
       notifications.show({ title: 'Échec de l\'import', message: 'Réessayez ou utilisez une autre image.', color: 'red' });
     }
   };
@@ -59,46 +74,16 @@ export function BlockLogoSettings({ customization, update }: BlockSettingsProps)
       <Text size="xs" c="dimmed" mb={4}>
         {LOGO_SIZE_HINT}
       </Text>
-      <Dropzone onDrop={handleLogoDrop} maxSize={2 * 1024 * 1024} accept={IMAGE_MIME_TYPE} loading={logoLoading} maxFiles={1}>
-        <Group justify="center" gap="xl" mih={80} style={{ pointerEvents: 'none' }}>
-          <Dropzone.Accept>
-            <IconUpload size={40} color="var(--mantine-color-blue-6)" stroke={1.5} />
-          </Dropzone.Accept>
-          <Dropzone.Reject>
-            <IconUpload size={40} color="var(--mantine-color-red-6)" stroke={1.5} />
-          </Dropzone.Reject>
-          <Dropzone.Idle>
-            <IconPhoto size={40} color="var(--mantine-color-dimmed)" stroke={1.5} />
-          </Dropzone.Idle>
-          <div>
-            <Text size="sm" inline>
-              Glissez le logo ici ou cliquez pour choisir
-            </Text>
-          </div>
-        </Group>
-      </Dropzone>
-      {logoUrl && (
-        <Group gap="xs" align="center" wrap="nowrap">
-          <Box
-            component="img"
-            src={logoUrl}
-            alt="Logo"
-            style={{ width: 60, height: 24, objectFit: 'contain', flexShrink: 0 }}
-          />
-          <Text size="xs" c="green" style={{ flex: 1 }}>
-            Logo configuré
-          </Text>
-          <ActionIcon
-            size="sm"
-            color="red"
-            variant="subtle"
-            aria-label="Supprimer le logo"
-            onClick={() => update('logo', '')}
-          >
-            <IconTrash size={14} />
-          </ActionIcon>
-        </Group>
-      )}
+      <ImageDropzone
+        imageUrl={logoUrl}
+        onDrop={handleLogoDrop}
+        onRemove={() => update('logo', '')}
+        loading={logoLoading}
+        placeholder="Glissez le logo ici ou cliquez pour choisir"
+        imageStyle={{ maxWidth: 200, maxHeight: 60, objectFit: 'contain' }}
+        maxSize={2 * 1024 * 1024}
+        accept={LOGO_FAVICON_MIME}
+      />
 
       <Text size="sm" fw={500}>
         Favicon
@@ -106,46 +91,16 @@ export function BlockLogoSettings({ customization, update }: BlockSettingsProps)
       <Text size="xs" c="dimmed" mb={4}>
         {FAVICON_SIZE_HINT}
       </Text>
-      <Dropzone onDrop={handleFaviconDrop} maxSize={512 * 1024} accept={IMAGE_MIME_TYPE} loading={faviconLoading} maxFiles={1}>
-        <Group justify="center" gap="xl" mih={80} style={{ pointerEvents: 'none' }}>
-          <Dropzone.Accept>
-            <IconUpload size={40} color="var(--mantine-color-blue-6)" stroke={1.5} />
-          </Dropzone.Accept>
-          <Dropzone.Reject>
-            <IconUpload size={40} color="var(--mantine-color-red-6)" stroke={1.5} />
-          </Dropzone.Reject>
-          <Dropzone.Idle>
-            <IconPhoto size={40} color="var(--mantine-color-dimmed)" stroke={1.5} />
-          </Dropzone.Idle>
-          <div>
-            <Text size="sm" inline>
-              Glissez le favicon ici ou cliquez pour choisir
-            </Text>
-          </div>
-        </Group>
-      </Dropzone>
-      {faviconUrl && (
-        <Group gap="xs" align="center" wrap="nowrap">
-          <Box
-            component="img"
-            src={faviconUrl}
-            alt="Favicon"
-            style={{ width: 24, height: 24, objectFit: 'contain', flexShrink: 0 }}
-          />
-          <Text size="xs" c="green" style={{ flex: 1 }}>
-            Favicon configuré
-          </Text>
-          <ActionIcon
-            size="sm"
-            color="red"
-            variant="subtle"
-            aria-label="Supprimer le favicon"
-            onClick={() => update('favicon', '')}
-          >
-            <IconTrash size={14} />
-          </ActionIcon>
-        </Group>
-      )}
+      <ImageDropzone
+        imageUrl={faviconUrl}
+        onDrop={handleFaviconDrop}
+        onRemove={() => update('favicon', '')}
+        loading={faviconLoading}
+        placeholder="Glissez le favicon ici ou cliquez pour choisir"
+        imageStyle={{ width: 48, height: 48, objectFit: 'contain' }}
+        maxSize={512 * 1024}
+        accept={LOGO_FAVICON_MIME}
+      />
 
       <Select
         label="Position du logo dans l'en-tête"
