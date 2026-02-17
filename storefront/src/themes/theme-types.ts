@@ -61,4 +61,6 @@ export interface ThemeConfig {
   heroHeight?: 'small' | 'medium' | 'large';
   sectionOrder?: string[];
   sectionVisibility?: Record<string, boolean>;
+  /** Blocs par instance (chaque bloc a son propre ID et données) */
+  blocks?: Record<string, { type: string; data: Record<string, unknown> }>;
 }

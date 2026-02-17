@@ -1,38 +1,37 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { BlockId } from '../editor-types';
 import {
   CANVAS_SOURCE_INDEX_KEY,
   DRAG_SOURCE_LIBRARY,
   DRAG_SOURCE_CANVAS,
 } from '../editor-constants';
-import type { UpdateFn } from '../editor-types';
 
 const DRAG_BLOCK_ID_KEY = 'application/x-simpshopy-block-id';
 const DRAG_SOURCE_KEY = 'application/x-simpshopy-drag-source';
 
 interface UseEditorDragDropParams {
   orderedHomeBlocks: string[];
-  selectedBlock: BlockId | null;
-  update: UpdateFn;
-  setSelectedBlock: React.Dispatch<React.SetStateAction<BlockId | null>>;
+  selectedBlock: string | null;
+  addBlockAt: (typeId: string, insertIndex: number) => string;
+  removeBlock: (instanceId: string) => void;
+  reorderBlocks: (newOrder: string[]) => void;
+  setSelectedBlock: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export function useEditorDragDrop(params: UseEditorDragDropParams) {
-  const { orderedHomeBlocks, selectedBlock, update, setSelectedBlock } = params;
+  const { orderedHomeBlocks, selectedBlock, addBlockAt, removeBlock, reorderBlocks, setSelectedBlock } = params;
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropOverIndex, setDropOverIndex] = useState<number | null>(null);
 
   const removeBlockAtIndex = useCallback(
     (index: number) => {
-      const order = [...orderedHomeBlocks];
-      if (index < 0 || index >= order.length) return;
-      const [removed] = order.splice(index, 1);
-      update('sectionOrder', order);
-      if (removed === selectedBlock) setSelectedBlock(null);
+      if (index < 0 || index >= orderedHomeBlocks.length) return;
+      const instanceId = orderedHomeBlocks[index];
+      removeBlock(instanceId);
+      if (instanceId === selectedBlock) setSelectedBlock(null);
     },
-    [orderedHomeBlocks, update, selectedBlock, setSelectedBlock]
+    [orderedHomeBlocks, removeBlock, selectedBlock, setSelectedBlock]
   );
 
   const handleLibraryDragStart = useCallback((e: React.DragEvent, blockId: string) => {
@@ -65,19 +64,17 @@ export function useEditorDragDrop(params: UseEditorDragDropParams) {
           if (removed) {
             const adjIndex = insertIndex > sourceIndex ? insertIndex - 1 : insertIndex;
             order.splice(Math.min(adjIndex, order.length), 0, removed);
-            update('sectionOrder', order);
+            reorderBlocks(order);
           }
           return;
         }
       }
 
       if (blockId && source === DRAG_SOURCE_LIBRARY) {
-        const order = [...orderedHomeBlocks];
-        order.splice(Math.min(insertIndex, order.length), 0, blockId);
-        update('sectionOrder', order);
+        addBlockAt(blockId, insertIndex);
       }
     },
-    [orderedHomeBlocks, update]
+    [orderedHomeBlocks, addBlockAt, reorderBlocks]
   );
 
   return {

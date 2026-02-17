@@ -1,6 +1,7 @@
 // Types partagés entre frontend et backend
 
 export type { ThemeCustomization } from './theme-customization';
+export type { BlockInstance, BlocksMap } from './block-instance';
 
 export interface User {
   id: string;

@@ -50,12 +50,14 @@ export default function BoutiqueEditorPage() {
   const dragDrop = useEditorDragDrop({
     orderedHomeBlocks: editorState.orderedHomeBlocks,
     selectedBlock: editorState.selectedBlock,
-    update: editorState.update,
+    addBlockAt: editorState.addBlockAt,
+    removeBlock: editorState.removeBlock,
+    reorderBlocks: editorState.reorderBlocks,
     setSelectedBlock: editorState.setSelectedBlock,
   });
 
   const selectBlockCore = useCallback(
-    (blockId: BlockId) => {
+    (blockId: string) => {
       editorState.setSelectedBlock(blockId);
       useEditorUIStore.getState().closeLibrary();
       useEditorUIStore.getState().openSettings();
@@ -69,11 +71,11 @@ export default function BoutiqueEditorPage() {
     ui.previewMode,
     editorState.selectedBlock,
     selectBlockCore,
-    dragDrop.removeBlockAtIndex
+    editorState.removeBlock
   );
 
   const selectBlock = useCallback(
-    (blockId: BlockId) => {
+    (blockId: string) => {
       selectBlockCore(blockId);
       iframe.scrollToBlock(blockId);
     },
@@ -215,15 +217,15 @@ export default function BoutiqueEditorPage() {
             panelCloseClassName={styles.panelCloseBtn}
             blockSearch={ui.blockSearch}
             onBlockSearchChange={ui.setBlockSearch}
-            selectedBlock={editorState.selectedBlock}
             draggedId={dragDrop.draggedId}
             onSelectBlock={(id) => {
-              selectBlock(id);
-              iframe.scrollToBlock(id);
+              const instanceId = id.startsWith('b-') ? id : editorState.addBlock(id as BlockId);
+              selectBlock(instanceId);
+              iframe.scrollToBlock(instanceId);
             }}
             onLibraryDragStart={dragDrop.handleLibraryDragStart}
             onDragEnd={dragDrop.handleDragEnd}
-            onResetOrder={() => editorState.update('sectionOrder', undefined)}
+            onResetOrder={editorState.resetToDefaults}
             onClose={ui.closeLibrary}
           />
 
@@ -250,6 +252,9 @@ export default function BoutiqueEditorPage() {
             customization={editorState.customization}
             update={editorState.update}
             updateNested={editorState.updateNested}
+            updateBlockData={editorState.updateBlockData}
+            updateBlockNested={editorState.updateBlockNested}
+            blocks={editorState.blocks}
             onClose={() => {
               ui.closeSettings();
               editorState.setSelectedBlock(null);
@@ -276,12 +281,11 @@ export default function BoutiqueEditorPage() {
         <AddBlockModal
           opened={ui.addBlockOpen}
           onClose={() => ui.setAddBlockOpen(false)}
-          onAddBlock={(blockId) => {
-            const currentOrder = editorState.customization.sectionOrder ?? DEFAULT_SECTION_ORDER;
-            editorState.update('sectionOrder', [...currentOrder, blockId]);
+          onAddBlock={(typeId) => {
+            const instanceId = editorState.addBlock(typeId);
             ui.setAddBlockOpen(false);
-            selectBlock(blockId);
-            iframe.scrollToBlock(blockId);
+            selectBlock(instanceId);
+            iframe.scrollToBlock(instanceId);
           }}
         />
       </Box>

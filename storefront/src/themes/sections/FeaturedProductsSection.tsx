@@ -11,9 +11,11 @@ interface FeaturedProductsSectionProps {
   limit?: number;
 }
 
-export function FeaturedProductsSection({ products: propProducts, title = 'Nos produits', limit = 6 }: FeaturedProductsSectionProps) {
+export function FeaturedProductsSection({ products: propProducts, title, limit }: FeaturedProductsSectionProps) {
   const { theme, basePath } = useTheme();
-  const products = (propProducts ?? theme.products.slice(0, limit)).filter((p): p is MockProduct => !!p.slug);
+  const displayTitle = title ?? theme.featuredProductsTitle ?? 'Nos produits';
+  const displayLimit = limit ?? theme.featuredProductsLimit ?? 6;
+  const products = (propProducts ?? theme.products.slice(0, displayLimit)).filter((p): p is MockProduct => !!p.slug);
 
   return (
     <section
@@ -24,7 +26,7 @@ export function FeaturedProductsSection({ products: propProducts, title = 'Nos p
     >
       <Container size="xl">
         <Title order={2} mb="xl" ta="center" style={{ color: theme.colors.text }}>
-          {title}
+          {displayTitle}
         </Title>
         <Grid gutter="lg">
           {products.map((product) => (

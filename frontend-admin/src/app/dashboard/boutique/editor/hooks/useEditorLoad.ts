@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import type { ThemeCustomization } from '@simpshopy/shared';
 import { useStoreStore, type Store } from '@/stores/storeStore';
 import { DEFAULT_SECTION_ORDER } from '../editor-constants';
+import { migrateToBlockInstances } from '../editor-migration';
 import type { IStoreSettingsRepository } from '../domain/store-settings.port';
 import { defaultStoreSettingsRepository } from '../infrastructure/store-settings.repository';
 
@@ -35,8 +36,9 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
     const load = async (): Promise<void> => {
       try {
         const store = await storeSettingsRepository.getStoreWithTheme(storeId);
-        const cust: ThemeCustomization =
+        const raw: ThemeCustomization =
           (store.settings?.themeCustomization as ThemeCustomization) ?? {};
+        const cust = migrateToBlockInstances(raw);
 
         setCurrentStore(store as Store);
         setCustomization(cust);
@@ -44,7 +46,7 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
         setHistoryIndex(0);
         lastSavedRef.current = JSON.stringify(cust);
       } catch {
-        const empty: ThemeCustomization = { sectionOrder: [...DEFAULT_SECTION_ORDER] };
+        const empty = migrateToBlockInstances({ sectionOrder: [...DEFAULT_SECTION_ORDER] });
         setCustomization(empty);
         setHistory([empty]);
         setHistoryIndex(0);

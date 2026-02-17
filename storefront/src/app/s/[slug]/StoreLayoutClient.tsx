@@ -131,6 +131,7 @@ function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null |
   if (cust.countdown?.endDate) result.countdownSection = { endDate: cust.countdown.endDate, label: cust.countdown.label };
   if (cust.sectionOrder?.length) result.sectionOrder = cust.sectionOrder;
   if (cust.sectionVisibility) result.sectionVisibility = cust.sectionVisibility;
+  if (cust.blocks && Object.keys(cust.blocks).length) result.blocks = cust.blocks;
   return result;
 }
 

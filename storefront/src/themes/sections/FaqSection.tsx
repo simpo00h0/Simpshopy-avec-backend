@@ -1,12 +1,23 @@
 'use client';
 
-import { Container, Title, Accordion } from '@mantine/core';
+import { Container, Title, Accordion, Text } from '@mantine/core';
 import { useTheme } from '../ThemeContext';
 
 export function FaqSection() {
-  const { theme } = useTheme();
+  const { theme, isEditor } = useTheme();
   const section = theme.faqSection;
-  if (!section?.items?.length) return null;
+  if (!section?.items?.length) {
+    if (isEditor) {
+      return (
+        <section style={{ padding: '32px 0', backgroundColor: theme.colors.bg }}>
+          <Container size="sm">
+            <Text size="sm" ta="center" c="dimmed">Ajoutez des questions/réponses dans le panneau Paramètres.</Text>
+          </Container>
+        </section>
+      );
+    }
+    return null;
+  }
 
   return (
     <section

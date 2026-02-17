@@ -6,9 +6,20 @@ import Link from 'next/link';
 import { useTheme } from '../ThemeContext';
 
 export function ImageTextSection() {
-  const { theme, basePath } = useTheme();
+  const { theme, basePath, isEditor } = useTheme();
   const section = theme.imageTextSection;
-  if (!section?.imageUrl && !section?.title && !section?.content) return null;
+  if (!section?.imageUrl && !section?.title && !section?.content) {
+    if (isEditor) {
+      return (
+        <section style={{ padding: '32px 0', backgroundColor: theme.colors.bg }}>
+          <Container size="sm">
+            <Text size="sm" ta="center" c="dimmed">Ajoutez une image, un titre ou du contenu dans le panneau Paramètres.</Text>
+          </Container>
+        </section>
+      );
+    }
+    return null;
+  }
 
   const isLeft = section.position === 'left';
 

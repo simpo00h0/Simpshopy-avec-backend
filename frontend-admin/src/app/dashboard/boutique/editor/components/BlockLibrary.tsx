@@ -8,7 +8,6 @@ import type { BlockId } from '../editor-types';
 interface BlockLibraryProps {
   blockSearch: string;
   onBlockSearchChange: (v: string) => void;
-  selectedBlock: BlockId | null;
   draggedId: string | null;
   onSelectBlock: (id: BlockId) => void;
   onLibraryDragStart: (e: React.DragEvent, blockId: string) => void;
@@ -23,7 +22,6 @@ export function BlockLibrary(props: BlockLibraryProps) {
   const {
     blockSearch,
     onBlockSearchChange,
-    selectedBlock,
     draggedId,
     onSelectBlock,
     onLibraryDragStart,
@@ -68,8 +66,8 @@ export function BlockLibrary(props: BlockLibraryProps) {
               radius="sm"
               style={{
                 cursor: 'grab',
-                border: selectedBlock === b.id ? '2px solid var(--mantine-color-green-6)' : '1px solid var(--mantine-color-gray-2)',
-                backgroundColor: selectedBlock === b.id ? 'var(--mantine-color-green-0)' : draggedId === b.id ? 'var(--mantine-color-gray-1)' : undefined,
+                border: '1px solid var(--mantine-color-gray-2)',
+                backgroundColor: draggedId === b.id ? 'var(--mantine-color-gray-1)' : undefined,
                 opacity: draggedId === b.id ? 0.7 : 1,
               }}
               onClick={() => onSelectBlock(b.id as BlockId)}

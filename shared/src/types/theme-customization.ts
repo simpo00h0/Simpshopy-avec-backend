@@ -1,5 +1,9 @@
+import type { BlocksMap } from './block-instance';
+
 /** Structure de personnalisation du thème (surcharge les valeurs par défaut du thème) */
 export interface ThemeCustomization {
+  /** Blocs par instance (chaque bloc canvas a son propre ID et données) */
+  blocks?: BlocksMap;
   logo?: string;
   colors?: {
     primary?: string;

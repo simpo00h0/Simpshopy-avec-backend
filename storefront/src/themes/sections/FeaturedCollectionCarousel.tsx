@@ -10,8 +10,9 @@ interface FeaturedCollectionCarouselProps {
   productIds?: string[];
 }
 
-export function FeaturedCollectionCarousel({ title = 'Nouveautés', productIds }: FeaturedCollectionCarouselProps) {
+export function FeaturedCollectionCarousel({ title, productIds }: FeaturedCollectionCarouselProps) {
   const { theme, basePath } = useTheme();
+  const displayTitle = title ?? theme.featuredCarouselTitle ?? 'Nouveautés';
   const products = productIds
     ? theme.products.filter((p) => productIds.includes(p.id))
     : theme.products.slice(0, 4);
@@ -27,7 +28,7 @@ export function FeaturedCollectionCarousel({ title = 'Nouveautés', productIds }
     >
       <Container size="xl">
         <Title order={2} mb="xl" ta="center" style={{ color: theme.colors.text }}>
-          {title}
+          {displayTitle}
         </Title>
         <Carousel
           slideSize="280px"

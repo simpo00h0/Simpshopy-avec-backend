@@ -53,3 +53,20 @@ export function useTheme() {
   if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
   return ctx;
 }
+
+/** Fournit un thème fusionné avec des surcharges (pour un bloc du canvas) */
+export function BlockThemeProvider({
+  overrides,
+  children,
+}: {
+  overrides: Partial<ThemeConfig>;
+  children: React.ReactNode;
+}) {
+  const parent = useTheme();
+  const mergedTheme = { ...parent.theme, ...overrides } as ThemeConfig;
+  return (
+    <ThemeContext.Provider value={{ ...parent, theme: mergedTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}

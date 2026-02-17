@@ -4,9 +4,20 @@ import { Container, SimpleGrid, Text, Box } from '@mantine/core';
 import { useTheme } from '../ThemeContext';
 
 export function TrustBadgesSection() {
-  const { theme } = useTheme();
+  const { theme, isEditor } = useTheme();
   const badges = theme.trustBadges?.items;
-  if (!badges?.length) return null;
+  if (!badges?.length) {
+    if (isEditor) {
+      return (
+        <section style={{ padding: '32px 0', backgroundColor: theme.colors.bg }}>
+          <Container size="sm">
+            <Text size="sm" ta="center" c="dimmed">Ajoutez des badges de confiance dans le panneau Paramètres.</Text>
+          </Container>
+        </section>
+      );
+    }
+    return null;
+  }
 
   return (
     <section

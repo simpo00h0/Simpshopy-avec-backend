@@ -1,13 +1,24 @@
 'use client';
 
-import { Container, Group, Button } from '@mantine/core';
+import { Container, Group, Button, Text } from '@mantine/core';
 import Link from 'next/link';
 import { useTheme } from '../ThemeContext';
 
 export function CtaButtonsSection() {
-  const { theme, basePath } = useTheme();
+  const { theme, basePath, isEditor } = useTheme();
   const cta = theme.ctaButtons;
-  if (!cta?.primaryText || !cta?.primaryHref) return null;
+  if (!cta?.primaryText || !cta?.primaryHref) {
+    if (isEditor) {
+      return (
+        <section style={{ padding: '32px 0', backgroundColor: theme.colors.bg }}>
+          <Container size="sm">
+            <Text size="sm" ta="center" c="dimmed">Configurez le bouton principal (texte + lien) dans le panneau Paramètres.</Text>
+          </Container>
+        </section>
+      );
+    }
+    return null;
+  }
 
   const primaryHref = cta.primaryHref.startsWith('http')
     ? cta.primaryHref

@@ -1,6 +1,6 @@
 'use client';
 
-import { useTheme } from '../ThemeContext';
+import { useTheme, BlockThemeProvider } from '../ThemeContext';
 import { BlockWrapper } from '../BlockWrapper';
 import { PromoBannerSection } from '../sections/PromoBannerSection';
 import { HeroSection } from '../sections/HeroSection';
@@ -18,6 +18,8 @@ import { FaqSection } from '../sections/FaqSection';
 import { SocialLinksSection } from '../sections/SocialLinksSection';
 import { TrustBadgesSection } from '../sections/TrustBadgesSection';
 import { CountdownSection } from '../sections/CountdownSection';
+import { blockDataToThemeOverrides } from '../block-theme-overrides';
+import type { ThemeConfig } from '../theme-types';
 
 const DEFAULT_ORDER = [
   'promoBanner', 'hero', 'richText', 'categories', 'featuredCarousel', 'featuredProducts',
@@ -44,13 +46,62 @@ const BLOCK_LABELS: Record<string, string> = {
   newsletter: 'Newsletter',
 };
 
+const TYPE_TO_SECTION: Record<string, React.ComponentType> = {
+  promoBanner: PromoBannerSection,
+  hero: HeroSection,
+  richText: RichTextSection,
+  categories: CategoriesSection,
+  featuredCarousel: FeaturedCollectionCarousel,
+  featuredProducts: FeaturedProductsSection,
+  countdown: CountdownSection,
+  video: VideoSection,
+  imageText: ImageTextSection,
+  separator: SeparatorSection,
+  ctaButtons: CtaButtonsSection,
+  testimonials: TestimonialsSection,
+  faq: FaqSection,
+  socialLinks: SocialLinksSection,
+  trustBadges: TrustBadgesSection,
+  newsletter: NewsletterSection,
+};
+
+function isInstanceMode(theme: ThemeConfig): boolean {
+  const blocks = theme.blocks;
+  const order = theme.sectionOrder;
+  if (!blocks || !order?.length) return false;
+  const firstId = order[0];
+  return firstId in blocks;
+}
+
 export function IndexTemplate() {
   const { theme } = useTheme();
-  const order = theme.sectionOrder ?? DEFAULT_ORDER;
   const visibility = theme.sectionVisibility ?? {};
-
   const isVisible = (id: string) => visibility[id] !== false;
 
+  if (isInstanceMode(theme)) {
+    const blocks = theme.blocks!;
+    const order = theme.sectionOrder!.filter((id) => blocks[id]);
+    return (
+      <>
+        {order.map((instanceId) => {
+          const block = blocks[instanceId];
+          if (!block || !isVisible(instanceId)) return null;
+          const Section = TYPE_TO_SECTION[block.type];
+          if (!Section) return null;
+          const overrides = blockDataToThemeOverrides(block, theme);
+          return (
+            <BlockWrapper key={instanceId} blockId={instanceId} label={BLOCK_LABELS[block.type] ?? block.type}>
+              <BlockThemeProvider overrides={overrides}>
+                <Section />
+              </BlockThemeProvider>
+            </BlockWrapper>
+          );
+        })}
+      </>
+    );
+  }
+
+  const order = theme.sectionOrder ?? DEFAULT_ORDER;
   const sections: { id: string; el: React.ReactNode }[] = [
     { id: 'promoBanner', el: <PromoBannerSection key="promoBanner" /> },
     { id: 'hero', el: <HeroSection key="hero" /> },
@@ -82,7 +133,7 @@ export function IndexTemplate() {
         const section = sections.find((s) => s.id === id);
         if (!section) return null;
         return (
-          <BlockWrapper key={`${section.id}-${i}`} blockId={section.id} label={BLOCK_LABELS[section.id] ?? section.id} indexInOrder={i}>
+          <BlockWrapper key={`${section.id}-${i}`} blockId={section.id} label={BLOCK_LABELS[section.id] ?? section.id}>
             {section.el}
           </BlockWrapper>
         );

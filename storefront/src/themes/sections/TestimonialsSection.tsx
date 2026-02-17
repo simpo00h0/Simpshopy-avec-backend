@@ -18,8 +18,8 @@ interface TestimonialsSectionProps {
 export function TestimonialsSection({ title, items }: TestimonialsSectionProps) {
   const { theme } = useTheme();
   const { colors } = theme;
-  const testimonials = (items && items.length > 0) ? items : defaultTestimonials;
-  const displayTitle = title ?? 'Ce que disent nos clients';
+  const testimonials = (items && items.length > 0) ? items : (theme.testimonialsItems ?? defaultTestimonials);
+  const displayTitle = title ?? theme.testimonialsTitle ?? 'Ce que disent nos clients';
 
   return (
     <section

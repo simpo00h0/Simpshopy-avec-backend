@@ -4,18 +4,25 @@ import { useState, useCallback, useRef } from 'react';
 import type { ThemeCustomization } from '@simpshopy/shared';
 import type { BlockId } from '../editor-types';
 import { DEFAULT_SECTION_ORDER, HOME_BLOCKS } from '../editor-constants';
+import { migrateToBlockInstances } from '../editor-migration';
+
+function genBlockId(): string {
+  return `b-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+}
 
 export function useEditorState() {
-  const [selectedBlock, setSelectedBlock] = useState<BlockId | null>(null);
-  const [customization, setCustomization] = useState<ThemeCustomization>({});
+  const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
+  const [customization, setCustomization] = useState<ThemeCustomization>(() =>
+    migrateToBlockInstances({})
+  );
   const [history, setHistory] = useState<ThemeCustomization[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoRef = useRef(false);
 
-  const sectionOrder = customization.sectionOrder ?? DEFAULT_SECTION_ORDER;
-  const orderedHomeBlocks = sectionOrder.filter((id) =>
-    HOME_BLOCKS.some((b) => b.id === id && (b.template === 'all' || b.template === 'home'))
-  );
+  const migrated = customization.blocks ? customization : migrateToBlockInstances(customization);
+  const blocks = migrated.blocks ?? {};
+  const sectionOrder = migrated.sectionOrder ?? [];
+  const orderedHomeBlocks = sectionOrder.filter((id) => blocks[id]);
 
   const pushHistory = useCallback((cust: ThemeCustomization) => {
     if (isUndoRedoRef.current) return;
@@ -66,6 +73,119 @@ export function useEditorState() {
     [pushHistory]
   );
 
+  const updateBlockData = useCallback(
+    (instanceId: string, data: Record<string, unknown>) => {
+      setCustomization((prev) => {
+        const block = prev.blocks?.[instanceId];
+        if (!block) return prev;
+        const next = {
+          ...prev,
+          blocks: {
+            ...prev.blocks,
+            [instanceId]: { ...block, data: { ...block.data, ...data } },
+          },
+        };
+        pushHistory(next);
+        return next;
+      });
+    },
+    [pushHistory]
+  );
+
+  const updateBlockNested = useCallback(
+    (instanceId: string, subKey: string, value: string | number) => {
+      setCustomization((prev) => {
+        const block = prev.blocks?.[instanceId];
+        if (!block) return prev;
+        const obj = block.data as Record<string, unknown>;
+        const next = {
+          ...prev,
+          blocks: {
+            ...prev.blocks,
+            [instanceId]: {
+              ...block,
+              data: { ...obj, [subKey]: value },
+            },
+          },
+        };
+        pushHistory(next);
+        return next;
+      });
+    },
+    [pushHistory]
+  );
+
+  const addBlock = useCallback(
+    (typeId: BlockId) => {
+      const instanceId = genBlockId();
+      setCustomization((prev) => {
+        const blocks = prev.blocks ?? {};
+        const order = prev.sectionOrder ?? [];
+        const next = {
+          ...prev,
+          blocks: { ...blocks, [instanceId]: { type: typeId, data: {} } },
+          sectionOrder: [...order, instanceId],
+        };
+        pushHistory(next);
+        return next;
+      });
+      return instanceId;
+    },
+    [pushHistory]
+  );
+
+  const addBlockAt = useCallback(
+    (typeId: BlockId, insertIndex: number) => {
+      const instanceId = genBlockId();
+      setCustomization((prev) => {
+        const blocks = prev.blocks ?? {};
+        const order = [...(prev.sectionOrder ?? [])];
+        order.splice(Math.min(insertIndex, order.length), 0, instanceId);
+        const next = {
+          ...prev,
+          blocks: { ...blocks, [instanceId]: { type: typeId, data: {} } },
+          sectionOrder: order,
+        };
+        pushHistory(next);
+        return next;
+      });
+      return instanceId;
+    },
+    [pushHistory]
+  );
+
+  const removeBlock = useCallback(
+    (instanceId: string) => {
+      setCustomization((prev) => {
+        const blocks = { ...prev.blocks };
+        delete blocks[instanceId];
+        const order = (prev.sectionOrder ?? []).filter((id) => id !== instanceId);
+        const next = { ...prev, blocks, sectionOrder: order };
+        pushHistory(next);
+        return next;
+      });
+    },
+    [pushHistory]
+  );
+
+  const reorderBlocks = useCallback(
+    (newOrder: string[]) => {
+      setCustomization((prev) => {
+        const next = { ...prev, sectionOrder: newOrder };
+        pushHistory(next);
+        return next;
+      });
+    },
+    [pushHistory]
+  );
+
+  const resetToDefaults = useCallback(() => {
+    const next = migrateToBlockInstances({});
+    setCustomization(next);
+    pushHistory(next);
+    setSelectedBlock(null);
+  }, [pushHistory]);
+
   return {
     selectedBlock,
     setSelectedBlock,
@@ -76,8 +196,16 @@ export function useEditorState() {
     historyIndex,
     setHistoryIndex,
     orderedHomeBlocks,
+    blocks,
     update,
     updateNested,
+    updateBlockData,
+    updateBlockNested,
+    addBlock,
+    addBlockAt,
+    removeBlock,
+    reorderBlocks,
+    resetToDefaults,
     undo,
     redo,
     pushHistory,

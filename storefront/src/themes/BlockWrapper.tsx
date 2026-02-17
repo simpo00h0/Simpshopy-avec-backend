@@ -12,12 +12,10 @@ export const SIMPSHOPY_BLOCK_DELETE = 'simpshopy-block-delete';
 export function BlockWrapper({
   blockId,
   label,
-  indexInOrder,
   children,
 }: {
   blockId: string;
   label: string;
-  indexInOrder?: number;
   children: React.ReactNode;
 }) {
   const { isEditor, isPreviewMode } = useTheme();
@@ -119,7 +117,7 @@ export function BlockWrapper({
       >
         {label}
       </div>
-      {typeof indexInOrder === 'number' && isHovered && (
+      {isHovered && (
         <button
           type="button"
           aria-label="Supprimer le bloc"
@@ -143,7 +141,7 @@ export function BlockWrapper({
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            window.parent?.postMessage({ type: SIMPSHOPY_BLOCK_DELETE, blockId, indexInOrder }, '*');
+            window.parent?.postMessage({ type: SIMPSHOPY_BLOCK_DELETE, blockId }, '*');
           }}
         >
           <IconTrash size={14} />
