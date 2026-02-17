@@ -181,7 +181,7 @@ export function StoreLayoutClient({ store, subdomain, children }: { store: Store
   };
   theme = applyCustomization(theme, effectiveCustomization);
 
-  const basePath = '';
+  const basePath = `/s/${subdomain}`;
 
   return (
     <ThemeProvider
