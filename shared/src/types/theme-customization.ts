@@ -13,6 +13,7 @@ export interface ThemeCustomization {
     subtitle?: string;
     image?: string;
     cta?: string;
+    ctaHref?: string;
   };
   richText?: { heading?: string; content?: string };
   about?: { title?: string; content?: string };

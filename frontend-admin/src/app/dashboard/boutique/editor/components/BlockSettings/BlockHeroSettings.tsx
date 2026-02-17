@@ -77,6 +77,12 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
         value={customization.hero?.cta ?? ''}
         onChange={(e) => updateNested('hero', 'cta', e.target.value)}
       />
+      <TextInput
+        label="Lien du bouton"
+        placeholder="/collections/all"
+        value={customization.hero?.ctaHref ?? ''}
+        onChange={(e) => updateNested('hero', 'ctaHref', e.target.value)}
+      />
       <Select
         label="Alignement du texte"
         data={[

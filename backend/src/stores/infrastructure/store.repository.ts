@@ -73,9 +73,32 @@ export class StoreRepository implements IStoreRepository {
             images: true,
           },
         },
+        categories: {
+          where: { parentId: null },
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            products: { where: { status: 'ACTIVE' }, select: { id: true } },
+          },
+        },
       },
     });
     if (!store) return null;
+
+    const productIds = (store.products as { id: string }[]).map((p) => p.id);
+    const collections = [
+      { id: 'all', slug: 'all', name: 'Tous les produits', productIds },
+      ...(store.categories as { id: string; slug: string; name: string; products: { id: string }[] }[]).map(
+        (c) => ({
+          id: c.id,
+          slug: c.slug,
+          name: c.name,
+          productIds: c.products.map((p) => p.id),
+        })
+      ),
+    ];
+
     return {
       id: store.id,
       name: store.name,
@@ -89,6 +112,7 @@ export class StoreRepository implements IStoreRepository {
       themeCustomization:
         (store.settings?.themeCustomization as object | null) ?? null,
       products: store.products,
+      collections,
     };
   }
 

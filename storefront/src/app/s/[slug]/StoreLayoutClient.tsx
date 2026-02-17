@@ -7,6 +7,13 @@ import { ThemeLayout } from '@/themes/ThemeLayout';
 import { themesData } from '@/themes/data';
 import type { ThemeConfig, MockProduct } from '@/themes/data';
 
+interface StoreCollection {
+  id: string;
+  slug: string;
+  name: string;
+  productIds: string[];
+}
+
 interface StoreData {
   id: string;
   name: string;
@@ -24,6 +31,7 @@ interface StoreData {
     compareAtPrice?: number;
     images?: string[];
   }>;
+  collections?: StoreCollection[];
 }
 
 function mapProducts(products: StoreData['products']): MockProduct[] {
@@ -56,6 +64,7 @@ function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null |
     if (cust.hero.subtitle) result.heroSubtitle = cust.hero.subtitle;
     if (cust.hero.image) result.heroImage = cust.hero.image;
     if (cust.hero.cta) result.heroCta = cust.hero.cta;
+    if (cust.hero.ctaHref != null) result.heroCtaHref = cust.hero.ctaHref;
   }
   if (cust.richText) {
     if (cust.richText.heading) result.richTextHeading = cust.richText.heading;
@@ -167,6 +176,7 @@ export function StoreLayoutClient({ store, subdomain, children }: { store: Store
     storeName: store.name,
     logo: store.logo ?? undefined,
     products,
+    collections: store.collections?.length ? store.collections : baseTheme.collections,
     footerTagline: `© ${store.name}`,
   };
   theme = applyCustomization(theme, effectiveCustomization);

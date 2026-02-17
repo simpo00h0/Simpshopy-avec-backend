@@ -18,6 +18,13 @@ export interface Store {
   updatedAt?: Date;
 }
 
+export interface StoreCollection {
+  id: string;
+  slug: string;
+  name: string;
+  productIds: string[];
+}
+
 export interface StorePublic {
   id: string;
   name: string;
@@ -30,6 +37,7 @@ export interface StorePublic {
   themeId: string;
   themeCustomization: object | null;
   products: unknown[];
+  collections?: StoreCollection[];
 }
 
 export interface StoreCustomer {

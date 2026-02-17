@@ -9,7 +9,7 @@ const HEIGHT_MAP = { small: 320, medium: 400, large: 520 };
 
 export function HeroSection() {
   const { theme, basePath } = useTheme();
-  const { heroTitle, heroSubtitle, heroCta, heroImage, colors, heroAlignment, heroHeight } = theme;
+  const { heroTitle, heroSubtitle, heroCta, heroCtaHref, heroImage, colors, heroAlignment, heroHeight } = theme;
   const align = heroAlignment ?? 'center';
   const minHeight = HEIGHT_MAP[heroHeight ?? 'medium'];
 
@@ -86,11 +86,13 @@ export function HeroSection() {
         {heroCta && (
           <Button
             component={Link}
-            href={`${basePath}/collections/all`}
+            href={heroCtaHref ? (heroCtaHref.startsWith('http') ? heroCtaHref : `${basePath}${heroCtaHref.startsWith('/') ? '' : '/'}${heroCtaHref}`) : `${basePath}/collections/all`}
             variant="white"
             color="dark"
             size="lg"
             radius="xl"
+            target={heroCtaHref?.startsWith('http') ? '_blank' : undefined}
+            rel={heroCtaHref?.startsWith('http') ? 'noopener noreferrer' : undefined}
           >
             {heroCta}
           </Button>

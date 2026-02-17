@@ -21,6 +21,7 @@ export interface ThemeConfig {
   heroSubtitle: string;
   heroImage?: string;
   heroCta?: string;
+  heroCtaHref?: string;
   richTextHeading?: string;
   richTextContent?: string;
   aboutTitle?: string;

@@ -1,14 +1,21 @@
 'use client';
 
+import { useState } from 'react';
 import { Container, Title, Text, TextInput, Button, Box } from '@mantine/core';
 import { useTheme } from '../ThemeContext';
 
 export function NewsletterSection() {
   const { theme } = useTheme();
   const { newsletterTitle, colors } = theme;
+  const [message, setMessage] = useState<string | null>(null);
 
   const title = newsletterTitle ?? 'Restez informé';
   const subtext = 'Inscrivez-vous pour recevoir nos offres et nouveautés.';
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage('Inscription bientôt disponible.');
+  };
 
   return (
     <section
@@ -27,6 +34,7 @@ export function NewsletterSection() {
         </Text>
         <Box
           component="form"
+          onSubmit={handleSubmit}
           style={{
             display: 'flex',
             gap: 8,
@@ -37,15 +45,21 @@ export function NewsletterSection() {
           <TextInput
             placeholder="Votre email"
             size="md"
+            type="email"
             style={{ flex: '1 1 200px', maxWidth: 320 }}
             styles={{
               input: { backgroundColor: 'rgba(255,255,255,0.95)', border: 'none' },
             }}
           />
-          <Button variant="white" color="dark" size="md">
+          <Button variant="white" color="dark" size="md" type="submit">
             S&apos;inscrire
           </Button>
         </Box>
+        {message && (
+          <Text size="sm" ta="center" mt="sm" opacity={0.9}>
+            {message}
+          </Text>
+        )}
       </Container>
     </section>
   );
