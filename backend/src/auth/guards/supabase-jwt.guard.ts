@@ -5,24 +5,31 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { AuthService } from '../auth.service';
 
 /**
  * Vérifie le JWT Supabase via JWKS (clés asymétriques ES256).
- * Utilisé quand Supabase a migré vers les JWT Signing Keys.
+ * Utilise import() dynamique car jose est ESM-only (incompatible avec require).
  */
 @Injectable()
 export class SupabaseJwtGuard implements CanActivate {
-  private jwks: ReturnType<typeof createRemoteJWKSet>;
+  private jwksPromise: Promise<ReturnType<typeof import('jose').createRemoteJWKSet>> | null = null;
 
   constructor(
     private authService: AuthService,
     private config: ConfigService,
-  ) {
-    const url = config.get('SUPABASE_URL') || 'https://eeelvkkhnwbnhiybzwlm.supabase.co';
-    const jwksUrl = `${url.replace(/\/$/, '')}/auth/v1/.well-known/jwks.json`;
-    this.jwks = createRemoteJWKSet(new URL(jwksUrl));
+  ) {}
+
+  private async getJwks() {
+    if (!this.jwksPromise) {
+      this.jwksPromise = (async () => {
+        const { createRemoteJWKSet } = await import('jose');
+        const url = this.config.get('SUPABASE_URL') || 'https://eeelvkkhnwbnhiybzwlm.supabase.co';
+        const jwksUrl = `${url.replace(/\/$/, '')}/auth/v1/.well-known/jwks.json`;
+        return createRemoteJWKSet(new URL(jwksUrl));
+      })();
+    }
+    return this.jwksPromise;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -36,7 +43,9 @@ export class SupabaseJwtGuard implements CanActivate {
     const token = authHeader.slice(7);
 
     try {
-      const { payload } = await jwtVerify(token, this.jwks);
+      const { jwtVerify } = await import('jose');
+      const jwks = await this.getJwks();
+      const { payload } = await jwtVerify(token, jwks);
 
       const authUserId = payload.sub as string;
       const email = (payload.email as string) || '';
