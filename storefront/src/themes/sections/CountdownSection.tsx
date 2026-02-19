@@ -36,7 +36,7 @@ export function CountdownSection() {
       return (
         <section style={{ padding: '32px 0', backgroundColor: theme.colors.primary }}>
           <Container size="sm">
-            <Text size="sm" ta="center" c="white" opacity={0.9}>Indiquez une date de fin (ISO) dans le panneau Paramètres.</Text>
+            <Text size="sm" ta="center" c="white" opacity={0.9}>Choisissez une date et heure de fin dans le panneau Paramètres.</Text>
           </Container>
         </section>
       );

@@ -1,7 +1,10 @@
+import 'dayjs/locale/fr';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dropzone/styles.css';
+import '@mantine/dates/styles.css';
 import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
+import { DatesProvider } from '@mantine/dates';
 import { Notifications } from '@mantine/notifications';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 import { TokenCachePrimer } from '@/components/TokenCachePrimer';
@@ -33,9 +36,11 @@ export default function RootLayout({
       <body>
         <ReactQueryProvider>
           <MantineProvider>
-            <TokenCachePrimer />
-            <Notifications position="top-right" />
-            {children}
+            <DatesProvider settings={{ locale: 'fr', firstDayOfWeek: 0 }}>
+              <TokenCachePrimer />
+              <Notifications position="top-right" />
+              {children}
+            </DatesProvider>
           </MantineProvider>
         </ReactQueryProvider>
       </body>
