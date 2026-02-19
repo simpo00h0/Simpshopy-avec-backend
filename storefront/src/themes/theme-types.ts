@@ -54,7 +54,7 @@ export interface ThemeConfig {
     ctaHref?: string;
   };
   separatorSection?: { style: 'line' | 'space' | 'dotted' | 'dashed'; thickness?: number; color?: string };
-  countdownSection?: { endDate: string; label?: string };
+  countdownSection?: { endDate: string; label?: string; size?: 'grand' | 'moyen' | 'petit' };
   ctaButtons?: { primaryText: string; primaryHref: string; secondaryText?: string; secondaryHref?: string };
   faqSection?: { title?: string; items: { question: string; answer: string }[] };
   socialLinks?: { facebook?: string; instagram?: string; whatsapp?: string; twitter?: string };

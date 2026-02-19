@@ -44,6 +44,7 @@ export function blockDataToThemeOverrides(
         countdownSection: {
           endDate: (d.endDate as string) ?? '',
           label: (d.label as string),
+          size: (d.size as 'grand' | 'moyen' | 'petit') ?? 'grand',
         },
       };
     case 'video':

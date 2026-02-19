@@ -41,7 +41,7 @@ export interface ThemeCustomization {
     ctaHref?: string;
   };
   separator?: { style?: 'line' | 'space' | 'dotted' | 'dashed'; thickness?: number; color?: string };
-  countdown?: { endDate?: string; label?: string };
+  countdown?: { endDate?: string; label?: string; size?: 'grand' | 'moyen' | 'petit' };
   ctaButtons?: {
     primaryText?: string;
     primaryHref?: string;
