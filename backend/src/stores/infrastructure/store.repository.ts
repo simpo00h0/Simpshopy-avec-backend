@@ -124,16 +124,6 @@ export class StoreRepository implements IStoreRepository {
     return store as Store | null;
   }
 
-  async findByIdMinimal(
-    id: string,
-  ): Promise<{ id: string; name: string; subdomain: string; email: string; status: string; ownerId: string } | null> {
-    const store = await this.prisma.store.findUnique({
-      where: { id },
-      select: { id: true, name: true, subdomain: true, email: true, status: true, ownerId: true },
-    });
-    return store;
-  }
-
   async findByIdForSettingsUpdate(
     id: string,
   ): Promise<{
@@ -168,14 +158,6 @@ export class StoreRepository implements IStoreRepository {
       themeCustomization:
         (store.settings?.themeCustomization as object | null) ?? null,
     };
-  }
-
-  async getThemeCustomization(storeId: string): Promise<object | null> {
-    const settings = await this.prisma.storeSettings.findUnique({
-      where: { storeId },
-      select: { themeCustomization: true },
-    });
-    return settings?.themeCustomization as object | null;
   }
 
   async update(id: string, data: UpdateStoreData): Promise<Store> {

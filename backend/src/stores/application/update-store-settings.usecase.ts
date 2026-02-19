@@ -53,27 +53,19 @@ export class UpdateStoreSettingsUseCase {
     ownerId: string,
     data: UpdateStoreSettingsData & { partial?: boolean },
   ): Promise<StoreSettingsUpdateResult> {
-    let themeCustomizationData: object | undefined;
-    let store: { id: string; name: string; subdomain: string; email: string; status: string; ownerId: string } | null;
+    const row = await this.storeRepository.findByIdForSettingsUpdate(id);
+    if (!row || row.ownerId !== ownerId) {
+      throw new ForbiddenException('Accès non autorisé');
+    }
 
-    if (data.themeCustomization != null && data.partial) {
-      const row = await this.storeRepository.findByIdForSettingsUpdate(id);
-      if (!row || row.ownerId !== ownerId) {
-        throw new ForbiddenException('Accès non autorisé');
-      }
-      store = row;
-      themeCustomizationData = this.deepMerge(
-        (row.themeCustomization as Record<string, unknown>) ?? {},
-        data.themeCustomization as Record<string, unknown>,
-      );
-    } else {
-      store = await this.storeRepository.findByIdMinimal(id);
-      if (!store || store.ownerId !== ownerId) {
-        throw new ForbiddenException('Accès non autorisé');
-      }
-      if (data.themeCustomization != null) {
-        themeCustomizationData = data.themeCustomization as object;
-      }
+    let themeCustomizationData: object | undefined;
+    if (data.themeCustomization != null) {
+      themeCustomizationData = data.partial
+        ? this.deepMerge(
+            (row.themeCustomization as Record<string, unknown>) ?? {},
+            data.themeCustomization as Record<string, unknown>,
+          )
+        : (data.themeCustomization as object);
     }
 
     const { partial: _partial, themeCustomization: _tc, ...rest } =
@@ -89,11 +81,11 @@ export class UpdateStoreSettingsUseCase {
       await this.storeRepository.updateSettings(id, settingsData);
 
     return {
-      id: store.id,
-      name: store.name,
-      subdomain: store.subdomain,
-      email: store.email,
-      status: store.status,
+      id: row.id,
+      name: row.name,
+      subdomain: row.subdomain,
+      email: row.email,
+      status: row.status,
       settings: {
         themeId: updatedSettings.themeId,
         themeCustomization: updatedSettings.themeCustomization,

@@ -283,7 +283,6 @@ export function useEditorState() {
     resetToDefaults,
     undo,
     redo,
-    pushHistory,
     getPartialPayload,
     clearDirtyTracking,
     hasDirtyTracking,
