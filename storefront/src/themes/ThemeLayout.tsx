@@ -66,7 +66,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
         component="header"
         py="md"
         pl="xl"
-        pr="md"
+        pr="xs"
         style={{
           backgroundColor: colors.primary,
           color: 'white',
