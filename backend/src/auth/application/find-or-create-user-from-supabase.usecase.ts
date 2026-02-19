@@ -40,7 +40,7 @@ export class FindOrCreateUserFromSupabaseUseCase {
         });
       }
     } else {
-      await this.userAuthRepository.updateLastLogin(user.id);
+      this.userAuthRepository.updateLastLogin(user.id).catch(() => {});
     }
 
     return user;

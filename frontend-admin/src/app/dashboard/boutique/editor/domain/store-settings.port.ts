@@ -9,7 +9,15 @@ export interface StoreWithTheme {
   settings?: { themeCustomization?: ThemeCustomization | null } | null;
 }
 
+export interface SaveThemeCustomizationOptions {
+  partial?: boolean;
+}
+
 export interface IStoreSettingsRepository {
   getStoreWithTheme(storeId: string): Promise<StoreWithTheme>;
-  saveThemeCustomization(storeId: string, customization: ThemeCustomization): Promise<StoreWithTheme | undefined>;
+  saveThemeCustomization(
+    storeId: string,
+    customization: ThemeCustomization | Partial<ThemeCustomization>,
+    options?: SaveThemeCustomizationOptions
+  ): Promise<StoreWithTheme | undefined>;
 }

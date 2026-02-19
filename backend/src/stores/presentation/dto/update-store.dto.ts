@@ -91,4 +91,13 @@ export class UpdateStoreSettingsDto {
   @IsOptional()
   @IsObject()
   themeCustomization?: Record<string, unknown>;
+
+  @ApiProperty({
+    required: false,
+    description:
+      'Si true, fusionne themeCustomization avec l\'existant (mise à jour partielle). Sinon remplace entièrement.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  partial?: boolean;
 }

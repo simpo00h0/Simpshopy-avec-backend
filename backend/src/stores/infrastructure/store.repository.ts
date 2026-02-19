@@ -124,6 +124,60 @@ export class StoreRepository implements IStoreRepository {
     return store as Store | null;
   }
 
+  async findByIdMinimal(
+    id: string,
+  ): Promise<{ id: string; name: string; subdomain: string; email: string; status: string; ownerId: string } | null> {
+    const store = await this.prisma.store.findUnique({
+      where: { id },
+      select: { id: true, name: true, subdomain: true, email: true, status: true, ownerId: true },
+    });
+    return store;
+  }
+
+  async findByIdForSettingsUpdate(
+    id: string,
+  ): Promise<{
+    id: string;
+    name: string;
+    subdomain: string;
+    email: string;
+    status: string;
+    ownerId: string;
+    themeCustomization: object | null;
+  } | null> {
+    const store = await this.prisma.store.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        subdomain: true,
+        email: true,
+        status: true,
+        ownerId: true,
+        settings: { select: { themeCustomization: true } },
+      },
+    });
+    if (!store) return null;
+    return {
+      id: store.id,
+      name: store.name,
+      subdomain: store.subdomain,
+      email: store.email,
+      status: store.status,
+      ownerId: store.ownerId,
+      themeCustomization:
+        (store.settings?.themeCustomization as object | null) ?? null,
+    };
+  }
+
+  async getThemeCustomization(storeId: string): Promise<object | null> {
+    const settings = await this.prisma.storeSettings.findUnique({
+      where: { storeId },
+      select: { themeCustomization: true },
+    });
+    return settings?.themeCustomization as object | null;
+  }
+
   async update(id: string, data: UpdateStoreData): Promise<Store> {
     const store = await this.prisma.store.update({
       where: { id },
@@ -143,8 +197,8 @@ export class StoreRepository implements IStoreRepository {
   async updateSettings(
     storeId: string,
     data: UpdateStoreSettingsData,
-  ): Promise<void> {
-    await this.prisma.storeSettings.update({
+  ): Promise<{ themeId: string | null; themeCustomization: object | null }> {
+    const updated = await this.prisma.storeSettings.update({
       where: { storeId },
       data: {
         ...(data.enableMobileMoney != null && {
@@ -171,6 +225,10 @@ export class StoreRepository implements IStoreRepository {
         }),
       },
     });
+    return {
+      themeId: updated.themeId,
+      themeCustomization: updated.themeCustomization as object | null,
+    };
   }
 
   async getCustomers(ownerId: string): Promise<StoreCustomer[]> {

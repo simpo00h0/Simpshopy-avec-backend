@@ -46,9 +46,21 @@ export interface IStoreRepository {
 
   findById(id: string): Promise<Store | null>;
 
+  findByIdMinimal(id: string): Promise<{ id: string; name: string; subdomain: string; email: string; status: string; ownerId: string } | null>;
+
+  /** Store + themeCustomization en une requête (pour mise à jour partielle rapide). */
+  findByIdForSettingsUpdate(
+    id: string
+  ): Promise<{ id: string; name: string; subdomain: string; email: string; status: string; ownerId: string; themeCustomization: object | null } | null>;
+
+  getThemeCustomization(storeId: string): Promise<object | null>;
+
   update(id: string, data: UpdateStoreData): Promise<Store>;
 
-  updateSettings(storeId: string, data: UpdateStoreSettingsData): Promise<void>;
+  updateSettings(
+    storeId: string,
+    data: UpdateStoreSettingsData,
+  ): Promise<{ themeId: string | null; themeCustomization: object | null }>;
 
   getCustomers(ownerId: string): Promise<StoreCustomer[]>;
 }

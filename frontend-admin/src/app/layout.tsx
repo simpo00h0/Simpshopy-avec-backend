@@ -4,6 +4,7 @@ import '@mantine/dropzone/styles.css';
 import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
+import { TokenCachePrimer } from '@/components/TokenCachePrimer';
 import type { Viewport } from 'next';
 
 export const viewport: Viewport = {
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body>
         <ReactQueryProvider>
           <MantineProvider>
+            <TokenCachePrimer />
             <Notifications position="top-right" />
             {children}
           </MantineProvider>

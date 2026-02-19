@@ -3,7 +3,15 @@ import {
   IStoreRepository,
   UpdateStoreSettingsData,
 } from '../domain/store.repository';
-import { Store } from '../domain/store.entity';
+
+export interface StoreSettingsUpdateResult {
+  id: string;
+  name: string;
+  subdomain: string;
+  email: string;
+  status: string;
+  settings: { themeId: string | null; themeCustomization: object | null };
+}
 
 @Injectable()
 export class UpdateStoreSettingsUseCase {
@@ -43,33 +51,53 @@ export class UpdateStoreSettingsUseCase {
   async execute(
     id: string,
     ownerId: string,
-    data: UpdateStoreSettingsData,
-  ): Promise<Store> {
-    const store = await this.storeRepository.findById(id);
-    if (!store || store.ownerId !== ownerId) {
-      throw new ForbiddenException('Accès non autorisé');
-    }
-
+    data: UpdateStoreSettingsData & { partial?: boolean },
+  ): Promise<StoreSettingsUpdateResult> {
     let themeCustomizationData: object | undefined;
-    if (data.themeCustomization != null) {
-      const existing = store.settings
-        ? ((store.settings as { themeCustomization?: object })
-            .themeCustomization as Record<string, unknown> | null)
-        : null;
-      themeCustomizationData = existing != null
-        ? this.deepMerge(existing, data.themeCustomization as Record<string, unknown>)
-        : (data.themeCustomization as Record<string, unknown>);
+    let store: { id: string; name: string; subdomain: string; email: string; status: string; ownerId: string } | null;
+
+    if (data.themeCustomization != null && data.partial) {
+      const row = await this.storeRepository.findByIdForSettingsUpdate(id);
+      if (!row || row.ownerId !== ownerId) {
+        throw new ForbiddenException('Accès non autorisé');
+      }
+      store = row;
+      themeCustomizationData = this.deepMerge(
+        (row.themeCustomization as Record<string, unknown>) ?? {},
+        data.themeCustomization as Record<string, unknown>,
+      );
+    } else {
+      store = await this.storeRepository.findByIdMinimal(id);
+      if (!store || store.ownerId !== ownerId) {
+        throw new ForbiddenException('Accès non autorisé');
+      }
+      if (data.themeCustomization != null) {
+        themeCustomizationData = data.themeCustomization as object;
+      }
     }
 
-    const settingsData: UpdateStoreSettingsData = { ...data };
-    if (themeCustomizationData) {
-      settingsData.themeCustomization = themeCustomizationData;
-    }
+    const { partial: _partial, themeCustomization: _tc, ...rest } =
+      data as UpdateStoreSettingsData & { partial?: boolean };
+    const settingsData: UpdateStoreSettingsData = {
+      ...rest,
+      ...(themeCustomizationData && {
+        themeCustomization: themeCustomizationData,
+      }),
+    };
 
-    await this.storeRepository.updateSettings(id, settingsData);
+    const updatedSettings =
+      await this.storeRepository.updateSettings(id, settingsData);
 
-    const updated = await this.storeRepository.findById(id);
-    if (!updated) throw new ForbiddenException('Boutique introuvable');
-    return updated;
+    return {
+      id: store.id,
+      name: store.name,
+      subdomain: store.subdomain,
+      email: store.email,
+      status: store.status,
+      settings: {
+        themeId: updatedSettings.themeId,
+        themeCustomization: updatedSettings.themeCustomization,
+      },
+    };
   }
 }

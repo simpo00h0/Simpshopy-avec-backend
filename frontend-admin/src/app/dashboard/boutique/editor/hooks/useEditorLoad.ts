@@ -15,6 +15,8 @@ interface UseEditorLoadParams {
   setHistory: (h: ThemeCustomization[] | ((prev: ThemeCustomization[]) => ThemeCustomization[])) => void;
   setHistoryIndex: (i: number) => void;
   lastSavedRef: React.MutableRefObject<string>;
+  setDirty?: (dirty: boolean) => void;
+  clearDirtyTracking?: () => void;
   storeSettingsRepository?: IStoreSettingsRepository;
 }
 
@@ -26,6 +28,8 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
     setHistory,
     setHistoryIndex,
     lastSavedRef,
+    setDirty,
+    clearDirtyTracking,
     storeSettingsRepository = defaultStoreSettingsRepository,
   } = params;
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
@@ -45,15 +49,19 @@ export function useEditorLoad(params: UseEditorLoadParams): void {
         setHistory([cust]);
         setHistoryIndex(0);
         lastSavedRef.current = JSON.stringify(cust);
+        setDirty?.(false);
+        clearDirtyTracking?.();
       } catch {
         const empty = migrateToBlockInstances({ sectionOrder: [...DEFAULT_SECTION_ORDER] });
         setCustomization(empty);
         setHistory([empty]);
         setHistoryIndex(0);
         lastSavedRef.current = JSON.stringify(empty);
+        setDirty?.(false);
+        clearDirtyTracking?.();
       }
     };
 
     load();
-  }, [storeId, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setCurrentStore, storeSettingsRepository]);
+  }, [storeId, setCustomization, setHistory, setHistoryIndex, lastSavedRef, setDirty, clearDirtyTracking, setCurrentStore, storeSettingsRepository]);
 }

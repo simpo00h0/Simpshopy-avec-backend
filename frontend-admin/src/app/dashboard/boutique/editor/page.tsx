@@ -32,7 +32,14 @@ export default function BoutiqueEditorPage() {
     editorState.customization,
     currentStore,
     undefined,
-    editorState.setCustomization
+    editorState.setCustomization,
+    {
+      setDirty: editorState.setDirty,
+      isDirty: editorState.isDirty,
+      getPartialPayload: editorState.getPartialPayload,
+      hasDirtyTracking: editorState.hasDirtyTracking,
+      clearDirtyTracking: editorState.clearDirtyTracking,
+    }
   );
   useEditorLoad({
     storeId,
@@ -41,6 +48,8 @@ export default function BoutiqueEditorPage() {
     setHistory: editorState.setHistory,
     setHistoryIndex: editorState.setHistoryIndex,
     lastSavedRef,
+    setDirty: editorState.setDirty,
+    clearDirtyTracking: editorState.clearDirtyTracking,
   });
 
   const ui = useEditorUIStore();

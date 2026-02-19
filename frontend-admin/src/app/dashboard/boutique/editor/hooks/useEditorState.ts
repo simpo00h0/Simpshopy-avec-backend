@@ -17,7 +17,11 @@ export function useEditorState() {
   );
   const [history, setHistory] = useState<ThemeCustomization[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isDirty, setIsDirty] = useState(false);
   const isUndoRedoRef = useRef(false);
+  const dirtyBlocksFullRef = useRef(false);
+  const dirtyBlockIdsRef = useRef<Set<string>>(new Set());
+  const dirtySectionsRef = useRef<Set<string>>(new Set());
 
   const migrated = customization.blocks ? customization : migrateToBlockInstances(customization);
   const blocks = migrated.blocks ?? {};
@@ -26,8 +30,20 @@ export function useEditorState() {
   const blocksRef = useRef(blocks);
   blocksRef.current = blocks;
 
+  const markDirtyBlockId = useCallback((instanceId: string) => {
+    dirtyBlockIdsRef.current.add(instanceId);
+  }, []);
+  const markDirtyBlocksFull = useCallback(() => {
+    dirtyBlocksFullRef.current = true;
+    dirtyBlockIdsRef.current.clear();
+  }, []);
+  const markDirtySection = useCallback((key: string) => {
+    dirtySectionsRef.current.add(key);
+  }, []);
+
   const pushHistory = useCallback((cust: ThemeCustomization) => {
     if (isUndoRedoRef.current) return;
+    setIsDirty(true);
     setHistory((h) => {
       const next = [...h.slice(0, historyIndex + 1), JSON.parse(JSON.stringify(cust))].slice(-50);
       setHistoryIndex(next.length - 1);
@@ -38,6 +54,7 @@ export function useEditorState() {
   const undo = useCallback(() => {
     if (historyIndex <= 0) return;
     isUndoRedoRef.current = true;
+    setIsDirty(true);
     setHistoryIndex(historyIndex - 1);
     setCustomization(JSON.parse(JSON.stringify(history[historyIndex - 1])));
     setTimeout(() => { isUndoRedoRef.current = false; }, 0);
@@ -46,6 +63,7 @@ export function useEditorState() {
   const redo = useCallback(() => {
     if (historyIndex >= history.length - 1) return;
     isUndoRedoRef.current = true;
+    setIsDirty(true);
     setHistoryIndex(historyIndex + 1);
     setCustomization(JSON.parse(JSON.stringify(history[historyIndex + 1])));
     setTimeout(() => { isUndoRedoRef.current = false; }, 0);
@@ -53,15 +71,17 @@ export function useEditorState() {
 
   const update = useCallback(
     <K extends keyof ThemeCustomization>(key: K, value: ThemeCustomization[K]) => {
+      markDirtySection(key as string);
       const next = { ...customization, [key]: value };
       setCustomization(next);
       pushHistory(next);
     },
-    [customization, pushHistory]
+    [customization, pushHistory, markDirtySection]
   );
 
   const updateNested = useCallback(
     <K extends keyof ThemeCustomization>(key: K, subKey: string, value: string | number) => {
+      markDirtySection(key as string);
       setCustomization((prev) => {
         const obj = prev[key];
         const n = {
@@ -72,11 +92,12 @@ export function useEditorState() {
         return n;
       });
     },
-    [pushHistory]
+    [pushHistory, markDirtySection]
   );
 
   const updateBlockData = useCallback(
     (instanceId: string, data: Record<string, unknown>) => {
+      markDirtyBlockId(instanceId);
       setCustomization((prev) => {
         const block = prev.blocks?.[instanceId];
         if (!block) return prev;
@@ -91,11 +112,12 @@ export function useEditorState() {
         return next;
       });
     },
-    [pushHistory]
+    [pushHistory, markDirtyBlockId]
   );
 
   const updateBlockNested = useCallback(
     (instanceId: string, subKey: string, value: string | number) => {
+      markDirtyBlockId(instanceId);
       setCustomization((prev) => {
         const block = prev.blocks?.[instanceId];
         if (!block) return prev;
@@ -114,10 +136,11 @@ export function useEditorState() {
         return next;
       });
     },
-    [pushHistory]
+    [pushHistory, markDirtyBlockId]
   );
 
   const ensureLogoBlock = useCallback(() => {
+    markDirtyBlocksFull();
     const blks = blocksRef.current;
     const existing = Object.entries(blks).find(([, b]) => b.type === 'logo');
     if (existing) return existing[0];
@@ -132,10 +155,11 @@ export function useEditorState() {
       return next;
     });
     return instanceId;
-  }, [pushHistory]);
+  }, [pushHistory, markDirtyBlocksFull]);
 
   const addBlockAt = useCallback(
     (typeId: BlockId, insertIndex: number) => {
+      markDirtyBlocksFull();
       const instanceId = genBlockId();
       setCustomization((prev) => {
         const blocks = prev.blocks ?? {};
@@ -151,7 +175,7 @@ export function useEditorState() {
       });
       return instanceId;
     },
-    [pushHistory]
+    [pushHistory, markDirtyBlocksFull]
   );
 
   const addBlock = useCallback(
@@ -161,6 +185,7 @@ export function useEditorState() {
 
   const removeBlock = useCallback(
     (instanceId: string) => {
+      markDirtyBlocksFull();
       setCustomization((prev) => {
         const blocks = { ...prev.blocks };
         delete blocks[instanceId];
@@ -170,26 +195,68 @@ export function useEditorState() {
         return next;
       });
     },
-    [pushHistory]
+    [pushHistory, markDirtyBlocksFull]
   );
 
   const reorderBlocks = useCallback(
     (newOrder: string[]) => {
+      markDirtyBlocksFull();
       setCustomization((prev) => {
         const next = { ...prev, sectionOrder: newOrder };
         pushHistory(next);
         return next;
       });
     },
-    [pushHistory]
+    [pushHistory, markDirtyBlocksFull]
   );
 
   const resetToDefaults = useCallback(() => {
+    dirtyBlocksFullRef.current = true;
+    dirtySectionsRef.current.clear();
     const next = migrateToBlockInstances({});
     setCustomization(next);
     pushHistory(next);
     setSelectedBlock(null);
   }, [pushHistory]);
+
+  const getPartialPayload = useCallback(
+    (cust: ThemeCustomization): Partial<ThemeCustomization> => {
+      const partial: Partial<ThemeCustomization> = {};
+      if (dirtyBlocksFullRef.current) {
+        partial.blocks = cust.blocks;
+        partial.sectionOrder = cust.sectionOrder;
+      } else if (dirtyBlockIdsRef.current.size > 0 && cust.blocks) {
+        const blocks: Record<string, { type: string; data: Record<string, unknown> }> = {};
+        for (const id of dirtyBlockIdsRef.current) {
+          const block = cust.blocks[id];
+          if (block) blocks[id] = block;
+        }
+        if (Object.keys(blocks).length > 0) partial.blocks = blocks;
+      }
+      for (const key of dirtySectionsRef.current) {
+        const val = cust[key as keyof ThemeCustomization];
+        if (val !== undefined) {
+          (partial as Record<string, unknown>)[key] = val;
+        }
+      }
+      return partial;
+    },
+    []
+  );
+
+  const clearDirtyTracking = useCallback(() => {
+    dirtyBlocksFullRef.current = false;
+    dirtyBlockIdsRef.current.clear();
+    dirtySectionsRef.current.clear();
+  }, []);
+
+  const hasDirtyTracking = useCallback(() => {
+    return (
+      dirtyBlocksFullRef.current ||
+      dirtyBlockIdsRef.current.size > 0 ||
+      dirtySectionsRef.current.size > 0
+    );
+  }, []);
 
   return {
     selectedBlock,
@@ -197,6 +264,8 @@ export function useEditorState() {
     customization,
     ensureLogoBlock,
     setCustomization,
+    setDirty: setIsDirty,
+    isDirty,
     history,
     setHistory,
     historyIndex,
@@ -215,5 +284,8 @@ export function useEditorState() {
     undo,
     redo,
     pushHistory,
+    getPartialPayload,
+    clearDirtyTracking,
+    hasDirtyTracking,
   };
 }

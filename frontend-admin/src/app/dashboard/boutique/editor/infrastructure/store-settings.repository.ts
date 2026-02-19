@@ -1,6 +1,10 @@
 import type { ThemeCustomization } from '@simpshopy/shared';
 import { api } from '@/lib/api';
-import type { IStoreSettingsRepository, StoreWithTheme } from '../domain/store-settings.port';
+import type {
+  IStoreSettingsRepository,
+  StoreWithTheme,
+  SaveThemeCustomizationOptions,
+} from '../domain/store-settings.port';
 
 export class ApiStoreSettingsRepository implements IStoreSettingsRepository {
   async getStoreWithTheme(storeId: string): Promise<StoreWithTheme> {
@@ -10,9 +14,14 @@ export class ApiStoreSettingsRepository implements IStoreSettingsRepository {
 
   async saveThemeCustomization(
     storeId: string,
-    customization: ThemeCustomization
+    customization: ThemeCustomization | Partial<ThemeCustomization>,
+    options?: SaveThemeCustomizationOptions
   ): Promise<StoreWithTheme | undefined> {
-    const res = await api.patch(`/stores/${storeId}/settings`, { themeCustomization: customization });
+    const body: Record<string, unknown> = {
+      themeCustomization: customization,
+      ...(options?.partial && { partial: true }),
+    };
+    const res = await api.patch(`/stores/${storeId}/settings`, body);
     return res.data as StoreWithTheme | undefined;
   }
 }
