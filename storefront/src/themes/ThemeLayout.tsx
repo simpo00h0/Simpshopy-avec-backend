@@ -76,36 +76,52 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
         }}
       >
         <Container size="xl" px={0}>
-          <Group justify="space-between" wrap="nowrap">
-            <Burger
-              opened={opened}
-              onClick={() => setOpened((o) => !o)}
-              size="sm"
-              color="white"
-              aria-label="Menu"
-              hiddenFrom="sm"
-            />
-            <Box
-              style={{
-                flex: 1,
-                display: 'flex',
-                justifyContent: logoAlign === 'left' ? 'flex-start' : logoAlign === 'center' ? 'center' : 'flex-end',
-              }}
-            >
-              {logo ? (
-                <Link href={basePath} style={{ display: 'flex', alignItems: 'center' }}>
-                  <Image src={logo} alt={storeName} width={120} height={36} style={{ objectFit: 'contain' }} unoptimized />
-                </Link>
-              ) : (
-                <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}>
-                  <Title order={3} component="span">
-                    {storeName}
-                  </Title>
-                </Link>
-              )}
+          <Group justify="space-between" wrap="nowrap" style={{ width: '100%' }}>
+            <Box style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', alignItems: 'center', minWidth: 0 }}>
+              <Burger
+                opened={opened}
+                onClick={() => setOpened((o) => !o)}
+                size="sm"
+                color="white"
+                aria-label="Menu"
+                hiddenFrom="sm"
+              />
+              <Box
+                visibleFrom="sm"
+                style={{
+                  display: 'flex',
+                  justifyContent: logoAlign === 'left' ? 'flex-start' : logoAlign === 'center' ? 'center' : 'flex-end',
+                  flex: 1,
+                }}
+              >
+                {logo ? (
+                  <Link href={basePath} style={{ display: 'flex', alignItems: 'center' }}>
+                    <Image src={logo} alt={storeName} width={120} height={36} style={{ objectFit: 'contain' }} unoptimized />
+                  </Link>
+                ) : (
+                  <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}>
+                    <Title order={3} component="span">
+                      {storeName}
+                    </Title>
+                  </Link>
+                )}
+              </Box>
             </Box>
-            <Group gap="lg">
+            <Box style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0 }}>
+              <Box hiddenFrom="sm" style={{ display: 'flex', justifyContent: 'center' }}>
+                {logo ? (
+                  <Link href={basePath} style={{ display: 'flex', alignItems: 'center' }}>
+                    <Image src={logo} alt={storeName} width={100} height={30} style={{ objectFit: 'contain' }} unoptimized />
+                  </Link>
+                ) : (
+                  <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none', fontSize: '1.1rem' }}>
+                    {storeName}
+                  </Link>
+                )}
+              </Box>
               <NavContent />
+            </Box>
+            <Box style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', minWidth: 0 }}>
               <UnstyledButton
                 component={Link}
                 href={`${basePath}/cart`}
@@ -142,7 +158,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
                   </span>
                 )}
               </UnstyledButton>
-            </Group>
+            </Box>
           </Group>
         </Container>
       </Box>
