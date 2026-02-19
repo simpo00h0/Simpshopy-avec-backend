@@ -83,6 +83,7 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
         ]}
         value={customization.heroAlignment ?? 'center'}
         onChange={(v) => update('heroAlignment', (v as 'left' | 'center' | 'right') ?? 'center')}
+        comboboxProps={{ withinPortal: true, zIndex: 10000 }}
       />
       <Select
         label="Hauteur de la bannière"
@@ -93,6 +94,7 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
         ]}
         value={customization.heroHeight ?? 'medium'}
         onChange={(v) => update('heroHeight', (v as 'small' | 'medium' | 'large') ?? 'medium')}
+        comboboxProps={{ withinPortal: true, zIndex: 10000 }}
       />
     </Stack>
   );
