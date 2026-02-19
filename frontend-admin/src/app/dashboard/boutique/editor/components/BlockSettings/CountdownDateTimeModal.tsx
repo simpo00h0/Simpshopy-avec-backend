@@ -92,7 +92,7 @@ export function CountdownDateTimeModal({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 16,
+        padding: 24,
         pointerEvents: 'auto',
       }}
     >
@@ -100,40 +100,43 @@ export function CountdownDateTimeModal({
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.55)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
         }}
         onClick={handleClose}
         aria-hidden
       />
       <Paper
         id="countdown-datetime-dialog"
-        shadow="lg"
-        p="md"
-        radius="md"
+        shadow="xl"
+        p="lg"
+        radius="lg"
         withBorder
         style={{
           position: 'relative',
           zIndex: 10001,
           maxWidth: 360,
           width: '100%',
+          borderColor: 'var(--mantine-color-default-border)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <Text id="countdown-datetime-title" size="sm" fw={600} mb="md">
+        <Text id="countdown-datetime-title" size="md" fw={600} mb="lg">
           {label}
         </Text>
-        <Stack gap="md">
+        <Stack gap="lg">
           <DatePicker value={date} onChange={setDate} allowDeselect />
           <TimeInput
             label="Heure"
             value={time}
             onChange={(e) => setTime(e.currentTarget.value)}
           />
-          <Group justify="flex-end" gap="xs">
+          <Group justify="flex-end" gap="sm">
             <Button variant="subtle" color="gray" onClick={handleClear}>
               Effacer
             </Button>
-            <Button onClick={handleConfirm} disabled={!date}>
+            <Button color="green" onClick={handleConfirm} disabled={!date}>
               Valider
             </Button>
           </Group>
@@ -155,13 +158,22 @@ export function CountdownDateTimeModal({
           display: 'block',
           width: '100%',
           cursor: 'pointer',
-          borderRadius: 'var(--mantine-radius-sm)',
+          borderRadius: 'var(--mantine-radius-md)',
           border: '1px solid var(--mantine-color-default-border)',
-          padding: '8px 12px',
+          padding: '10px 12px',
           backgroundColor: 'var(--mantine-color-default)',
           fontSize: 'var(--mantine-font-size-sm)',
           textAlign: 'left',
-          minHeight: 36,
+          minHeight: 40,
+          transition: 'border-color 0.15s ease, background-color 0.15s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'var(--mantine-color-green-4)';
+          e.currentTarget.style.backgroundColor = 'var(--mantine-color-green-0)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'var(--mantine-color-default-border)';
+          e.currentTarget.style.backgroundColor = 'var(--mantine-color-default)';
         }}
       >
         <Group gap="xs" wrap="nowrap">
