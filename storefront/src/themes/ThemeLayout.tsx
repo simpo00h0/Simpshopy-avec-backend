@@ -1,17 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { Container, Title, Text, Group, Button, Box, Burger, Drawer, Stack } from '@mantine/core';
+import { Container, Title, Text, Group, Box, Burger, Drawer, Stack, UnstyledButton } from '@mantine/core';
 import { IconShoppingCart } from '@tabler/icons-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from './ThemeContext';
 import { BlockWrapper } from './BlockWrapper';
 import { FaviconUpdater } from './FaviconUpdater';
+import { useCartStore } from '@/stores/cartStore';
 
 export function ThemeLayout({ children }: { children: React.ReactNode }) {
   const [opened, setOpened] = useState(false);
-  const { theme, basePath, isPreview } = useTheme();
+  const { theme, basePath, isPreview, storeSubdomain } = useTheme();
+  const getItems = useCartStore((s) => s.getItems);
+  const cartCount = getItems(storeSubdomain).reduce((sum, i) => sum + i.quantity, 0);
   const { storeName, logo, logoAlignment, logoBlockId, footerTagline, footerLinks, colors } = theme;
   const logoAlign = logoAlignment ?? 'left';
 
@@ -24,7 +27,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
   ];
 
   const NavContent = () => (
-    <>
+    <Group gap="lg" visibleFrom="sm">
       {navLinks.slice(0, -1).map((link) => (
         <Text
           key={link.href}
@@ -37,7 +40,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
           {link.label}
         </Text>
       ))}
-    </>
+    </Group>
   );
 
   return (
@@ -62,7 +65,8 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
       <Box
         component="header"
         py="md"
-        px="xl"
+        pl="xl"
+        pr="md"
         style={{
           backgroundColor: colors.primary,
           color: 'white',
@@ -71,7 +75,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
           zIndex: 100,
         }}
       >
-        <Container size="xl">
+        <Container size="xl" px={0}>
           <Group justify="space-between" wrap="nowrap">
             <Burger
               opened={opened}
@@ -100,30 +104,44 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               )}
             </Box>
-            <Group gap="lg" visibleFrom="sm">
+            <Group gap="lg">
               <NavContent />
-              <Button
+              <UnstyledButton
                 component={Link}
                 href={`${basePath}/cart`}
-                variant="white"
-                color="dark"
-                size="sm"
-                leftSection={<IconShoppingCart size={16} />}
+                aria-label={`Panier${cartCount > 0 ? ` (${cartCount} article${cartCount > 1 ? 's' : ''})` : ''}`}
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  padding: 6,
+                }}
               >
-                Panier (0)
-              </Button>
-            </Group>
-            <Group hiddenFrom="sm">
-              <Button
-                component={Link}
-                href={`${basePath}/cart`}
-                variant="white"
-                color="dark"
-                size="xs"
-                leftSection={<IconShoppingCart size={14} />}
-              >
-                Panier
-              </Button>
+                <IconShoppingCart size={22} stroke={1.5} style={{ display: 'block' }} />
+                {cartCount > 0 && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      minWidth: 16,
+                      height: 16,
+                      padding: '0 4px',
+                      fontSize: 10,
+                      fontWeight: 600,
+                      lineHeight: '16px',
+                      textAlign: 'center',
+                      color: theme.colors.primary,
+                      backgroundColor: 'white',
+                      borderRadius: 8,
+                    }}
+                  >
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </UnstyledButton>
             </Group>
           </Group>
         </Container>
