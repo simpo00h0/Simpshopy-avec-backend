@@ -22,6 +22,25 @@ export default function BoutiquePage() {
     });
   }, [currentStore, setCurrentStore]);
 
+  useEffect(() => {
+    const sub = currentStore?.subdomain;
+    if (!sub) return;
+    const storefrontOrigin = new URL(getStoreUrl(sub)).origin;
+    const editorUrl = `${storefrontOrigin}?editor=1`;
+    const preconnect = document.createElement('link');
+    preconnect.rel = 'preconnect';
+    preconnect.href = storefrontOrigin;
+    const prefetch = document.createElement('link');
+    prefetch.rel = 'prefetch';
+    prefetch.href = editorUrl;
+    document.head.appendChild(preconnect);
+    document.head.appendChild(prefetch);
+    return () => {
+      preconnect.remove();
+      prefetch.remove();
+    };
+  }, [currentStore?.subdomain]);
+
   if (!themeId) {
     return (
       <Container fluid py="xl">

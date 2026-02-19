@@ -32,8 +32,15 @@ export default async function StoreLayout({
   if (!store) notFound();
 
   return (
-    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div>}>
-      <StoreLayoutClient store={store} subdomain={slug}>{children}</StoreLayoutClient>
-    </Suspense>
+    <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `if(new URLSearchParams(window.location.search).get("editor")==="1"){window.parent?.postMessage({type:"simpshopy-editor-ready"},"*");}`,
+        }}
+      />
+      <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div>}>
+        <StoreLayoutClient store={store} subdomain={slug}>{children}</StoreLayoutClient>
+      </Suspense>
+    </>
   );
 }
