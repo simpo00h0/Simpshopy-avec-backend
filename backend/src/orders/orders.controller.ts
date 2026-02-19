@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { SupabaseJwtGuard } from '../auth/guards/supabase-jwt.guard';
 import { OrdersService } from './orders.service';
-import { StoresService } from '../stores/stores.service';
+import { FindFirstStoreByOwnerUseCase } from '../stores/application/find-first-store-by-owner.usecase';
 import { CreateOrderDto } from './presentation/dto/create-order.dto';
 import { ConfirmPaymentDto } from './presentation/dto/confirm-payment.dto';
 
@@ -30,7 +30,7 @@ import { ConfirmPaymentDto } from './presentation/dto/confirm-payment.dto';
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
-    private readonly storesService: StoresService,
+    private readonly findFirstStoreByOwnerUseCase: FindFirstStoreByOwnerUseCase,
   ) {}
 
   @Post()
@@ -58,7 +58,8 @@ export class OrdersController {
     if (status) filters.status = status;
 
     if (req.user.role === 'SELLER') {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       filters.storeId = store.id;
     } else if (storeId) {
       filters.storeId = storeId;
@@ -84,7 +85,8 @@ export class OrdersController {
     }
 
     if (req.user.role === 'SELLER') {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       if (order.storeId !== store.id) {
         throw new ForbiddenException('Accès non autorisé');
       }

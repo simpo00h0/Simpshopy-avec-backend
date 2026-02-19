@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, UseGuards, Request, Query } from '@nestjs/
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SupabaseJwtGuard } from '../../auth/guards/supabase-jwt.guard';
 import { EventsService } from '../events.service';
-import { StoresService } from '../../stores/stores.service';
+import { FindFirstStoreByOwnerUseCase } from '../../stores/application/find-first-store-by-owner.usecase';
 import { CreateEventDto } from './dto/create-event.dto';
 
 @ApiTags('events')
@@ -12,7 +12,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 export class EventsController {
   constructor(
     private readonly eventsService: EventsService,
-    private readonly storesService: StoresService,
+    private readonly findFirstStoreByOwnerUseCase: FindFirstStoreByOwnerUseCase,
   ) {}
 
   @Post()
@@ -41,7 +41,8 @@ export class EventsController {
     let resolvedStoreId = storeId;
 
     if (req.user.role === 'SELLER' && !storeId) {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       resolvedStoreId = store.id;
     }
 

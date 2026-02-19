@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
-import { StoresService } from './stores.service';
 import { StoresController } from './presentation/stores.controller';
 import { StoresPublicController } from './presentation/stores-public.controller';
 import { CreateStoreUseCase } from './application/create-store.usecase';
@@ -18,7 +17,6 @@ import { IStoreRepository } from './domain/store.repository';
   imports: [AuthModule],
   controllers: [StoresController, StoresPublicController],
   providers: [
-    StoresService,
     CreateStoreUseCase,
     FindStoresByOwnerUseCase,
     FindFirstStoreByOwnerUseCase,
@@ -33,6 +31,6 @@ import { IStoreRepository } from './domain/store.repository';
       useClass: StoreRepository,
     },
   ],
-  exports: [StoresService],
+  exports: [FindFirstStoreByOwnerUseCase],
 })
 export class StoresModule {}

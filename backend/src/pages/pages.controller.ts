@@ -20,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { SupabaseJwtGuard } from '../auth/guards/supabase-jwt.guard';
 import { PagesService } from './pages.service';
-import { StoresService } from '../stores/stores.service';
+import { FindFirstStoreByOwnerUseCase } from '../stores/application/find-first-store-by-owner.usecase';
 import { CreatePageDto, UpdatePageDto } from './presentation/dto/page.dto';
 
 @ApiTags('pages')
@@ -30,14 +30,15 @@ import { CreatePageDto, UpdatePageDto } from './presentation/dto/page.dto';
 export class PagesController {
   constructor(
     private readonly pagesService: PagesService,
-    private readonly storesService: StoresService,
+    private readonly findFirstStoreByOwnerUseCase: FindFirstStoreByOwnerUseCase,
   ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une nouvelle page' })
   @ApiResponse({ status: 201, description: 'Page créée avec succès' })
   async create(@Request() req, @Body() dto: CreatePageDto) {
-    const store = await this.storesService.findFirstByOwner(req.user.id);
+    const store =
+      await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
 
     return this.pagesService.createPage({
       ...dto,
@@ -58,7 +59,8 @@ export class PagesController {
     let resolvedStoreId = storeId;
 
     if (req.user.role === 'SELLER' && !storeId) {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       resolvedStoreId = store.id;
     }
 
@@ -79,7 +81,8 @@ export class PagesController {
     const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       if (page.storeId !== store.id) {
         throw new ForbiddenException('Accès non autorisé');
       }
@@ -104,7 +107,8 @@ export class PagesController {
     const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       if (page.storeId !== store.id) {
         throw new ForbiddenException('Accès non autorisé');
       }
@@ -127,7 +131,8 @@ export class PagesController {
     const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       if (page.storeId !== store.id) {
         throw new ForbiddenException('Accès non autorisé');
       }
@@ -149,7 +154,8 @@ export class PagesController {
     const page = await this.pagesService.getPage(id);
 
     if (req.user.role === 'SELLER') {
-      const store = await this.storesService.findFirstByOwner(req.user.id);
+      const store =
+        await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
       if (page.storeId !== store.id) {
         throw new ForbiddenException('Accès non autorisé');
       }

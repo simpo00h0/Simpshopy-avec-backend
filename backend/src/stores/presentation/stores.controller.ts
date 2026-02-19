@@ -10,7 +10,13 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SupabaseJwtGuard } from '../../auth/guards/supabase-jwt.guard';
-import { StoresService } from '../stores.service';
+import { CreateStoreUseCase } from '../application/create-store.usecase';
+import { FindStoresByOwnerUseCase } from '../application/find-stores-by-owner.usecase';
+import { FindFirstStoreByOwnerUseCase } from '../application/find-first-store-by-owner.usecase';
+import { FindStoreUseCase } from '../application/find-store.usecase';
+import { UpdateStoreUseCase } from '../application/update-store.usecase';
+import { UpdateStoreSettingsUseCase } from '../application/update-store-settings.usecase';
+import { GetStoreCustomersUseCase } from '../application/get-store-customers.usecase';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto, UpdateStoreSettingsDto } from './dto/update-store.dto';
 
@@ -19,7 +25,14 @@ import { UpdateStoreDto, UpdateStoreSettingsDto } from './dto/update-store.dto';
 @UseGuards(SupabaseJwtGuard)
 @ApiBearerAuth()
 export class StoresController {
-  constructor(private readonly storesService: StoresService) {}
+  constructor(
+    private readonly createStoreUseCase: CreateStoreUseCase,
+    private readonly findStoresByOwnerUseCase: FindStoresByOwnerUseCase,
+    private readonly findStoreUseCase: FindStoreUseCase,
+    private readonly updateStoreUseCase: UpdateStoreUseCase,
+    private readonly updateStoreSettingsUseCase: UpdateStoreSettingsUseCase,
+    private readonly getStoreCustomersUseCase: GetStoreCustomersUseCase,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer une boutique' })
@@ -27,19 +40,19 @@ export class StoresController {
     @Body() dto: CreateStoreDto,
     @Request() req: { user: { id: string } },
   ) {
-    return this.storesService.create(req.user.id, dto);
+    return this.createStoreUseCase.execute(req.user.id, dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Lister mes boutiques' })
   async findByOwner(@Request() req: { user: { id: string } }) {
-    return this.storesService.findByOwner(req.user.id);
+    return this.findStoresByOwnerUseCase.execute(req.user.id);
   }
 
   @Get('customers')
   @ApiOperation({ summary: 'Liste des clients de la boutique' })
   async getCustomers(@Request() req: { user: { id: string } }) {
-    return this.storesService.getCustomers(req.user.id);
+    return this.getStoreCustomersUseCase.execute(req.user.id);
   }
 
   @Get(':id')
@@ -48,7 +61,7 @@ export class StoresController {
     @Request() req: { user: { id: string } },
     @Param('id') id: string,
   ) {
-    return this.storesService.findOne(id, req.user.id);
+    return this.findStoreUseCase.execute(id, req.user.id);
   }
 
   @Patch(':id')
@@ -58,7 +71,7 @@ export class StoresController {
     @Param('id') id: string,
     @Body() dto: UpdateStoreDto,
   ) {
-    return this.storesService.update(id, req.user.id, dto);
+    return this.updateStoreUseCase.execute(id, req.user.id, dto);
   }
 
   @Patch(':id/settings')
@@ -68,6 +81,6 @@ export class StoresController {
     @Param('id') id: string,
     @Body() dto: UpdateStoreSettingsDto,
   ) {
-    return this.storesService.updateSettings(id, req.user.id, dto);
+    return this.updateStoreSettingsUseCase.execute(id, req.user.id, dto);
   }
 }
