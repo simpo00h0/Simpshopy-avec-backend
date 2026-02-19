@@ -1,11 +1,12 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
+import { unstable_cache } from 'next/cache';
 import { StoreLayoutClient } from './StoreLayoutClient';
 import { API_BASE_URL } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
-async function getStore(subdomain: string) {
+async function fetchStore(subdomain: string) {
   try {
     const res = await fetch(`${API_BASE_URL}/storefront/${subdomain}`, {
       cache: 'no-store',
@@ -18,6 +19,15 @@ async function getStore(subdomain: string) {
     }
     return null;
   }
+}
+
+async function getStore(subdomain: string) {
+  const cached = unstable_cache(
+    () => fetchStore(subdomain),
+    [`store-${subdomain}`],
+    { revalidate: 60 }
+  );
+  return cached();
 }
 
 export default async function StoreLayout({
