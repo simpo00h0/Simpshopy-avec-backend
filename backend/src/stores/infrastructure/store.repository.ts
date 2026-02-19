@@ -57,8 +57,8 @@ export class StoreRepository implements IStoreRepository {
   }
 
   async findBySubdomainPublic(subdomain: string): Promise<StorePublic | null> {
-    const store = await this.prisma.store.findFirst({
-      where: { subdomain, status: { in: ['ACTIVE', 'DRAFT'] } },
+    const store = await this.prisma.store.findUnique({
+      where: { subdomain },
       include: {
         settings: { select: { themeId: true, themeCustomization: true } },
         products: {
@@ -84,7 +84,7 @@ export class StoreRepository implements IStoreRepository {
         },
       },
     });
-    if (!store) return null;
+    if (!store || !['ACTIVE', 'DRAFT'].includes(store.status)) return null;
 
     const productIds = (store.products as { id: string }[]).map((p) => p.id);
     const collections = [

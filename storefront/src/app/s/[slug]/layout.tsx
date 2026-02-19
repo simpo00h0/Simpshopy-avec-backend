@@ -25,7 +25,7 @@ async function getStore(subdomain: string) {
   const cached = unstable_cache(
     () => fetchStore(subdomain),
     [`store-${subdomain}`],
-    { revalidate: 10 }
+    { tags: [`store-${subdomain}`], revalidate: 60 }
   );
   return cached();
 }
