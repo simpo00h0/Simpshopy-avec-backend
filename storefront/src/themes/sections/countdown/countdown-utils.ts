@@ -1,9 +1,9 @@
 export type CountdownSize = 'grand' | 'moyen' | 'petit';
 
-export const SIZE_STYLES: Record<CountdownSize, { padding: string; numberSize: 'xl' | 'lg' | 'md'; labelSize: 'xs'; gap: 'lg' | 'md' | 'sm'; titleOrder: 3 | 4 | 5 }> = {
-  grand: { padding: '40px 0', numberSize: 'xl', labelSize: 'xs', gap: 'lg', titleOrder: 3 },
-  moyen: { padding: '28px 0', numberSize: 'lg', labelSize: 'xs', gap: 'md', titleOrder: 4 },
-  petit: { padding: '20px 0', numberSize: 'md', labelSize: 'xs', gap: 'sm', titleOrder: 5 },
+export const SIZE_STYLES: Record<CountdownSize, { padding: string; titleOrder: 3 | 4 | 5 }> = {
+  grand: { padding: '40px 0', titleOrder: 3 },
+  moyen: { padding: '28px 0', titleOrder: 4 },
+  petit: { padding: '20px 0', titleOrder: 5 },
 };
 
 export type CountdownRemaining = { days: number; hours: number; min: number; sec: number };

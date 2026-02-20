@@ -3,15 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Container, Text, Title } from '@mantine/core';
 import { useTheme } from '../ThemeContext';
-import { parseRemaining, SIZE_STYLES } from './countdown/countdown-utils';
-import type { CountdownSize } from './countdown/countdown-utils';
+import { parseRemaining, SIZE_STYLES, type CountdownSize } from './countdown/countdown-utils';
 import styles from './countdown/countdown.module.css';
 
-const UNITS: { key: keyof { days: number; hours: number; min: number; sec: number }; label: string }[] = [
-  { key: 'days', label: 'jours' },
-  { key: 'hours', label: 'heures' },
-  { key: 'min', label: 'min' },
-  { key: 'sec', label: 'sec' },
+const UNITS = [
+  { key: 'days' as const, label: 'jours' },
+  { key: 'hours' as const, label: 'heures' },
+  { key: 'min' as const, label: 'min' },
+  { key: 'sec' as const, label: 'sec' },
 ];
 
 export function CountdownSection() {
@@ -75,16 +74,13 @@ export function CountdownSection() {
         <div className={styles.grid} role="timer" aria-label="Temps restant">
           {UNITS.flatMap(({ key, label }, i) => {
             const value = String(remaining[key]).padStart(2, '0');
-            const unit = (
+            return [
               <div key={key} className={styles.unit} aria-live="polite" aria-label={`${value} ${label}`}>
                 <div className={styles.valueBox}>{value}</div>
                 <span className={styles.label}>{label}</span>
-              </div>
-            );
-            const sep = i < UNITS.length - 1 ? (
-              <span key={`sep-${key}`} className={styles.separator} aria-hidden>:</span>
-            ) : null;
-            return sep ? [unit, sep] : [unit];
+              </div>,
+              ...(i < UNITS.length - 1 ? [<span key={`s-${key}`} className={styles.separator} aria-hidden>:</span>] : []),
+            ];
           })}
         </div>
       </Container>

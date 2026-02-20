@@ -21,26 +21,19 @@ const VARIANTS: { id: CountdownStyle; label: string }[] = [
 ];
 
 export function BlockCountdownSettings({ customization, update }: BlockSettingsProps) {
-  const cd = customization.countdown;
-  const size = (cd?.size as CountdownSize) ?? 'grand';
-  const style = (cd?.style as CountdownStyle) ?? 'simple';
-
-  const handleDateChange = (iso: string) => {
-    update('countdown', { ...cd, endDate: iso });
-  };
-
-  const applyVariant = (id: CountdownStyle) => {
-    update('countdown', { ...cd, style: id });
-  };
+  const cd = customization.countdown ?? {};
+  const size = (cd.size as CountdownSize) ?? 'grand';
+  const style = (cd.style as CountdownStyle) ?? 'simple';
+  const upd = (k: keyof typeof cd, v: unknown) => update('countdown', { ...cd, [k]: v });
 
   return (
     <Stack gap="md">
-      <CountdownDateTimeModal value={cd?.endDate ?? ''} onChange={handleDateChange} />
+      <CountdownDateTimeModal value={cd.endDate ?? ''} onChange={(iso) => upd('endDate', iso)} />
       <TextInput
         label="Titre (optionnel)"
         placeholder="Offre se termine dans"
-        value={cd?.label ?? ''}
-        onChange={(e) => update('countdown', { ...cd, label: e.target.value })}
+        value={cd.label ?? ''}
+        onChange={(e) => upd('label', e.target.value)}
       />
       <div>
         <Text size="sm" fw={500} mb="xs">
@@ -48,7 +41,7 @@ export function BlockCountdownSettings({ customization, update }: BlockSettingsP
         </Text>
         <SegmentedControl
           value={size}
-          onChange={(v) => update('countdown', { ...cd, size: (v as CountdownSize) ?? 'grand' })}
+          onChange={(v) => upd('size', (v as CountdownSize) ?? 'grand')}
           data={[
             { value: 'grand', label: 'Grand' },
             { value: 'moyen', label: 'Moyen' },
@@ -67,7 +60,7 @@ export function BlockCountdownSettings({ customization, update }: BlockSettingsP
             return (
               <UnstyledButton
                 key={v.id}
-                onClick={() => applyVariant(v.id)}
+                onClick={() => upd('style', v.id)}
                 style={{
                   padding: '8px 10px',
                   borderRadius: 'var(--mantine-radius-sm)',
