@@ -1,30 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Container, Title, Text, Group, Box } from '@mantine/core';
+import { Container, Text, Title } from '@mantine/core';
 import { useTheme } from '../ThemeContext';
+import { parseRemaining, SIZE_STYLES } from './countdown/countdown-utils';
+import type { CountdownSize } from './countdown/countdown-utils';
+import styles from './countdown/countdown.module.css';
 
-type CountdownSize = 'grand' | 'moyen' | 'petit';
-
-const SIZE_STYLES: Record<CountdownSize, { padding: string; numberSize: 'xl' | 'lg' | 'md'; labelSize: 'xs'; gap: 'lg' | 'md' | 'sm'; titleOrder: 3 | 4 | 5 }> = {
-  grand: { padding: '40px 0', numberSize: 'xl', labelSize: 'xs', gap: 'lg', titleOrder: 3 },
-  moyen: { padding: '28px 0', numberSize: 'lg', labelSize: 'xs', gap: 'md', titleOrder: 4 },
-  petit: { padding: '20px 0', numberSize: 'md', labelSize: 'xs', gap: 'sm', titleOrder: 5 },
-};
-
-function parseRemaining(endDate: string): { days: number; hours: number; min: number; sec: number } | null {
-  const end = new Date(endDate).getTime();
-  const now = Date.now();
-  if (end <= now) return { days: 0, hours: 0, min: 0, sec: 0 };
-  let diff = Math.floor((end - now) / 1000);
-  const sec = diff % 60;
-  diff = Math.floor(diff / 60);
-  const min = diff % 60;
-  diff = Math.floor(diff / 60);
-  const hours = diff % 24;
-  const days = Math.floor(diff / 24);
-  return { days, hours, min, sec };
-}
+const UNITS: { key: keyof { days: number; hours: number; min: number; sec: number }; label: string }[] = [
+  { key: 'days', label: 'jours' },
+  { key: 'hours', label: 'heures' },
+  { key: 'min', label: 'min' },
+  { key: 'sec', label: 'sec' },
+];
 
 export function CountdownSection() {
   const { theme, isEditor } = useTheme();
@@ -44,7 +32,9 @@ export function CountdownSection() {
       return (
         <section style={{ padding: '32px 0', backgroundColor: theme.colors.primary }}>
           <Container size="sm">
-            <Text size="sm" ta="center" c="white" opacity={0.9}>Choisissez une date et heure de fin dans le panneau Paramètres.</Text>
+            <Text size="sm" ta="center" c="white" opacity={0.9}>
+              Choisissez une date et heure de fin dans le panneau Paramètres.
+            </Text>
           </Container>
         </section>
       );
@@ -55,44 +45,41 @@ export function CountdownSection() {
 
   const isFinished = remaining.days === 0 && remaining.hours === 0 && remaining.min === 0 && remaining.sec === 0;
   const size = (section.size as CountdownSize) ?? 'grand';
-  const styles = SIZE_STYLES[size];
+  const style = (section.style as string) ?? 'simple';
+  const s = SIZE_STYLES[size];
+
+  if (isFinished) {
+    return (
+      <section style={{ padding: s.padding, backgroundColor: theme.colors.primary, color: 'white' }}>
+        <Container size="sm">
+          <Text ta="center" fw={600}>
+            L&apos;offre est terminée
+          </Text>
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <section
-      style={{
-        padding: styles.padding,
-        backgroundColor: theme.colors.primary,
-        color: 'white',
-      }}
+      data-style={style}
+      data-size={size}
+      style={{ padding: s.padding, backgroundColor: theme.colors.primary, color: 'white' }}
     >
       <Container size="sm">
         {section.label && (
-          <Title order={styles.titleOrder} ta="center" mb="md" style={{ color: 'white' }}>
+          <Title order={s.titleOrder} ta="center" mb="md" style={{ color: 'white' }}>
             {section.label}
           </Title>
         )}
-        {isFinished ? (
-          <Text ta="center" fw={600}>L&apos;offre est terminée</Text>
-        ) : (
-          <Group justify="center" gap={styles.gap} wrap="wrap">
-            <Box ta="center">
-              <Text size={styles.numberSize} fw={700} lh={1}>{String(remaining.days).padStart(2, '0')}</Text>
-              <Text size={styles.labelSize} opacity={0.9}>jours</Text>
-            </Box>
-            <Box ta="center">
-              <Text size={styles.numberSize} fw={700} lh={1}>{String(remaining.hours).padStart(2, '0')}</Text>
-              <Text size={styles.labelSize} opacity={0.9}>heures</Text>
-            </Box>
-            <Box ta="center">
-              <Text size={styles.numberSize} fw={700} lh={1}>{String(remaining.min).padStart(2, '0')}</Text>
-              <Text size={styles.labelSize} opacity={0.9}>min</Text>
-            </Box>
-            <Box ta="center">
-              <Text size={styles.numberSize} fw={700} lh={1}>{String(remaining.sec).padStart(2, '0')}</Text>
-              <Text size={styles.labelSize} opacity={0.9}>sec</Text>
-            </Box>
-          </Group>
-        )}
+        <div className={styles.grid}>
+          {UNITS.map(({ key, label }) => (
+            <div key={key} className={styles.unit}>
+              <div className={styles.valueBox}>{String(remaining[key]).padStart(2, '0')}</div>
+              <span className={styles.label}>{label}</span>
+            </div>
+          ))}
+        </div>
       </Container>
     </section>
   );
