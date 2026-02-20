@@ -72,13 +72,20 @@ export function CountdownSection() {
             {section.label}
           </Title>
         )}
-        <div className={styles.grid}>
-          {UNITS.map(({ key, label }) => (
-            <div key={key} className={styles.unit}>
-              <div className={styles.valueBox}>{String(remaining[key]).padStart(2, '0')}</div>
-              <span className={styles.label}>{label}</span>
-            </div>
-          ))}
+        <div className={styles.grid} role="timer" aria-label="Temps restant">
+          {UNITS.flatMap(({ key, label }, i) => {
+            const value = String(remaining[key]).padStart(2, '0');
+            const unit = (
+              <div key={key} className={styles.unit} aria-live="polite" aria-label={`${value} ${label}`}>
+                <div className={styles.valueBox}>{value}</div>
+                <span className={styles.label}>{label}</span>
+              </div>
+            );
+            const sep = i < UNITS.length - 1 ? (
+              <span key={`sep-${key}`} className={styles.separator} aria-hidden>:</span>
+            ) : null;
+            return sep ? [unit, sep] : [unit];
+          })}
         </div>
       </Container>
     </section>

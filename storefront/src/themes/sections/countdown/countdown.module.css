@@ -17,7 +17,8 @@
   color: white;
   font-weight: 700;
   line-height: 1;
-  font-size: 1.5rem; /* défaut pour style inconnu ou simple */
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .label {
@@ -65,3 +66,98 @@
 
 [data-style="circle"][data-size="moyen"] .valueBox { width: 3.5rem; height: 3.5rem; font-size: 1.1rem; }
 [data-style="circle"][data-size="petit"] .valueBox { width: 3rem; height: 3rem; font-size: 0.95rem; }
+
+/* boxed : carrés avec bordure */
+[data-style="boxed"] .valueBox {
+  width: 3.5rem;
+  height: 4rem;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+[data-style="boxed"][data-size="moyen"] .valueBox { width: 3rem; height: 3.5rem; font-size: 1.25rem; }
+[data-style="boxed"][data-size="petit"] .valueBox { width: 2.5rem; height: 3rem; font-size: 1rem; }
+
+/* dotted : bordure pointillée */
+[data-style="dotted"] .valueBox {
+  width: 3.5rem;
+  height: 4rem;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+[data-style="dotted"][data-size="moyen"] .valueBox { width: 3rem; height: 3.5rem; font-size: 1.25rem; }
+[data-style="dotted"][data-size="petit"] .valueBox { width: 2.5rem; height: 3rem; font-size: 1rem; }
+
+/* pill : forme pilule */
+[data-style="pill"] .valueBox {
+  min-width: 3.5rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+[data-style="pill"][data-size="moyen"] .valueBox { min-width: 3rem; height: 2.25rem; font-size: 1.25rem; padding: 0 0.5rem; }
+[data-style="pill"][data-size="petit"] .valueBox { min-width: 2.5rem; height: 2rem; font-size: 1rem; padding: 0 0.4rem; }
+
+/* outline : contour uniquement */
+[data-style="outline"] .valueBox {
+  width: 3.5rem;
+  height: 4rem;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+[data-style="outline"][data-size="moyen"] .valueBox { width: 3rem; height: 3.5rem; font-size: 1.25rem; }
+[data-style="outline"][data-size="petit"] .valueBox { width: 2.5rem; height: 3rem; font-size: 1rem; }
+
+/* glow : halo lumineux */
+[data-style="glow"] .valueBox {
+  width: 3.5rem;
+  height: 4rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4), 0 0 24px rgba(255, 255, 255, 0.2);
+}
+[data-style="glow"][data-size="moyen"] .valueBox { width: 3rem; height: 3.5rem; font-size: 1.25rem; }
+[data-style="glow"][data-size="petit"] .valueBox { width: 2.5rem; height: 3rem; font-size: 1rem; }
+
+/* minimal : ultra épuré */
+[data-style="minimal"] .valueBox {
+  background: transparent;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+}
+[data-style="minimal"][data-size="moyen"] .valueBox { font-size: 1.25rem; }
+[data-style="minimal"][data-size="petit"] .valueBox { font-size: 1rem; }
+
+.separator {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 0.35em;
+  font-size: 1.25rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+[data-size="moyen"] .separator { font-size: 1.1rem; padding-bottom: 0.3em; }
+[data-size="petit"] .separator { font-size: 0.95rem; padding-bottom: 0.25em; }

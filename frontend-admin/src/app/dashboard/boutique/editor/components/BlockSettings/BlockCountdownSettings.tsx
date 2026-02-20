@@ -6,12 +6,18 @@ import type { BlockSettingsProps } from '../../editor-types';
 import { CountdownDateTimeModal } from './CountdownDateTimeModal';
 
 type CountdownSize = 'grand' | 'moyen' | 'petit';
-type CountdownStyle = 'simple' | 'flip' | 'circle';
+type CountdownStyle = 'simple' | 'flip' | 'circle' | 'boxed' | 'dotted' | 'pill' | 'outline' | 'glow' | 'minimal';
 
 const VARIANTS: { id: CountdownStyle; label: string; desc: string }[] = [
   { id: 'simple', label: 'Simple', desc: 'Chiffres plats' },
   { id: 'flip', label: 'Flip', desc: 'Cartes style horloge' },
   { id: 'circle', label: 'Cercle', desc: 'Unités en cercles' },
+  { id: 'boxed', label: 'Encadré', desc: 'Carrés avec bordure' },
+  { id: 'dotted', label: 'Pointillé', desc: 'Bordure pointillée' },
+  { id: 'pill', label: 'Pilule', desc: 'Forme pilule arrondie' },
+  { id: 'outline', label: 'Contour', desc: 'Contour uniquement' },
+  { id: 'glow', label: 'Lueur', desc: 'Halo lumineux' },
+  { id: 'minimal', label: 'Minimal', desc: 'Ultra épuré' },
 ];
 
 export function BlockCountdownSettings({ customization, update }: BlockSettingsProps) {
