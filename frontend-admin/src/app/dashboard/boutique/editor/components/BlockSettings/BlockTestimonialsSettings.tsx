@@ -10,12 +10,13 @@ const DEFAULT_ITEMS = [
 ];
 
 export function BlockTestimonialsSettings({ customization, update }: BlockSettingsProps) {
-  const items = customization.testimonials?.items?.length ? customization.testimonials.items : DEFAULT_ITEMS;
+  const tm = customization.testimonials ?? {};
+  const items = tm.items?.length ? tm.items : DEFAULT_ITEMS;
 
   const updateItem = (idx: number, field: 'name' | 'text' | 'rating', value: string | number) => {
     const newItems = [...items];
     newItems[idx] = { ...newItems[idx], [field]: value };
-    update('testimonials', { ...customization.testimonials, items: newItems });
+    update('testimonials', { ...tm, items: newItems });
   };
 
   return (
@@ -23,8 +24,8 @@ export function BlockTestimonialsSettings({ customization, update }: BlockSettin
       <TextInput
         label="Titre"
         placeholder="Ce que disent nos clients"
-        value={customization.testimonials?.title ?? ''}
-        onChange={(e) => update('testimonials', { ...customization.testimonials, title: e.target.value })}
+        value={tm.title ?? ''}
+        onChange={(e) => update('testimonials', { ...tm, title: e.target.value })}
       />
       <Text size="xs" fw={500}>
         Témoignages

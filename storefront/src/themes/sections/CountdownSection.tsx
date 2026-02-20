@@ -44,7 +44,6 @@ export function CountdownSection() {
 
   const isFinished = remaining.days === 0 && remaining.hours === 0 && remaining.min === 0 && remaining.sec === 0;
   const size = (section.size as CountdownSize) ?? 'grand';
-  const style = (section.style as string) ?? 'simple';
   const s = SIZE_STYLES[size];
 
   if (isFinished) {
@@ -61,7 +60,7 @@ export function CountdownSection() {
 
   return (
     <section
-      data-style={style}
+      data-style={section.style ?? 'simple'}
       data-size={size}
       style={{ padding: s.padding, backgroundColor: theme.colors.primary, color: 'white' }}
     >

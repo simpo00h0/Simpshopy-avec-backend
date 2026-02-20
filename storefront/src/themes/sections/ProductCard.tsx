@@ -16,8 +16,7 @@ export function ProductCard({ product, basePath }: ProductCardProps) {
   const productHref = `${basePath}/products/${product.slug}`;
   const [hovered, setHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const { theme: { colors } } = useTheme();
   const showImage = product.imageUrl && !imgError;
 
   return (

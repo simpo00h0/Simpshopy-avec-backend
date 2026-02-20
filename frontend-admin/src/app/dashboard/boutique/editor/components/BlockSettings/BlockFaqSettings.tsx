@@ -5,12 +5,13 @@ import { IconPlus, IconTrash } from '@tabler/icons-react';
 import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockFaqSettings({ customization, update }: BlockSettingsProps) {
-  const items = customization.faq?.items?.length ? customization.faq.items : [{ question: '', answer: '' }];
+  const faq = customization.faq ?? {};
+  const items = faq.items?.length ? faq.items : [{ question: '', answer: '' }];
 
   const updateItem = (idx: number, field: 'question' | 'answer', value: string) => {
     const newItems = [...items];
     newItems[idx] = { ...newItems[idx], [field]: value };
-    update('faq', { ...customization.faq, items: newItems });
+    update('faq', { ...faq, items: newItems });
   };
 
   return (
@@ -18,8 +19,8 @@ export function BlockFaqSettings({ customization, update }: BlockSettingsProps) 
       <TextInput
         label="Titre section"
         placeholder="Questions fréquentes"
-        value={customization.faq?.title ?? ''}
-        onChange={(e) => update('faq', { ...customization.faq, title: e.target.value })}
+        value={faq.title ?? ''}
+        onChange={(e) => update('faq', { ...faq, title: e.target.value })}
       />
       <Text size="xs" fw={500}>
         Questions / Réponses
@@ -39,12 +40,7 @@ export function BlockFaqSettings({ customization, update }: BlockSettingsProps) 
             value={item.answer}
             onChange={(e) => updateItem(idx, 'answer', e.target.value)}
           />
-          <ActionIcon
-            size="sm"
-            color="red"
-            variant="subtle"
-            onClick={() => update('faq', { ...customization.faq, items: items.filter((_, i) => i !== idx) })}
-          >
+          <ActionIcon size="sm" color="red" variant="subtle" onClick={() => update('faq', { ...faq, items: items.filter((_, i) => i !== idx) })}>
             <IconTrash size={14} />
           </ActionIcon>
         </Stack>
@@ -53,7 +49,7 @@ export function BlockFaqSettings({ customization, update }: BlockSettingsProps) 
         size="xs"
         variant="light"
         leftSection={<IconPlus size={14} />}
-        onClick={() => update('faq', { ...customization.faq, items: [...items, { question: '', answer: '' }] })}
+        onClick={() => update('faq', { ...faq, items: [...items, { question: '', answer: '' }] })}
       >
         Ajouter une question
       </Button>

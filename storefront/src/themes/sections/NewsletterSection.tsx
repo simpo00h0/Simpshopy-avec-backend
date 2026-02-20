@@ -9,9 +9,6 @@ export function NewsletterSection() {
   const { newsletterTitle, colors } = theme;
   const [message, setMessage] = useState<string | null>(null);
 
-  const title = newsletterTitle ?? 'Restez informé';
-  const subtext = 'Inscrivez-vous pour recevoir nos offres et nouveautés.';
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('Inscription bientôt disponible.');
@@ -27,10 +24,10 @@ export function NewsletterSection() {
     >
       <Container size="sm">
         <Title order={2} ta="center" mb="xs">
-          {title}
+          {newsletterTitle ?? 'Restez informé'}
         </Title>
         <Text size="sm" ta="center" opacity={0.9} mb="lg">
-          {subtext}
+          Inscrivez-vous pour recevoir nos offres et nouveautés.
         </Text>
         <Box
           component="form"

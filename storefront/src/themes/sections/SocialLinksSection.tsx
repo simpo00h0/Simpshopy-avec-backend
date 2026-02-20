@@ -29,8 +29,7 @@ export function SocialLinksSection() {
     >
       <Group justify="center" gap="lg">
         {entries.map((key) => {
-          const href = links[key];
-          if (!href) return null;
+          const href = links[key]!;
           const Icon = ICONS[key];
           const url =
             key === 'whatsapp' && !href.startsWith('http')

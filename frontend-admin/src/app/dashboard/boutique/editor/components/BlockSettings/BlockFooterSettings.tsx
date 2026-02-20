@@ -5,15 +5,16 @@ import { IconPlus, IconTrash } from '@tabler/icons-react';
 import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockFooterSettings({ customization, update }: BlockSettingsProps) {
-  const links = customization.footer?.links ?? [];
+  const footer = customization.footer ?? {};
+  const links = footer.links ?? [];
 
   return (
     <Stack gap="sm">
       <TextInput
         label="Tagline"
         placeholder="© Ma Boutique"
-        value={customization.footer?.tagline ?? ''}
-        onChange={(e) => update('footer', { ...customization.footer, tagline: e.target.value, links })}
+        value={footer.tagline ?? ''}
+        onChange={(e) => update('footer', { ...footer, tagline: e.target.value })}
       />
       <Text size="xs" fw={500}>
         Liens
@@ -27,7 +28,7 @@ export function BlockFooterSettings({ customization, update }: BlockSettingsProp
             onChange={(e) => {
               const newLinks = [...links];
               newLinks[idx] = { ...newLinks[idx], label: e.target.value };
-              update('footer', { ...customization.footer, links: newLinks });
+              update('footer', { ...footer, links: newLinks });
             }}
             style={{ minWidth: 0, flex: 1 }}
           />
@@ -38,16 +39,11 @@ export function BlockFooterSettings({ customization, update }: BlockSettingsProp
             onChange={(e) => {
               const newLinks = [...links];
               newLinks[idx] = { ...newLinks[idx], href: e.target.value };
-              update('footer', { ...customization.footer, links: newLinks });
+              update('footer', { ...footer, links: newLinks });
             }}
             style={{ minWidth: 0, flex: 1 }}
           />
-          <ActionIcon
-            size="sm"
-            color="red"
-            variant="subtle"
-            onClick={() => update('footer', { ...customization.footer, links: links.filter((_, i) => i !== idx) })}
-          >
+          <ActionIcon size="sm" color="red" variant="subtle" onClick={() => update('footer', { ...footer, links: links.filter((_, i) => i !== idx) })}>
             <IconTrash size={14} />
           </ActionIcon>
         </Group>
@@ -56,7 +52,7 @@ export function BlockFooterSettings({ customization, update }: BlockSettingsProp
         size="xs"
         variant="light"
         leftSection={<IconPlus size={14} />}
-        onClick={() => update('footer', { ...customization.footer, links: [...links, { label: '', href: '' }] })}
+        onClick={() => update('footer', { ...footer, links: [...links, { label: '', href: '' }] })}
       >
         Ajouter un lien
       </Button>
