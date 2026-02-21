@@ -8,10 +8,22 @@ import { useTheme } from '../ThemeContext';
 const HEIGHT_MAP = { small: 320, medium: 400, large: 520 };
 
 export function HeroSection() {
-  const { theme, basePath } = useTheme();
+  const { theme, basePath, isEditor } = useTheme();
   const { heroTitle, heroSubtitle, heroCta, heroCtaHref, heroImage, colors, heroAlignment, heroHeight } = theme;
   const align = heroAlignment ?? 'center';
   const minHeight = HEIGHT_MAP[heroHeight ?? 'medium'];
+
+  if (isEditor && !heroTitle && !heroSubtitle) {
+    return (
+      <section style={{ padding: '80px 0', background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.secondary} 50%, ${theme.colors.accent} 100%)`, color: 'white', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Container size="md">
+          <Text size="sm" opacity={0.9}>
+            Choisissez un titre, un sous-titre et une image dans le panneau Paramètres.
+          </Text>
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <section

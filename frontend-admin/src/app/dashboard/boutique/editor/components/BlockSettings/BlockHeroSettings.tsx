@@ -9,7 +9,8 @@ import { ImageDropzone } from './ImageDropzone';
 
 export function BlockHeroSettings({ customization, update, updateNested }: BlockSettingsProps) {
   const [loading, setLoading] = useState(false);
-  const heroImage = customization.hero?.image ?? '';
+  const hero = customization.hero ?? {};
+  const upd = (k: keyof typeof hero, v: string) => updateNested('hero', k, v);
 
   const handleDrop = async (files: File[]) => {
     const file = files[0];
@@ -24,7 +25,6 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
     setLoading(true);
     const result = await uploadImage(file);
     setLoading(false);
-
     if (result.success && result.url) {
       updateNested('hero', 'image', result.url);
       notifications.show({ title: 'Image importée', message: '', color: 'green' });
@@ -35,26 +35,12 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
 
   return (
     <Stack gap="sm">
-      <TextInput
-        label="Titre"
-        placeholder="Bienvenue"
-        value={customization.hero?.title ?? ''}
-        onChange={(e) => updateNested('hero', 'title', e.target.value)}
-      />
-      <TextInput
-        label="Sous-titre"
-        placeholder="Découvrez..."
-        value={customization.hero?.subtitle ?? ''}
-        onChange={(e) => updateNested('hero', 'subtitle', e.target.value)}
-      />
-      <Text size="sm" fw={500}>
-        Image bannière
-      </Text>
-      <Text size="xs" c="dimmed" mb={4}>
-        JPEG, PNG, GIF ou WebP — max 5 Mo
-      </Text>
+      <TextInput label="Titre" placeholder="Bienvenue" value={hero.title ?? ''} onChange={(e) => upd('title', e.target.value)} />
+      <TextInput label="Sous-titre" placeholder="Découvrez..." value={hero.subtitle ?? ''} onChange={(e) => upd('subtitle', e.target.value)} />
+      <Text size="sm" fw={500}>Image bannière</Text>
+      <Text size="xs" c="dimmed" mb={4}>JPEG, PNG, GIF ou WebP — max 5 Mo</Text>
       <ImageDropzone
-        imageUrl={heroImage}
+        imageUrl={hero.image ?? ''}
         onDrop={handleDrop}
         onRemove={() => updateNested('hero', 'image', '')}
         loading={loading}
@@ -62,18 +48,8 @@ export function BlockHeroSettings({ customization, update, updateNested }: Block
         imageStyle={{ maxWidth: 280, maxHeight: 120, objectFit: 'contain' }}
         maxSize={5 * 1024 * 1024}
       />
-      <TextInput
-        label="Texte du bouton"
-        placeholder="Voir les produits"
-        value={customization.hero?.cta ?? ''}
-        onChange={(e) => updateNested('hero', 'cta', e.target.value)}
-      />
-      <TextInput
-        label="Lien du bouton"
-        placeholder="/collections/all"
-        value={customization.hero?.ctaHref ?? ''}
-        onChange={(e) => updateNested('hero', 'ctaHref', e.target.value)}
-      />
+      <TextInput label="Texte du bouton" placeholder="Voir les produits" value={hero.cta ?? ''} onChange={(e) => upd('cta', e.target.value)} />
+      <TextInput label="Lien du bouton" placeholder="/collections/all" value={hero.ctaHref ?? ''} onChange={(e) => upd('ctaHref', e.target.value)} />
       <Select
         label="Alignement du texte"
         data={[
