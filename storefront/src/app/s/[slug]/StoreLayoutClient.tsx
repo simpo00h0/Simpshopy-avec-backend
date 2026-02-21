@@ -150,7 +150,14 @@ function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null |
   if (cust.trustBadges?.items?.length) result.trustBadges = { items: cust.trustBadges.items };
   if (cust.heroAlignment) result.heroAlignment = cust.heroAlignment;
   if (cust.heroHeight) result.heroHeight = cust.heroHeight;
-  if (cust.countdown?.endDate) result.countdownSection = { endDate: cust.countdown.endDate, label: cust.countdown.label };
+  if (cust.countdown?.endDate) {
+    result.countdownSection = {
+      endDate: cust.countdown.endDate,
+      label: cust.countdown.label,
+      size: cust.countdown.size ?? 'grand',
+      style: cust.countdown.style ?? 'simple',
+    };
+  }
   if (cust.sectionOrder?.length) result.sectionOrder = cust.sectionOrder;
   if (cust.sectionVisibility) result.sectionVisibility = cust.sectionVisibility;
   if (cust.blocks && Object.keys(cust.blocks).length) result.blocks = cust.blocks;

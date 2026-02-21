@@ -7,11 +7,12 @@ import type { BlockSettingsProps } from '../../editor-types';
 export function BlockTrustBadgesSettings({ customization, update }: BlockSettingsProps) {
   const tb = customization.trustBadges ?? {};
   const items = tb.items?.length ? tb.items : [{ icon: '🔒', text: 'Paiement sécurisé' }];
+  const upd = (k: keyof typeof tb, v: unknown) => update('trustBadges', { ...tb, [k]: v });
 
   const updateItem = (idx: number, field: 'icon' | 'text', value: string) => {
     const newItems = [...items];
     newItems[idx] = { ...newItems[idx], [field]: value };
-    update('trustBadges', { ...tb, items: newItems });
+    upd('items', newItems);
   };
 
   return (
@@ -33,12 +34,12 @@ export function BlockTrustBadgesSettings({ customization, update }: BlockSetting
             value={item.text}
             onChange={(e) => updateItem(idx, 'text', e.target.value)}
           />
-          <ActionIcon size="sm" color="red" variant="subtle" onClick={() => update('trustBadges', { ...tb, items: items.filter((_, i) => i !== idx) })}>
+          <ActionIcon size="sm" color="red" variant="subtle" onClick={() => upd('items', items.filter((_, i) => i !== idx))}>
             <IconTrash size={14} />
           </ActionIcon>
         </Stack>
       ))}
-      <Button size="xs" variant="light" leftSection={<IconPlus size={14} />} onClick={() => update('trustBadges', { ...tb, items: [...items, { text: '' }] })}>
+      <Button size="xs" variant="light" leftSection={<IconPlus size={14} />} onClick={() => upd('items', [...items, { text: '' }])}>
         Ajouter un badge
       </Button>
     </Stack>
