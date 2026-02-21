@@ -5,10 +5,23 @@ import { IconTruck } from '@tabler/icons-react';
 import { useTheme } from '../ThemeContext';
 
 export function PromoBannerSection() {
-  const { theme } = useTheme();
+  const { theme, isEditor } = useTheme();
   const { promoBanner, colors } = theme;
 
-  if (!promoBanner) return null;
+  if (!promoBanner) {
+    if (isEditor) {
+      return (
+        <section style={{ backgroundColor: colors.accent, color: 'white', padding: '12px 0', textAlign: 'center' }}>
+          <Container size="xl">
+            <Text size="sm" opacity={0.9}>
+              Choisissez un message promo dans le panneau Paramètres.
+            </Text>
+          </Container>
+        </section>
+      );
+    }
+    return null;
+  }
 
   return (
     <section
