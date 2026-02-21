@@ -1,37 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { Select, Stack, Text, TextInput } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { uploadImage } from '@/lib/upload-service';
+import { useImageUpload } from '@/lib/hooks/useImageUpload';
 import type { BlockSettingsProps } from '../../editor-types';
 import { ImageDropzone } from './ImageDropzone';
 
 export function BlockHeroSettings({ customization, update, updateNested }: BlockSettingsProps) {
-  const [loading, setLoading] = useState(false);
   const hero = customization.hero ?? {};
   const upd = (k: keyof typeof hero, v: string) => updateNested('hero', k, v);
-
-  const handleDrop = async (files: File[]) => {
-    const file = files[0];
-    if (!file) return;
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Lecture impossible'));
-      reader.readAsDataURL(file);
-    });
-    updateNested('hero', 'image', dataUrl);
-    setLoading(true);
-    const result = await uploadImage(file);
-    setLoading(false);
-    if (result.success && result.url) {
-      updateNested('hero', 'image', result.url);
-      notifications.show({ title: 'Image importée', message: '', color: 'green' });
-    } else {
-      updateNested('hero', 'image', '');
-    }
-  };
+  const { handleDrop, loading } = useImageUpload({
+    onUpdate: (url) => updateNested('hero', 'image', url),
+    successTitle: 'Image importée',
+  });
 
   return (
     <Stack gap="sm">

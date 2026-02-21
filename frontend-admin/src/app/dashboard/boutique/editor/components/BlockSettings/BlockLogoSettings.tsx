@@ -1,66 +1,36 @@
 'use client';
 
-import { useState } from 'react';
 import { SegmentedControl, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { uploadImage } from '@/lib/upload-service';
+import { useImageUpload } from '@/lib/hooks/useImageUpload';
 import type { BlockSettingsProps } from '../../editor-types';
 import { ImageDropzone, LOGO_FAVICON_MIME } from './ImageDropzone';
 
 const LOGO_SIZE_HINT = 'Recommandé : 120–400 px de large, PNG ou SVG';
 const FAVICON_SIZE_HINT = 'Recommandé : 32×32 ou 64×64 px, format carré (ICO, PNG)';
 
-export function BlockLogoSettings({ customization, update }: BlockSettingsProps) {
-  const [logoLoading, setLogoLoading] = useState(false);
-  const [faviconLoading, setFaviconLoading] = useState(false);
+const showUploadError = () => {
+  notifications.show({ title: "Échec de l'import", message: 'Réessayez ou utilisez une autre image.', color: 'red' });
+};
 
+export function BlockLogoSettings({ customization, update }: BlockSettingsProps) {
   const logoUrl = (customization as { logo?: string }).logo ?? '';
   const faviconUrl = (customization as { favicon?: string }).favicon ?? '';
   const logoAlignment = (customization as { logoAlignment?: 'left' | 'center' | 'right' }).logoAlignment ?? 'left';
 
-  const handleLogoDrop = async (files: File[]) => {
-    const file = files[0];
-    if (!file) return;
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Lecture impossible'));
-      reader.readAsDataURL(file);
-    });
-    update('logo', dataUrl);
-    setLogoLoading(true);
-    const result = await uploadImage(file);
-    setLogoLoading(false);
-    if (result.success && result.url) {
-      update('logo', result.url);
-      notifications.show({ title: 'Logo importé', message: LOGO_SIZE_HINT, color: 'green' });
-    } else {
-      update('logo', '');
-      notifications.show({ title: 'Échec de l\'import', message: 'Réessayez ou utilisez une autre image.', color: 'red' });
-    }
-  };
+  const { handleDrop: handleLogoDrop, loading: logoLoading } = useImageUpload({
+    onUpdate: (url) => update('logo', url),
+    successTitle: 'Logo importé',
+    successMessage: LOGO_SIZE_HINT,
+    onError: showUploadError,
+  });
 
-  const handleFaviconDrop = async (files: File[]) => {
-    const file = files[0];
-    if (!file) return;
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Lecture impossible'));
-      reader.readAsDataURL(file);
-    });
-    update('favicon', dataUrl);
-    setFaviconLoading(true);
-    const result = await uploadImage(file);
-    setFaviconLoading(false);
-    if (result.success && result.url) {
-      update('favicon', result.url);
-      notifications.show({ title: 'Favicon importé', message: FAVICON_SIZE_HINT, color: 'green' });
-    } else {
-      update('favicon', '');
-      notifications.show({ title: 'Échec de l\'import', message: 'Réessayez ou utilisez une autre image.', color: 'red' });
-    }
-  };
+  const { handleDrop: handleFaviconDrop, loading: faviconLoading } = useImageUpload({
+    onUpdate: (url) => update('favicon', url),
+    successTitle: 'Favicon importé',
+    successMessage: FAVICON_SIZE_HINT,
+    onError: showUploadError,
+  });
 
   return (
     <Stack gap="md">
