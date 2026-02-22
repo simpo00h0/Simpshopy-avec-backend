@@ -27,6 +27,9 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
   },
+  experimental: {
+    optimizePackageImports: ['@mantine/core', '@mantine/hooks', '@mantine/carousel'],
+  },
 };
 
 module.exports = nextConfig;
