@@ -3,8 +3,19 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Container, Title, Text, Card, Group, Button, Box, Badge, Stack, Tabs } from '@mantine/core';
-import { IconShoppingBag, IconEye, IconPalette, IconSettings } from '@tabler/icons-react';
+import {
+  Container,
+  Title,
+  Text,
+  Card,
+  Group,
+  Button,
+  Box,
+  Badge,
+  Stack,
+  UnstyledButton,
+} from '@mantine/core';
+import { IconShoppingBag, IconEye, IconPalette, IconExternalLink, IconChevronRight } from '@tabler/icons-react';
 import { useStoreStore, type Store } from '@/stores/storeStore';
 import { loadStores } from '@/lib/store-service';
 import { getStoreUrl } from '@/lib/storefront-url';
@@ -15,7 +26,6 @@ export default function BoutiquePage() {
   const currentStore = useStoreStore((s) => s.currentStore);
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
   const themeId = currentStore?.settings?.themeId ?? null;
-  const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3002';
 
   useEffect(() => {
     if (currentStore != null) return;
@@ -48,26 +58,30 @@ export default function BoutiquePage() {
 
   if (!themeId) {
     return (
-      <Container fluid py="xl">
-        <Title order={2} mb="xl">
-          Boutique
-        </Title>
-        <Card shadow="sm" padding="xl" radius="md" withBorder>
-          <Group justify="center" py={40}>
-            <div style={{ textAlign: 'center' }}>
-              <IconShoppingBag size={48} stroke={1.5} color="var(--mantine-color-gray-4)" />
-              <Text size="lg" fw={500} mt="md">
-                Choisissez d&apos;abord un thème
-              </Text>
-              <Text size="sm" c="dimmed" mt="xs">
-                Pour personnaliser votre boutique, sélectionnez un template dans l&apos;onglet Thèmes.
-              </Text>
-              <Link href="/dashboard/themes" style={{ textDecoration: 'none' }}>
-                <Button color="green" mt="md">Choisir un thème</Button>
-              </Link>
-            </div>
-          </Group>
-        </Card>
+      <Container size="md" py="xl">
+        <Box
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 360,
+            textAlign: 'center',
+          }}
+        >
+          <IconShoppingBag size={64} stroke={1.2} color="var(--mantine-color-gray-3)" />
+          <Title order={3} mt="lg" fw={600}>
+            Choisissez un thème
+          </Title>
+          <Text size="sm" c="dimmed" mt="xs" maw={320}>
+            Pour personnaliser votre boutique, sélectionnez d&apos;abord un template dans les thèmes.
+          </Text>
+          <Link href="/dashboard/themes" style={{ textDecoration: 'none', marginTop: 24 }}>
+            <Button color="green" size="md" leftSection={<IconPalette size={18} />}>
+              Voir les thèmes
+            </Button>
+          </Link>
+        </Box>
       </Container>
     );
   }
@@ -77,134 +91,145 @@ export default function BoutiquePage() {
   const storeUrl = getStoreUrl(subdomain);
   const storefrontDomain = process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN || 'localhost:3002';
   const storeDisplayUrl = `${subdomain}.${storefrontDomain}`;
-  const previewUrl = `${storefrontUrl}/preview/${themeId}`;
 
   return (
-    <Container fluid py="xl">
-      <Group justify="space-between" mb="xl">
+    <Container size="lg" py="xl">
+      <Group justify="space-between" mb="lg">
         <div>
-          <Title order={2}>Boutique</Title>
+          <Title order={2} fw={600}>
+            Boutique
+          </Title>
           <Text size="sm" c="dimmed" mt={4}>
-            Thème actuel et personnalisation
+            Personnalisez l&apos;apparence de votre vitrine
           </Text>
         </div>
-        <Group>
-          <Button
-            component="a"
-            href={storeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            leftSection={<IconEye size={18} />}
-            color="green"
-          >
-            Voir ma boutique
-          </Button>
-        </Group>
       </Group>
 
-      <Tabs defaultValue="theme">
-        <Tabs.List>
-          <Tabs.Tab value="theme" leftSection={<IconPalette size={16} />}>
-            Thème
-          </Tabs.Tab>
-          <Tabs.Tab value="settings" leftSection={<IconSettings size={16} />}>
-            Paramètres
-          </Tabs.Tab>
-        </Tabs.List>
-
-        <Tabs.Panel value="theme" pt="lg">
-          <Stack gap="lg">
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Group justify="space-between" wrap="wrap">
-                <div>
-                  <Group gap="xs">
-                    <Text fw={600}>Thème actif</Text>
-                    <Badge color="green">{themeName}</Badge>
-                  </Group>
-                  <Text size="sm" c="dimmed" mt={4}>
-                    Ce thème définit l&apos;apparence de votre boutique en ligne.
-                  </Text>
-                  <Text size="sm" fw={500} mt="md">
-                    Votre boutique :{' '}
-                    <a href={storeUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--mantine-color-green-7)' }}>
-                      {storeDisplayUrl}
-                    </a>
-                  </Text>
-                </div>
-                <Group>
-                  <Button
-                    component="a"
-                    href={storeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    leftSection={<IconEye size={16} />}
-                    color="green"
-                  >
-                    Voir ma boutique
-                  </Button>
-                  <Button
-                    component="a"
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    leftSection={<IconEye size={16} />}
-                    variant="light"
-                  >
-                    Aperçu thème seul
-                  </Button>
-                </Group>
-              </Group>
-            </Card>
-
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Title order={4} mb="md">
-                Constructeur de boutique
-              </Title>
-              <Text size="sm" c="dimmed" mb="md">
-                Cliquez sur « Personnaliser » pour ouvrir votre boutique en mode édition. Chaque bloc (en-tête, bannière, produits, etc.) est cliquable pour le modifier.
-              </Text>
-              <Link
-                href={currentStore?.id ? `/dashboard/boutique/editor?storeId=${currentStore.id}` : '/dashboard/boutique/editor'}
-                style={{ textDecoration: 'none' }}
-              >
-                <Button
-                  color="green"
-                  size="lg"
-                  leftSection={<IconPalette size={20} />}
-                >
-                  Personnaliser ma boutique
-                </Button>
-              </Link>
-            </Card>
-
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Group>
-                <IconPalette size={24} />
-                <div>
-                  <Text fw={500}>Changer de thème</Text>
-                  <Text size="sm" c="dimmed">
-                    Vous souhaitez un autre style ? Rendez-vous dans l&apos;onglet Thèmes pour choisir un autre template.
-                  </Text>
-                  <Link href="/dashboard/themes" style={{ textDecoration: 'none' }}>
-                    <Button variant="light" size="xs" mt="xs">Voir les thèmes</Button>
-                  </Link>
-                </div>
-              </Group>
-            </Card>
-          </Stack>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="settings" pt="lg">
-          <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <Text size="sm" c="dimmed" mb="md">
-              Informations générales, logo, bannière, domaine personnalisé.
+      {/* Thème actuel - style Shopify */}
+      <Card
+        shadow="sm"
+        padding={0}
+        radius="md"
+        withBorder
+        style={{ overflow: 'hidden' }}
+      >
+        <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}>
+          <Group gap="sm">
+            <Badge color="green" variant="light" size="lg">
+              Thème actif
+            </Badge>
+            <Text fw={600} size="lg">
+              {themeName}
             </Text>
-            <Link href="/dashboard/settings" style={{ textDecoration: 'none' }}>
-              <Button color="green">Ouvrir les paramètres</Button>
+          </Group>
+          <Group gap="xs">
+            <Button
+              component="a"
+              href={storeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="subtle"
+              size="sm"
+              leftSection={<IconExternalLink size={16} />}
+            >
+              Voir ma boutique
+            </Button>
+            <Link
+              href={currentStore?.id ? `/dashboard/boutique/editor?storeId=${currentStore.id}` : '/dashboard/boutique/editor'}
+              style={{ textDecoration: 'none' }}
+            >
+              <Button color="green" leftSection={<IconPalette size={18} />}>
+                Personnaliser
+              </Button>
             </Link>
-          </Card>
-        </Tabs.Panel>
-      </Tabs>
+          </Group>
+        </Group>
+
+        {/* Preview live de la boutique */}
+        <Box
+          style={{
+            position: 'relative',
+            aspectRatio: '16 / 9',
+            backgroundColor: 'var(--mantine-color-gray-0)',
+          }}
+        >
+          <iframe
+            src={storeUrl}
+            title="Aperçu de la boutique"
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              display: 'block',
+            }}
+          />
+        </Box>
+
+        <Group justify="space-between" p="sm" style={{ backgroundColor: 'var(--mantine-color-gray-0)' }}>
+          <Text size="xs" c="dimmed">
+            {storeDisplayUrl}
+          </Text>
+        </Group>
+      </Card>
+
+      {/* Actions secondaires */}
+      <Stack gap="xs" mt="lg">
+        <UnstyledButton
+          component={Link}
+          href="/dashboard/themes"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderRadius: 8,
+            backgroundColor: 'var(--mantine-color-gray-0)',
+            color: 'inherit',
+            textDecoration: 'none',
+          }}
+        >
+          <Group gap="sm">
+            <IconPalette size={20} color="var(--mantine-color-gray-6)" />
+            <div style={{ textAlign: 'left' }}>
+              <Text size="sm" fw={500}>
+                Changer de thème
+              </Text>
+              <Text size="xs" c="dimmed">
+                Choisir un autre template
+              </Text>
+            </div>
+          </Group>
+          <IconChevronRight size={18} color="var(--mantine-color-gray-5)" />
+        </UnstyledButton>
+
+        <UnstyledButton
+          component={Link}
+          href="/dashboard/settings"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderRadius: 8,
+            backgroundColor: 'var(--mantine-color-gray-0)',
+            color: 'inherit',
+            textDecoration: 'none',
+          }}
+        >
+          <Group gap="sm">
+            <IconShoppingBag size={20} color="var(--mantine-color-gray-6)" />
+            <div style={{ textAlign: 'left' }}>
+              <Text size="sm" fw={500}>
+                Paramètres de la boutique
+              </Text>
+              <Text size="xs" c="dimmed">
+                Logo, bannière, domaine personnalisé
+              </Text>
+            </div>
+          </Group>
+          <IconChevronRight size={18} color="var(--mantine-color-gray-5)" />
+        </UnstyledButton>
+      </Stack>
     </Container>
   );
 }
