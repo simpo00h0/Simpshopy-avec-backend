@@ -93,18 +93,7 @@ export default function BoutiquePage() {
   const storeDisplayUrl = `${subdomain}.${storefrontDomain}`;
 
   return (
-    <Container size="lg" py="xl">
-      <Group justify="space-between" mb="lg">
-        <div>
-          <Title order={2} fw={600}>
-            Boutique
-          </Title>
-          <Text size="sm" c="dimmed" mt={4}>
-            Personnalisez l&apos;apparence de votre vitrine
-          </Text>
-        </div>
-      </Group>
-
+    <Container size="lg" py="md">
       {/* Thème actuel - iframe header + promo banner + hero */}
       <Card shadow="sm" padding={0} radius="md" withBorder style={{ overflow: 'hidden' }}>
         <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}>
