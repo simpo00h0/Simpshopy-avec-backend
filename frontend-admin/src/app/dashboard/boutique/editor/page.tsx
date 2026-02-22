@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { Box, Button, Group, Text, Alert } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { useStoreStore } from '@/stores/storeStore';
 import { useEditorState, useEditorLoad, useEditorSave, useEditorIframe, useEditorDragDrop, useEditorKeyboardShortcuts } from './hooks';
@@ -22,6 +22,7 @@ import type { BlockId } from './editor-types';
 import styles from './editor.module.css';
 
 export default function BoutiqueEditorPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const storeId = searchParams.get('storeId');
   const currentStore = useStoreStore((s) => s.currentStore);
@@ -138,9 +139,9 @@ export default function BoutiqueEditorPage() {
     allowLeaveRef.current = true;
     useEditorUIStore.getState().setIsLeaving(true);
     setTimeout(() => {
-      window.location.href = '/dashboard/boutique';
+      router.replace('/dashboard/boutique');
     }, LEAVE_FADE_MS + 20);
-  }, []);
+  }, [router]);
 
   const handleSaveAndLeave = useCallback(async () => {
     const store = useEditorUIStore.getState();
