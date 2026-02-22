@@ -10,7 +10,7 @@ export default function StoreProductsRedirect() {
   const { basePath } = useTheme();
 
   useEffect(() => {
-    router.replace(`${basePath}/collections/all`);
+    router.replace(basePath ? `${basePath}/collections/all` : '/collections/all');
   }, [router, basePath]);
 
   return (

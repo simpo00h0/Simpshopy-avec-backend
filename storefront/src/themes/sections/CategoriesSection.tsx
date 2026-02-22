@@ -29,7 +29,7 @@ export function CategoriesSection() {
             <Card
               key={col.id}
               component={Link}
-              href={`${basePath}/collections/${col.slug}`}
+              href={basePath ? `${basePath}/collections/${col.slug}` : `/collections/${col.slug}`}
               shadow="sm"
               padding="lg"
               radius="md"

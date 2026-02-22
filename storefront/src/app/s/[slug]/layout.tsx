@@ -1,8 +1,10 @@
 import { Suspense } from 'react';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { unstable_cache } from 'next/cache';
 import { StoreLayoutClient } from './StoreLayoutClient';
 import { API_BASE_URL } from '@/lib/constants';
+import { getSubdomain } from '@/lib/subdomain';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +43,11 @@ export default async function StoreLayout({
   const store = await getStore(slug);
   if (!store) notFound();
 
+  const headersList = await headers();
+  const host = headersList.get('host') || '';
+  const subdomain = getSubdomain(host);
+  const basePath = subdomain ? '' : `/s/${slug}`;
+
   return (
     <>
       <script
@@ -49,7 +56,9 @@ export default async function StoreLayout({
         }}
       />
       <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div>}>
-        <StoreLayoutClient store={store} subdomain={slug}>{children}</StoreLayoutClient>
+        <StoreLayoutClient store={store} subdomain={slug} basePath={basePath}>
+          {children}
+        </StoreLayoutClient>
       </Suspense>
     </>
   );

@@ -167,7 +167,17 @@ function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null |
 const SIMPSHOPY_THEME_UPDATE = 'simpshopy-theme-update';
 const SIMPSHOPY_PREVIEW_MODE = 'simpshopy-preview-mode';
 
-export function StoreLayoutClient({ store, subdomain, children }: { store: StoreData; subdomain: string; children: React.ReactNode }) {
+export function StoreLayoutClient({
+  store,
+  subdomain,
+  basePath,
+  children,
+}: {
+  store: StoreData;
+  subdomain: string;
+  basePath: string;
+  children: React.ReactNode;
+}) {
   const baseTheme = themesData[store.themeId] ?? themesData.classique;
   const products = mapProducts(store.products || []);
 
@@ -210,8 +220,6 @@ export function StoreLayoutClient({ store, subdomain, children }: { store: Store
     footerTagline: `© ${store.name}`,
   };
   theme = applyCustomization(theme, effectiveCustomization);
-
-  const basePath = `/s/${subdomain}`;
 
   return (
     <ThemeProvider

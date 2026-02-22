@@ -36,7 +36,7 @@ export function CollectionTemplate({ collectionSlug }: CollectionTemplateProps) 
           data={collections.map((c) => ({ value: c.slug, label: c.name }))}
           value={currentCollection?.slug}
           onChange={(v) => {
-            if (v) router.push(`${basePath}/collections/${v}`);
+            if (v) router.push(basePath ? `${basePath}/collections/${v}` : `/collections/${v}`);
           }}
           mb="xl"
           style={{ maxWidth: 300 }}

@@ -1,16 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-const RESERVED_SUBDOMAINS = ['www', 'app', 'api', 'admin', 'preview', 's'];
-
-function getSubdomain(host: string): string | null {
-  const hostname = host.split(':')[0];
-  const parts = hostname.split('.');
-  if (parts.length < 2) return null;
-  const subdomain = parts[0];
-  if (RESERVED_SUBDOMAINS.includes(subdomain.toLowerCase())) return null;
-  return subdomain;
-}
+import { getSubdomain } from '@/lib/subdomain';
 
 function getBaseDomain(): string {
   return process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN || 'localhost:3002';

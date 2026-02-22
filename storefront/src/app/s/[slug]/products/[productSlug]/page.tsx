@@ -16,7 +16,7 @@ export default function StoreProductPage() {
     return (
       <div style={{ padding: 40, textAlign: 'center' }}>
         <h2>Produit introuvable</h2>
-        <Link href={`${basePath}/collections/all`}>Retour aux produits</Link>
+        <Link href={basePath ? `${basePath}/collections/all` : '/collections/all'}>Retour aux produits</Link>
       </div>
     );
   }

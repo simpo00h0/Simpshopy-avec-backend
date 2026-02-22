@@ -13,7 +13,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, basePath }: ProductCardProps) {
-  const productHref = `${basePath}/products/${product.slug}`;
+  const productHref = basePath ? `${basePath}/products/${product.slug}` : `/products/${product.slug}`;
   const [hovered, setHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
   const { theme: { colors } } = useTheme();

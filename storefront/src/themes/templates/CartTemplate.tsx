@@ -45,7 +45,7 @@ export function CartTemplate() {
             </Text>
             <Button
               component={Link}
-              href={`${basePath}/collections/all`}
+              href={basePath ? `${basePath}/collections/all` : '/collections/all'}
               size="lg"
               style={{ backgroundColor: colors.primary }}
             >
@@ -54,7 +54,7 @@ export function CartTemplate() {
           </Box>
         </Card>
         <Group justify="space-between" mt="xl">
-          <Button component={Link} href={basePath} variant="subtle">
+          <Button component={Link} href={basePath || '/'} variant="subtle">
             ← Continuer mes achats
           </Button>
         </Group>
@@ -181,7 +181,7 @@ export function CartTemplate() {
             </Group>
             <Button
               component={Link}
-              href={`${basePath}/collections/all`}
+              href={basePath ? `${basePath}/collections/all` : '/collections/all'}
               fullWidth
               size="lg"
               style={{ backgroundColor: colors.primary }}

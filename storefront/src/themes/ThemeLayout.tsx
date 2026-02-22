@@ -18,12 +18,14 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
   const { storeName, logo, logoAlignment, logoBlockId, footerTagline, footerLinks, colors } = theme;
   const logoAlign = logoAlignment ?? 'left';
 
+  const homeHref = basePath || '/';
+  const toHref = (path: string) => (basePath ? `${basePath}${path}` : path);
   const navLinks = [
-    { label: 'Accueil', href: basePath },
-    { label: 'Produits', href: `${basePath}/collections/all` },
-    { label: 'À propos', href: `${basePath}/about` },
-    { label: 'Contact', href: `${basePath}/contact` },
-    { label: 'Panier', href: `${basePath}/cart` },
+    { label: 'Accueil', href: homeHref },
+    { label: 'Produits', href: toHref('/collections/all') },
+    { label: 'À propos', href: toHref('/about') },
+    { label: 'Contact', href: toHref('/contact') },
+    { label: 'Panier', href: toHref('/cart') },
   ];
 
   const NavContent = () => (
@@ -95,11 +97,11 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
                 }}
               >
                 {logo ? (
-                  <Link href={basePath} style={{ display: 'flex', alignItems: 'center' }}>
+                  <Link href={homeHref} style={{ display: 'flex', alignItems: 'center' }}>
                     <Image src={logo} alt={storeName} width={120} height={36} style={{ objectFit: 'contain' }} unoptimized />
                   </Link>
                 ) : (
-                  <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}>
+                  <Link href={homeHref} style={{ color: 'white', fontWeight: 700, textDecoration: 'none' }}>
                     <Title order={3} component="span">
                       {storeName}
                     </Title>
@@ -110,11 +112,11 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
             <Box style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', minWidth: 0 }}>
               <Box hiddenFrom="sm" style={{ display: 'flex', justifyContent: 'center' }}>
                 {logo ? (
-                  <Link href={basePath} style={{ display: 'flex', alignItems: 'center' }}>
+                  <Link href={homeHref} style={{ display: 'flex', alignItems: 'center' }}>
                     <Image src={logo} alt={storeName} width={100} height={30} style={{ objectFit: 'contain' }} unoptimized />
                   </Link>
                 ) : (
-                  <Link href={basePath} style={{ color: 'white', fontWeight: 700, textDecoration: 'none', fontSize: '1.1rem' }}>
+                  <Link href={homeHref} style={{ color: 'white', fontWeight: 700, textDecoration: 'none', fontSize: '1.1rem' }}>
                     {storeName}
                   </Link>
                 )}
@@ -124,7 +126,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
             <Box style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', minWidth: 0 }}>
               <UnstyledButton
                 component={Link}
-                href={`${basePath}/cart`}
+                href={toHref('/cart')}
                 aria-label={`Panier${cartCount > 0 ? ` (${cartCount} article${cartCount > 1 ? 's' : ''})` : ''}`}
                 style={{
                   position: 'relative',
@@ -212,7 +214,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
                   key={link.label}
                   size="sm"
                   component={Link}
-                  href={link.href.startsWith('/') ? `${basePath}${link.href === '/' ? '' : link.href}` : link.href}
+                  href={link.href.startsWith('/') ? (link.href === '/' ? homeHref : toHref(link.href)) : link.href}
                   style={{ color: 'rgba(255,255,255,0.9)', textDecoration: 'none' }}
                 >
                   {link.label}

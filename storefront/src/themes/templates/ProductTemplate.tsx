@@ -24,8 +24,8 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
   const relatedProducts = theme.products.filter((p) => p.id !== product.id).slice(0, 3);
 
   const breadcrumbItems = [
-    { title: 'Accueil', href: basePath },
-    { title: 'Produits', href: `${basePath}/collections/all` },
+    { title: 'Accueil', href: basePath || '/' },
+    { title: 'Produits', href: basePath ? `${basePath}/collections/all` : '/collections/all' },
     { title: product.name, href: '#' },
   ];
 
@@ -121,7 +121,7 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
 
           <Button
             component={Link}
-            href={`${basePath}/collections/all`}
+            href={basePath ? `${basePath}/collections/all` : '/collections/all'}
             variant="subtle"
             mt="xl"
           >
