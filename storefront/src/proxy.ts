@@ -24,7 +24,7 @@ function buildSubdomainUrl(slug: string, pathname: string): string {
   return `${protocol}://${slug}.${base}${path}`;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
 
