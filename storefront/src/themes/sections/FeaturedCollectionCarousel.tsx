@@ -33,8 +33,7 @@ export function FeaturedCollectionCarousel({ title, productIds }: FeaturedCollec
         <Carousel
           slideSize="280px"
           slideGap="md"
-          align="start"
-          loop
+          emblaOptions={{ align: 'start', loop: true }}
           withIndicators
           styles={{
             control: {

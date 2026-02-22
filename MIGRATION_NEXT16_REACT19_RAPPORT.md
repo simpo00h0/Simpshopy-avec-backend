@@ -8,12 +8,14 @@
 
 ## 1. Structure et dépendances
 
-### 1.1 État actuel
+### 1.1 État actuel (post-migration)
 
 | Package | frontend-admin | storefront | shared |
 |---------|----------------|------------|--------|
-| **Next.js** | 14.0.4 | 14.0.4 | - |
-| **React** | ^18.2.0 | ^18.2.0 | - |
+| **Next.js** | 16.2.0-canary.56 | 16.2.0-canary.56 | - |
+| **React** | 19.2.4 | 19.2.4 | - |
+| **Mantine** | ^8.3.15 | ^8.3.15 | - |
+| **Lint** | eslint . (ESLint CLI) | eslint . (ESLint CLI) | - |
 | **TypeScript** | ^5.3.3 | ^5.3.3 | ^5.3.3 |
 | **Node.js (engines)** | >=18.0.0 (racine) | idem | idem |
 

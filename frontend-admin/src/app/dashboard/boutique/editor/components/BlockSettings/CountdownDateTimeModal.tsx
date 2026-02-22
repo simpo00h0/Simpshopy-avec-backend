@@ -15,18 +15,18 @@ function formatDisplay(iso: string | undefined): string {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function parseIso(iso: string | undefined): { date: Date | null; time: string } {
-  if (!iso) return { date: null, time: '23:59' };
+function parseIso(iso: string | undefined): { dateStr: string | null; time: string } {
+  if (!iso) return { dateStr: null, time: '23:59' };
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return { date: null, time: '23:59' };
-  return { date: d, time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
+  if (Number.isNaN(d.getTime())) return { dateStr: null, time: '23:59' };
+  const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return { dateStr, time: `${pad(d.getHours())}:${pad(d.getMinutes())}` };
 }
 
-function toIso(date: Date | null, time: string): string {
-  if (!date) return '';
+function toIso(dateStr: string | null, time: string): string {
+  if (!dateStr) return '';
   const [h = '23', m = '59'] = time.split(':');
-  const d = new Date(date);
-  d.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+  const d = new Date(`${dateStr}T${h}:${m}:00`);
   return d.toISOString();
 }
 
@@ -44,12 +44,12 @@ export function CountdownDateTimeModal({
   placeholder = "Choisir la date et l'heure",
 }: CountdownDateTimeModalProps) {
   const [opened, setOpened] = useState(false);
-  const [date, setDate] = useState<Date | null>(null);
+  const [dateStr, setDateStr] = useState<string | null>(null);
   const [time, setTime] = useState('23:59');
 
   const handleOpen = useCallback(() => {
-    const { date: d, time: t } = parseIso(value);
-    setDate(d);
+    const { dateStr: d, time: t } = parseIso(value);
+    setDateStr(d);
     setTime(t);
     setOpened(true);
   }, [value]);
@@ -57,13 +57,13 @@ export function CountdownDateTimeModal({
   const handleClose = useCallback(() => setOpened(false), []);
 
   const handleConfirm = useCallback(() => {
-    onChange(toIso(date, time));
+    onChange(toIso(dateStr, time));
     setOpened(false);
-  }, [date, time, onChange]);
+  }, [dateStr, time, onChange]);
 
   const handleClear = useCallback(() => {
     onChange('');
-    setDate(null);
+    setDateStr(null);
     setTime('23:59');
     setOpened(false);
   }, [onChange]);
@@ -126,7 +126,7 @@ export function CountdownDateTimeModal({
           {label}
         </Text>
         <Stack gap="lg">
-          <DatePicker value={date} onChange={setDate} allowDeselect />
+          <DatePicker value={dateStr} onChange={setDateStr} allowDeselect />
           <TimeInput
             label="Heure"
             value={time}
@@ -136,7 +136,7 @@ export function CountdownDateTimeModal({
             <Button variant="subtle" color="gray" onClick={handleClear}>
               Effacer
             </Button>
-            <Button color="green" onClick={handleConfirm} disabled={!date}>
+            <Button color="green" onClick={handleConfirm} disabled={!dateStr}>
               Valider
             </Button>
           </Group>
