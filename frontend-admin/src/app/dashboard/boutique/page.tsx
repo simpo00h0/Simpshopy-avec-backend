@@ -15,7 +15,7 @@ import {
   Stack,
   UnstyledButton,
 } from '@mantine/core';
-import { IconShoppingBag, IconEye, IconPalette, IconExternalLink, IconChevronRight } from '@tabler/icons-react';
+import { IconShoppingBag, IconPalette, IconExternalLink, IconChevronRight } from '@tabler/icons-react';
 import { useStoreStore, type Store } from '@/stores/storeStore';
 import { loadStores } from '@/lib/store-service';
 import { getStoreUrl } from '@/lib/storefront-url';
@@ -105,21 +105,16 @@ export default function BoutiquePage() {
         </div>
       </Group>
 
-      {/* Thème actuel - style Shopify (sans preview embarquée) */}
-      <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Group justify="space-between" wrap="wrap" gap="md">
+      {/* Thème actuel - iframe header + promo banner + hero */}
+      <Card shadow="sm" padding={0} radius="md" withBorder style={{ overflow: 'hidden' }}>
+        <Group justify="space-between" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}>
           <Group gap="sm">
             <Badge color="green" variant="light" size="lg">
               Thème actif
             </Badge>
-            <div>
-              <Text fw={600} size="lg">
-                {themeName}
-              </Text>
-              <Text size="xs" c="dimmed" mt={2}>
-                {storeDisplayUrl}
-              </Text>
-            </div>
+            <Text fw={600} size="lg">
+              {themeName}
+            </Text>
           </Group>
           <Group gap="xs">
             <Button
@@ -127,7 +122,8 @@ export default function BoutiquePage() {
               href={storeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              variant="light"
+              variant="subtle"
+              size="sm"
               leftSection={<IconExternalLink size={16} />}
             >
               Voir ma boutique
@@ -136,15 +132,38 @@ export default function BoutiquePage() {
               href={currentStore?.id ? `/dashboard/boutique/editor?storeId=${currentStore.id}` : '/dashboard/boutique/editor'}
               style={{ textDecoration: 'none' }}
             >
-              <Button color="green" leftSection={<IconPalette size={18} />}>
+              <Button color="green" size="sm" leftSection={<IconPalette size={18} />}>
                 Personnaliser
               </Button>
             </Link>
           </Group>
         </Group>
+
+        <Box
+          style={{
+            height: 480,
+            backgroundColor: 'var(--mantine-color-gray-0)',
+          }}
+        >
+          <iframe
+            src={storeUrl}
+            title="Aperçu : header, bannière promo et bannière principale"
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              display: 'block',
+            }}
+          />
+        </Box>
+
+        <Group justify="space-between" p="sm" style={{ backgroundColor: 'var(--mantine-color-gray-0)' }}>
+          <Text size="xs" c="dimmed">
+            {storeDisplayUrl}
+          </Text>
+        </Group>
       </Card>
 
-      {/* Actions secondaires */}
       <Stack gap="xs" mt="lg">
         <UnstyledButton
           component={Link}
