@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   if (process.env.REVALIDATE_SECRET && secret !== process.env.REVALIDATE_SECRET) return json({ error: 'Invalid secret' }, 401);
   if (!store || !/^[a-z0-9-]+$/i.test(store)) return json({ error: 'Invalid store' }, 400);
   try {
-    revalidateTag(`store-${store}`);
+    revalidateTag(`store-${store}`, 'max');
     return json({ revalidated: true, store });
   } catch {
     return json({ error: 'Revalidation failed' }, 500);

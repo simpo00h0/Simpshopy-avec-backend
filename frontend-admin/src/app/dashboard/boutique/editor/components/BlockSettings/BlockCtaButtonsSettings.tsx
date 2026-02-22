@@ -5,7 +5,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockCtaButtonsSettings({ customization, update }: BlockSettingsProps) {
   const cta = customization.ctaButtons ?? {};
-  const upd = (k: keyof typeof cta, v: unknown) => update('ctaButtons', { ...cta, [k]: v });
+  const upd = <K extends keyof typeof cta>(k: K, v: (typeof cta)[K]) =>
+    update('ctaButtons', { ...cta, [k]: v });
   return (
     <Stack gap="sm">
       <TextInput label="Bouton principal - Texte" placeholder="Voir les produits" value={cta.primaryText ?? ''} onChange={(e) => upd('primaryText', e.target.value)} />

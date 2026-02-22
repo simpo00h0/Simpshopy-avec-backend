@@ -62,9 +62,9 @@ export default function BoutiquePage() {
               <Text size="sm" c="dimmed" mt="xs">
                 Pour personnaliser votre boutique, sélectionnez un template dans l&apos;onglet Thèmes.
               </Text>
-              <Button component={Link} href="/dashboard/themes" color="green" mt="md">
-                Choisir un thème
-              </Button>
+              <Link href="/dashboard/themes" style={{ textDecoration: 'none' }}>
+                <Button color="green" mt="md">Choisir un thème</Button>
+              </Link>
             </div>
           </Group>
         </Card>
@@ -163,15 +163,18 @@ export default function BoutiquePage() {
               <Text size="sm" c="dimmed" mb="md">
                 Cliquez sur « Personnaliser » pour ouvrir votre boutique en mode édition. Chaque bloc (en-tête, bannière, produits, etc.) est cliquable pour le modifier.
               </Text>
-              <Button
-                component={Link}
+              <Link
                 href={currentStore?.id ? `/dashboard/boutique/editor?storeId=${currentStore.id}` : '/dashboard/boutique/editor'}
-                color="green"
-                size="lg"
-                leftSection={<IconPalette size={20} />}
+                style={{ textDecoration: 'none' }}
               >
-                Personnaliser ma boutique
-              </Button>
+                <Button
+                  color="green"
+                  size="lg"
+                  leftSection={<IconPalette size={20} />}
+                >
+                  Personnaliser ma boutique
+                </Button>
+              </Link>
             </Card>
 
             <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -182,9 +185,9 @@ export default function BoutiquePage() {
                   <Text size="sm" c="dimmed">
                     Vous souhaitez un autre style ? Rendez-vous dans l&apos;onglet Thèmes pour choisir un autre template.
                   </Text>
-                  <Button component={Link} href="/dashboard/themes" variant="light" size="xs" mt="xs">
-                    Voir les thèmes
-                  </Button>
+                  <Link href="/dashboard/themes" style={{ textDecoration: 'none' }}>
+                    <Button variant="light" size="xs" mt="xs">Voir les thèmes</Button>
+                  </Link>
                 </div>
               </Group>
             </Card>
@@ -196,9 +199,9 @@ export default function BoutiquePage() {
             <Text size="sm" c="dimmed" mb="md">
               Informations générales, logo, bannière, domaine personnalisé.
             </Text>
-            <Button component={Link} href="/dashboard/settings" color="green">
-              Ouvrir les paramètres
-            </Button>
+            <Link href="/dashboard/settings" style={{ textDecoration: 'none' }}>
+              <Button color="green">Ouvrir les paramètres</Button>
+            </Link>
           </Card>
         </Tabs.Panel>
       </Tabs>

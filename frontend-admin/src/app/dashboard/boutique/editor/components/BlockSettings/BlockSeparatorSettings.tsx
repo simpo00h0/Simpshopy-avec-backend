@@ -5,7 +5,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockSeparatorSettings({ customization, update }: BlockSettingsProps) {
   const sep = customization.separator ?? {};
-  const upd = (k: keyof typeof sep, v: unknown) => update('separator', { ...sep, [k]: v });
+  const upd = <K extends keyof typeof sep>(k: K, v: (typeof sep)[K]) =>
+    update('separator', { ...sep, [k]: v });
   return (
     <Stack gap="sm">
       <Select label="Style" data={[{ value: 'line', label: 'Ligne' }, { value: 'dashed', label: 'Tirets' }, { value: 'dotted', label: 'Pointillé' }, { value: 'space', label: 'Espace' }]} value={sep.style ?? 'line'} onChange={(v) => upd('style', (v as 'line' | 'space' | 'dotted' | 'dashed') ?? 'line')} comboboxProps={{ withinPortal: true, zIndex: 10000 }} />

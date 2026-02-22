@@ -7,7 +7,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 export function BlockFaqSettings({ customization, update }: BlockSettingsProps) {
   const faq = customization.faq ?? {};
   const items = faq.items?.length ? faq.items : [{ question: '', answer: '' }];
-  const upd = (k: keyof typeof faq, v: unknown) => update('faq', { ...faq, [k]: v });
+  const upd = <K extends keyof typeof faq>(k: K, v: (typeof faq)[K]) =>
+    update('faq', { ...faq, [k]: v });
 
   const updateItem = (idx: number, field: 'question' | 'answer', value: string) => {
     const newItems = [...items];

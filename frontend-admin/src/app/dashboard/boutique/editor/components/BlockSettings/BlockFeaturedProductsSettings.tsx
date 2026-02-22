@@ -5,7 +5,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockFeaturedProductsSettings({ customization, update }: BlockSettingsProps) {
   const fp = customization.featuredProducts ?? {};
-  const upd = (k: keyof typeof fp, v: unknown) => update('featuredProducts', { ...fp, [k]: v });
+  const upd = <K extends keyof typeof fp>(k: K, v: (typeof fp)[K]) =>
+    update('featuredProducts', { ...fp, [k]: v });
   return (
     <Stack gap="sm">
       <TextInput label="Titre" placeholder="Tous nos produits" value={fp.title ?? ''} onChange={(e) => upd('title', e.target.value)} />

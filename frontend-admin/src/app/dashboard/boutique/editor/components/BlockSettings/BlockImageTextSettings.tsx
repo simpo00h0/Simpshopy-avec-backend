@@ -5,7 +5,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockImageTextSettings({ customization, update }: BlockSettingsProps) {
   const img = customization.imageText ?? {};
-  const upd = (k: keyof typeof img, v: unknown) => update('imageText', { ...img, [k]: v });
+  const upd = <K extends keyof typeof img>(k: K, v: (typeof img)[K]) =>
+    update('imageText', { ...img, [k]: v });
   return (
     <Stack gap="sm">
       <TextInput label="URL image" placeholder="https://..." value={img.imageUrl ?? ''} onChange={(e) => upd('imageUrl', e.target.value)} />

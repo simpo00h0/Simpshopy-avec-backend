@@ -74,9 +74,11 @@ export default function DashboardPage() {
               <Text size="sm" c="dimmed" mb="md">
                 {s.desc}
               </Text>
-              <Button size="xs" color="green" variant="light" component={Link} href={s.href}>
-                {s.num === '01' ? 'Ajouter un produit' : s.num === '02' ? 'Personnaliser' : 'Configurer'}
-              </Button>
+              <Link href={s.href} style={{ textDecoration: 'none' }}>
+                <Button size="xs" color="green" variant="light">
+                  {s.num === '01' ? 'Ajouter un produit' : s.num === '02' ? 'Personnaliser' : 'Configurer'}
+                </Button>
+              </Link>
             </Box>
           ))}
         </SimpleGrid>
@@ -112,9 +114,15 @@ export default function DashboardPage() {
           Actions rapides
         </Title>
         <Group>
-          <Button component={Link} href="/dashboard/products">Ajouter un produit</Button>
-          <Button component={Link} href="/dashboard/orders" variant="outline">Voir mes commandes</Button>
-          <Button component={Link} href="/dashboard/settings" variant="outline">Paramètres de la boutique</Button>
+          <Link href="/dashboard/products" style={{ textDecoration: 'none' }}>
+            <Button>Ajouter un produit</Button>
+          </Link>
+          <Link href="/dashboard/orders" style={{ textDecoration: 'none' }}>
+            <Button variant="outline">Voir mes commandes</Button>
+          </Link>
+          <Link href="/dashboard/settings" style={{ textDecoration: 'none' }}>
+            <Button variant="outline">Paramètres de la boutique</Button>
+          </Link>
           {currentStore && (
             <Button
               component="a"

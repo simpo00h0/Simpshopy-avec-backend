@@ -53,9 +53,9 @@ export default function ForgotPasswordPage() {
               <Text c="dimmed" ta="center">
                 Un email a été envoyé à {form.values.email}. Cliquez sur le lien pour réinitialiser votre mot de passe.
               </Text>
-              <Button component={Link} href="/login" fullWidth>
-                Retour à la connexion
-              </Button>
+              <Link href="/login" style={{ textDecoration: 'none', width: '100%' }}>
+                <Button fullWidth>Retour à la connexion</Button>
+              </Link>
             </Stack>
           ) : (
             <form onSubmit={form.onSubmit(handleSubmit)}>

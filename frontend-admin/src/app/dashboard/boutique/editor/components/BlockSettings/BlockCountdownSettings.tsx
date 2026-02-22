@@ -24,7 +24,8 @@ export function BlockCountdownSettings({ customization, update }: BlockSettingsP
   const cd = customization.countdown ?? {};
   const size = (cd.size as CountdownSize) ?? 'grand';
   const style = (cd.style as CountdownStyle) ?? 'simple';
-  const upd = (k: keyof typeof cd, v: unknown) => update('countdown', { ...cd, [k]: v });
+  const upd = <K extends keyof typeof cd>(k: K, v: (typeof cd)[K]) =>
+    update('countdown', { ...cd, [k]: v });
 
   return (
     <Stack gap="md">

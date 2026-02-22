@@ -159,9 +159,9 @@ export default function BoutiqueEditorPage() {
     return (
       <Box p="xl">
         <Text c="dimmed">{storeId ? 'Chargement de la boutique...' : 'Aucune boutique sélectionnée. Retournez à la boutique pour en choisir une.'}</Text>
-        <Button component={Link} href="/dashboard/boutique" variant="subtle" mt="md">
-          Retour à la boutique
-        </Button>
+        <Link href="/dashboard/boutique" style={{ textDecoration: 'none' }}>
+          <Button variant="subtle" mt="md">Retour à la boutique</Button>
+        </Link>
       </Box>
     );
   }

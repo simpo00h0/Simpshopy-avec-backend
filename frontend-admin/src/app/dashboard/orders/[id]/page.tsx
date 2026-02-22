@@ -67,9 +67,11 @@ export default function OrderDetailPage() {
   return (
     <Container fluid py="xl">
       <Group mb="xl" gap="md">
-        <Button variant="subtle" leftSection={<IconArrowLeft size={16} />} component={Link} href="/dashboard/orders">
-          Retour aux commandes
-        </Button>
+        <Link href="/dashboard/orders" style={{ textDecoration: 'none' }}>
+          <Button variant="subtle" leftSection={<IconArrowLeft size={16} />}>
+            Retour aux commandes
+          </Button>
+        </Link>
       </Group>
       <Stack gap="md">
         <Card shadow="sm" padding="xl" radius="md" withBorder>

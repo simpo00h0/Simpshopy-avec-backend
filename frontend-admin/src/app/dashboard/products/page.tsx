@@ -154,9 +154,9 @@ export default function ProductsPage() {
                   <Table.Td>{p.price.toLocaleString('fr-FR')} XOF</Table.Td>
                   <Table.Td>{p.inventoryQty}</Table.Td>
                   <Table.Td>
-                    <Button variant="subtle" size="xs" component={Link} href={`/dashboard/products/${p.id}`}>
-                      Modifier
-                    </Button>
+                    <Link href={`/dashboard/products/${p.id}`} style={{ textDecoration: 'none' }}>
+                      <Button variant="subtle" size="xs">Modifier</Button>
+                    </Link>
                   </Table.Td>
                 </Table.Tr>
               ))}

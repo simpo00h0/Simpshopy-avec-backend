@@ -43,12 +43,16 @@ export default function LandingPage() {
             </Title>
           </Link>
           <Group gap="md">
-            <Button component={Link} href="/login" variant="subtle" color="dark">
-              Se connecter
-            </Button>
-            <Button component={Link} href="/signup" color="green">
-              Démarrer gratuitement
-            </Button>
+            <Link href="/login" style={{ textDecoration: 'none' }}>
+              <Button variant="subtle" color="dark">
+                Se connecter
+              </Button>
+            </Link>
+            <Link href="/signup" style={{ textDecoration: 'none' }}>
+              <Button color="green">
+                Démarrer gratuitement
+              </Button>
+            </Link>
           </Group>
         </Group>
       </Box>
@@ -78,18 +82,20 @@ export default function LandingPage() {
               tout pour réussir en Zone CFA.
             </Text>
             <Group justify="center" gap="md">
-              <Button
-                component={Link}
-                href="/signup"
-                size="xl"
-                color="green"
-                rightSection={<IconChevronRight size={20} />}
-              >
-                Démarrer gratuitement
-              </Button>
-              <Button component={Link} href="/login" size="xl" variant="light" color="green">
-                Se connecter
-              </Button>
+              <Link href="/signup" style={{ textDecoration: 'none' }}>
+                <Button
+                  size="xl"
+                  color="green"
+                  rightSection={<IconChevronRight size={20} />}
+                >
+                  Démarrer gratuitement
+                </Button>
+              </Link>
+              <Link href="/login" style={{ textDecoration: 'none' }}>
+                <Button size="xl" variant="light" color="green">
+                  Se connecter
+                </Button>
+              </Link>
             </Group>
           </Stack>
         </Container>
@@ -103,9 +109,11 @@ export default function LandingPage() {
             <Text size="lg" c="dimmed" maw={500}>
               Créez votre boutique, ajoutez vos produits. Passez à un plan payant quand vous êtes prêt à vendre.
             </Text>
-            <Button component={Link} href="/signup" size="lg" color="green">
-              Démarrer gratuitement
-            </Button>
+            <Link href="/signup" style={{ textDecoration: 'none' }}>
+              <Button size="lg" color="green">
+                Démarrer gratuitement
+              </Button>
+            </Link>
           </Stack>
         </Container>
       </Box>
@@ -248,16 +256,16 @@ export default function LandingPage() {
             <Text c="gray.3" maw={500}>
               Rejoignez les vendeurs qui utilisent Simpshopy pour vendre en Zone CFA.
             </Text>
-            <Button
-              component={Link}
-              href="/signup"
-              size="lg"
-              color="white"
-              c="green.8"
-              rightSection={<IconChevronRight size={20} />}
-            >
-              Créer mon compte
-            </Button>
+            <Link href="/signup" style={{ textDecoration: 'none' }}>
+              <Button
+                size="lg"
+                color="white"
+                c="green.8"
+                rightSection={<IconChevronRight size={20} />}
+              >
+                Créer mon compte
+              </Button>
+            </Link>
           </Stack>
         </Container>
       </Box>

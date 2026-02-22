@@ -8,9 +8,11 @@ export default function PrivacyPage() {
       <Text c="dimmed" mb="xl">
         Cette page sera bientôt disponible.
       </Text>
-      <Button component={Link} href="/" variant="light">
-        Retour à l&apos;accueil
-      </Button>
+      <Link href="/" style={{ textDecoration: 'none' }}>
+        <Button variant="light">
+          Retour à l&apos;accueil
+        </Button>
+      </Link>
     </Container>
   );
 }

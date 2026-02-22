@@ -5,7 +5,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockSocialLinksSettings({ customization, update }: BlockSettingsProps) {
   const links = customization.socialLinks ?? {};
-  const upd = (k: keyof typeof links, v: unknown) => update('socialLinks', { ...links, [k]: v });
+  const upd = <K extends keyof typeof links>(k: K, v: (typeof links)[K]) =>
+    update('socialLinks', { ...links, [k]: v });
   return (
     <Stack gap="sm">
       <TextInput label="Facebook (URL)" placeholder="https://facebook.com/..." value={links.facebook ?? ''} onChange={(e) => upd('facebook', e.target.value)} />

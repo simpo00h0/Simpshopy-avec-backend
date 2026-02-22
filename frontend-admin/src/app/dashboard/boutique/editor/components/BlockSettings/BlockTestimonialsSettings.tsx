@@ -12,7 +12,8 @@ const DEFAULT_ITEMS = [
 export function BlockTestimonialsSettings({ customization, update }: BlockSettingsProps) {
   const tm = customization.testimonials ?? {};
   const items = tm.items?.length ? tm.items : DEFAULT_ITEMS;
-  const upd = (k: keyof typeof tm, v: unknown) => update('testimonials', { ...tm, [k]: v });
+  const upd = <K extends keyof typeof tm>(k: K, v: (typeof tm)[K]) =>
+    update('testimonials', { ...tm, [k]: v });
 
   const updateItem = (idx: number, field: 'name' | 'text' | 'rating', value: string | number) => {
     const newItems = [...items];

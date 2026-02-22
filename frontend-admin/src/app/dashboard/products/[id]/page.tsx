@@ -132,9 +132,11 @@ export default function ProductEditPage() {
   return (
     <Container fluid py="xl">
       <Group mb="xl" gap="md">
-        <Button variant="subtle" leftSection={<IconArrowLeft size={16} />} component={Link} href="/dashboard/products">
-          Retour
-        </Button>
+        <Link href="/dashboard/products" style={{ textDecoration: 'none' }}>
+          <Button variant="subtle" leftSection={<IconArrowLeft size={16} />}>
+            Retour
+          </Button>
+        </Link>
       </Group>
       <Card shadow="sm" padding="xl" radius="md" withBorder>
         <Title order={3} mb="lg">Modifier le produit</Title>
@@ -164,9 +166,9 @@ export default function ProductEditPage() {
               <Button type="submit" color="green" loading={updateMutation.isPending}>
                 Enregistrer
               </Button>
-              <Button variant="subtle" component={Link} href="/dashboard/products">
-                Annuler
-              </Button>
+              <Link href="/dashboard/products" style={{ textDecoration: 'none' }}>
+                <Button variant="subtle">Annuler</Button>
+              </Link>
             </Group>
           </Stack>
         </form>

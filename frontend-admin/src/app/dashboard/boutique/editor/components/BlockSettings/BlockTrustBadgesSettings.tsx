@@ -7,7 +7,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 export function BlockTrustBadgesSettings({ customization, update }: BlockSettingsProps) {
   const tb = customization.trustBadges ?? {};
   const items = tb.items?.length ? tb.items : [{ icon: '🔒', text: 'Paiement sécurisé' }];
-  const upd = (k: keyof typeof tb, v: unknown) => update('trustBadges', { ...tb, [k]: v });
+  const upd = <K extends keyof typeof tb>(k: K, v: (typeof tb)[K]) =>
+    update('trustBadges', { ...tb, [k]: v });
 
   const updateItem = (idx: number, field: 'icon' | 'text', value: string) => {
     const newItems = [...items];

@@ -7,7 +7,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 export function BlockFooterSettings({ customization, update }: BlockSettingsProps) {
   const footer = customization.footer ?? {};
   const links = footer.links ?? [];
-  const upd = (k: keyof typeof footer, v: unknown) => update('footer', { ...footer, [k]: v });
+  const upd = <K extends keyof typeof footer>(k: K, v: (typeof footer)[K]) =>
+    update('footer', { ...footer, [k]: v });
 
   return (
     <Stack gap="sm">

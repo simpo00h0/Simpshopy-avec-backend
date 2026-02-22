@@ -227,13 +227,13 @@ export function useEditorState() {
         partial.sectionOrder = cust.sectionOrder;
       } else if (dirtyBlockIdsRef.current.size > 0 && cust.blocks) {
         const blocks: Record<string, { type: string; data: Record<string, unknown> }> = {};
-        for (const id of dirtyBlockIdsRef.current) {
+        for (const id of Array.from(dirtyBlockIdsRef.current)) {
           const block = cust.blocks[id];
           if (block) blocks[id] = block;
         }
         if (Object.keys(blocks).length > 0) partial.blocks = blocks;
       }
-      for (const key of dirtySectionsRef.current) {
+      for (const key of Array.from(dirtySectionsRef.current)) {
         const val = cust[key as keyof ThemeCustomization];
         if (val !== undefined) {
           (partial as Record<string, unknown>)[key] = val;

@@ -5,7 +5,8 @@ import type { BlockSettingsProps } from '../../editor-types';
 
 export function BlockCategoriesSettings({ customization, update }: BlockSettingsProps) {
   const cat = customization.categories ?? {};
-  const upd = (k: keyof typeof cat, v: unknown) => update('categories', { ...cat, [k]: v });
+  const upd = <K extends keyof typeof cat>(k: K, v: (typeof cat)[K]) =>
+    update('categories', { ...cat, [k]: v });
   return (
     <Stack gap="sm">
       <TextInput label="Titre" placeholder="Parcourir par catégorie" value={cat.title ?? ''} onChange={(e) => upd('title', e.target.value)} />
