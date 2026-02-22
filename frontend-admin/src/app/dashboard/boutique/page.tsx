@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Container, Title, Text, Card, Group, Button, Box, Badge, Stack, Tabs } from '@mantine/core';
 import { IconShoppingBag, IconEye, IconPalette, IconSettings } from '@tabler/icons-react';
-import Link from 'next/link';
 import { useStoreStore, type Store } from '@/stores/storeStore';
 import { loadStores } from '@/lib/store-service';
 import { getStoreUrl } from '@/lib/storefront-url';
 import { THEME_NAMES } from '@/lib/constants';
 
 export default function BoutiquePage() {
+  const router = useRouter();
   const currentStore = useStoreStore((s) => s.currentStore);
   const setCurrentStore = useStoreStore((s) => s.setCurrentStore);
   const themeId = currentStore?.settings?.themeId ?? null;
@@ -23,21 +25,24 @@ export default function BoutiquePage() {
   }, [currentStore, setCurrentStore]);
 
   useEffect(() => {
+    router.prefetch('/dashboard/boutique/editor');
+  }, [router]);
+
+  useEffect(() => {
     const sub = currentStore?.subdomain;
     if (!sub) return;
     const storefrontOrigin = new URL(getStoreUrl(sub)).origin;
-    const editorUrl = `${storefrontOrigin}?editor=1`;
     const preconnect = document.createElement('link');
     preconnect.rel = 'preconnect';
     preconnect.href = storefrontOrigin;
-    const prefetch = document.createElement('link');
-    prefetch.rel = 'prefetch';
-    prefetch.href = editorUrl;
     document.head.appendChild(preconnect);
-    document.head.appendChild(prefetch);
+    const prefetchStorefront = document.createElement('link');
+    prefetchStorefront.rel = 'prefetch';
+    prefetchStorefront.href = `${storefrontOrigin}?editor=1`;
+    document.head.appendChild(prefetchStorefront);
     return () => {
       preconnect.remove();
-      prefetch.remove();
+      prefetchStorefront.remove();
     };
   }, [currentStore?.subdomain]);
 

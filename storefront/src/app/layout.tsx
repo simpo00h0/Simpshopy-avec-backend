@@ -1,6 +1,6 @@
 import '@mantine/core/styles.css';
 import '@mantine/carousel/styles.css';
-import { MantineProvider, ColorSchemeScript } from '@mantine/core';
+import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from '@mantine/core';
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 
 export const metadata = {
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
+    <html lang="fr" {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
       </head>

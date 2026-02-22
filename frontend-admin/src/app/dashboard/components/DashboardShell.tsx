@@ -102,7 +102,7 @@ export function DashboardShell({
                 key={item.href}
                 component={Link}
                 href={item.href}
-                prefetch={false}
+                prefetch={true}
                 label={item.label}
                 leftSection={<item.icon size={20} stroke={1.5} />}
                 active={isActive(item.href)}
@@ -121,7 +121,7 @@ export function DashboardShell({
                 key={item.href}
                 component={Link}
                 href={item.href}
-                prefetch={false}
+                prefetch={true}
                 label={item.label}
                 leftSection={<item.icon size={20} stroke={1.5} />}
                 active={isActive(item.href)}
