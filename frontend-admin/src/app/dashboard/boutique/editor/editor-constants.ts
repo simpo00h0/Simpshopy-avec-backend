@@ -3,6 +3,7 @@ export const SIMPSHOPY_BLOCK_DELETE = 'simpshopy-block-delete';
 export const SIMPSHOPY_THEME_UPDATE = 'simpshopy-theme-update';
 export const SIMPSHOPY_SCROLL_TO_BLOCK = 'simpshopy-scroll-to-block';
 export const SIMPSHOPY_SELECTED_BLOCK = 'simpshopy-selected-block';
+/** Clé pour afficher l'éditeur immédiatement (persiste entre onglets via localStorage). */
 export const EDITOR_CACHED_KEY = 'simpshopy-editor-cached';
 export const CANVAS_SOURCE_INDEX_KEY = 'application/x-simpshopy-source-index';
 export const DRAG_SOURCE_LIBRARY = 'library';

@@ -31,7 +31,7 @@ export function useEditorIframe(
     setCanvasReady(false);
     setShowCanvasLoader(false);
     const t = setTimeout(() => {
-      if (typeof window !== 'undefined' && window.sessionStorage?.getItem(EDITOR_CACHED_KEY) !== '1') {
+      if (typeof window !== 'undefined' && window.localStorage?.getItem(EDITOR_CACHED_KEY) !== '1') {
         setShowCanvasLoader(true);
       }
     }, 400);
@@ -46,7 +46,7 @@ export function useEditorIframe(
       if (e.data?.type === 'simpshopy-editor-ready') {
         setCanvasReady(true);
         try {
-          window.sessionStorage?.setItem(EDITOR_CACHED_KEY, '1');
+          window.localStorage?.setItem(EDITOR_CACHED_KEY, '1');
         } catch {
           // ignore
         }

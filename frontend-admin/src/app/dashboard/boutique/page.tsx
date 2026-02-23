@@ -39,19 +39,29 @@ export default function BoutiquePage() {
   }, [router]);
 
   useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const apiOrigin = new URL(apiUrl).origin;
+    const apiPreconnect = document.createElement('link');
+    apiPreconnect.rel = 'preconnect';
+    apiPreconnect.href = apiOrigin;
+    document.head.appendChild(apiPreconnect);
+
     const sub = currentStore?.subdomain;
-    if (!sub) return;
+    if (!sub) {
+      return () => apiPreconnect.remove();
+    }
     const storefrontOrigin = new URL(getStoreUrl(sub)).origin;
-    const preconnect = document.createElement('link');
-    preconnect.rel = 'preconnect';
-    preconnect.href = storefrontOrigin;
-    document.head.appendChild(preconnect);
+    const storefrontPreconnect = document.createElement('link');
+    storefrontPreconnect.rel = 'preconnect';
+    storefrontPreconnect.href = storefrontOrigin;
+    document.head.appendChild(storefrontPreconnect);
     const prefetchStorefront = document.createElement('link');
     prefetchStorefront.rel = 'prefetch';
     prefetchStorefront.href = `${storefrontOrigin}?editor=1`;
     document.head.appendChild(prefetchStorefront);
     return () => {
-      preconnect.remove();
+      apiPreconnect.remove();
+      storefrontPreconnect.remove();
       prefetchStorefront.remove();
     };
   }, [currentStore?.subdomain]);
@@ -122,11 +132,10 @@ export default function BoutiquePage() {
               size="sm"
               leftSection={<IconPalette size={18} />}
               onClick={() => {
-                const base = typeof window !== 'undefined' ? window.location.origin : '';
                 const params = currentStore?.id
                   ? `?storeId=${currentStore.id}&subdomain=${encodeURIComponent(subdomain)}`
                   : '';
-                window.open(`${base}/dashboard/boutique/editor${params}`, '_blank', 'noopener,noreferrer');
+                window.open(`${window.location.origin}/dashboard/boutique/editor${params}`, '_blank', 'noopener,noreferrer');
               }}
             >
               Personnaliser

@@ -18,6 +18,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useAuthStore, type User } from '@/stores/authStore';
 import { signUp } from '@/lib/auth-service';
+import { AuthPreconnect } from '@/components/AuthPreconnect';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -80,7 +81,9 @@ export default function SignupPage() {
   };
 
   return (
-    <Container size={420} py={60}>
+    <>
+      <AuthPreconnect />
+      <Container size={420} py={60}>
       <Stack gap="xl">
         <Stack gap={4} ta="center">
           <Link href="/" style={{ textDecoration: 'none' }}>
@@ -141,5 +144,6 @@ export default function SignupPage() {
         </Group>
       </Stack>
     </Container>
+    </>
   );
 }

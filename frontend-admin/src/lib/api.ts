@@ -1,6 +1,7 @@
 import axios, { type AxiosError } from 'axios';
 import { supabase } from './supabase';
 import { reportError } from './error-handler';
+import { getFastSessionSync } from './fast-session';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
@@ -51,9 +52,14 @@ api.interceptors.request.use(async (config) => {
   }
   let token = getCachedToken();
   if (!token) {
-    const { data: { session } } = await supabase.auth.getSession();
-    token = session?.access_token ?? null;
+    const fast = getFastSessionSync();
+    token = fast?.access_token ?? null;
     if (token) setTokenCache(token);
+    else {
+      const { data: { session } } = await supabase.auth.getSession();
+      token = session?.access_token ?? null;
+      if (token) setTokenCache(token);
+    }
   }
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;

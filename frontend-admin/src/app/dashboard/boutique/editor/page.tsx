@@ -101,7 +101,7 @@ export default function BoutiqueEditorPage() {
 
   useLayoutEffect(() => {
     try {
-      if (typeof window !== 'undefined' && window.sessionStorage?.getItem(EDITOR_CACHED_KEY) === '1') {
+      if (typeof window !== 'undefined' && window.localStorage?.getItem(EDITOR_CACHED_KEY) === '1') {
         setCachedFromSession(true);
       }
     } catch {

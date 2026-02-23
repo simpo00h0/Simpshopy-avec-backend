@@ -9,6 +9,8 @@ import { notifications } from '@mantine/notifications';
 import { useAuthStore, type User } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import { signIn } from '@/lib/auth-service';
+import { getFastSessionSync } from '@/lib/fast-session';
+import { AuthPreconnect } from '@/components/AuthPreconnect';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +18,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (getFastSessionSync()) {
+      router.replace('/dashboard');
+      return;
+    }
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) router.replace('/dashboard');
     });
@@ -42,7 +48,9 @@ export default function LoginPage() {
   };
 
   return (
-    <Container size={420} py={60}>
+    <>
+      <AuthPreconnect />
+      <Container size={420} py={60}>
       <Stack gap="xl">
         <Stack gap={4} ta="center">
           <Link href="/" style={{ textDecoration: 'none' }}>
@@ -90,5 +98,6 @@ export default function LoginPage() {
         </Group>
       </Stack>
     </Container>
+    </>
   );
 }

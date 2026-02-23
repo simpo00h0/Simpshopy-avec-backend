@@ -8,6 +8,7 @@ import { useAuthStore, type User } from '@/stores/authStore';
 import { useStoreStore, type Store } from '@/stores/storeStore';
 import { fetchDashboardAuth } from '@/lib/dashboard-auth-service';
 import { reportError } from '@/lib/error-handler';
+import { getFastSessionSync } from '@/lib/fast-session';
 
 type AuthState = {
   hasSession: boolean | null;
@@ -20,6 +21,9 @@ export function useDashboardAuth(): AuthState {
   const [state, setState] = useState<AuthState>({ hasSession: null, hasStore: null });
 
   useEffect(() => {
+    const fast = getFastSessionSync();
+    if (fast) setState((s) => ({ ...s, hasSession: true }));
+
     const run = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
