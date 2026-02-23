@@ -37,8 +37,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = getNavItems(prefetchRoute, queryClient);
   const navBottom = getNavBottom(prefetchRoute);
 
-  const mainContent =
-    hasStore === null || hasStore === false
+  const isEditorPath = pathname?.includes('/editor') ?? false;
+  const mainContent = isEditorPath
+    ? children
+    : hasStore === null || hasStore === false
       ? <LoadingScreen />
       : showNavLoader && navigatingTo
         ? <LoadingScreen />
@@ -59,6 +61,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
+  if (isEditorPath) {
+    return <>{mainContent}</>;
+  }
+
   return (
     <DashboardShell
       opened={opened}
@@ -70,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       userFirstName={user?.firstName}
       storeSubdomain={currentStore?.subdomain}
       onLogout={handleLogout}
-      isEditorPath={pathname?.includes('/boutique/editor') ?? false}
+      isEditorPath={false}
       styles={{ editorMain: styles.editorMain, appShellMain: styles.appShellMain }}
     >
       {mainContent}

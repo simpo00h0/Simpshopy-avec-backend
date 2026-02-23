@@ -117,14 +117,20 @@ export default function BoutiquePage() {
             >
               Voir ma boutique
             </Button>
-            <Link
-              href={currentStore?.id ? `/dashboard/boutique/editor?storeId=${currentStore.id}` : '/dashboard/boutique/editor'}
-              style={{ textDecoration: 'none' }}
+            <Button
+              color="green"
+              size="sm"
+              leftSection={<IconPalette size={18} />}
+              onClick={() => {
+                const base = typeof window !== 'undefined' ? window.location.origin : '';
+                const params = currentStore?.id
+                  ? `?storeId=${currentStore.id}&subdomain=${encodeURIComponent(subdomain)}`
+                  : '';
+                window.open(`${base}/dashboard/boutique/editor${params}`, '_blank', 'noopener,noreferrer');
+              }}
             >
-              <Button color="green" size="sm" leftSection={<IconPalette size={18} />}>
-                Personnaliser
-              </Button>
-            </Link>
+              Personnaliser
+            </Button>
           </Group>
         </Group>
 
