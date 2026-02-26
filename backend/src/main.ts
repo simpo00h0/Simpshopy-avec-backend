@@ -23,12 +23,11 @@ async function bootstrap() {
   const apiPrefix = configService.get('API_PREFIX') || 'api';
   const apiVersion = configService.get('API_VERSION') || 'v1';
 
-  // CORS
+  // CORS — accepte plusieurs origines séparées par des virgules
+  const adminOrigins = (configService.get('FRONTEND_ADMIN_URL') || 'http://localhost:3001').split(',').map((s) => s.trim());
+  const storefrontOrigins = (configService.get('FRONTEND_STOREFRONT_URL') || 'http://localhost:3002').split(',').map((s) => s.trim());
   app.enableCors({
-    origin: [
-      configService.get('FRONTEND_ADMIN_URL') || 'http://localhost:3001',
-      configService.get('FRONTEND_STOREFRONT_URL') || 'http://localhost:3002',
-    ],
+    origin: [...adminOrigins, ...storefrontOrigins],
     credentials: true,
   });
 
