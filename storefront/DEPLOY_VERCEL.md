@@ -5,7 +5,8 @@
 1. Va sur [vercel.com/new](https://vercel.com/new)
 2. Importe ton repo Simpshopy
 3. **Root Directory** : `storefront`
-4. Framework : Next.js (détecté automatiquement)
+4. **Include source files outside of the Root Directory** : activé *(pour @simpshopy/shared)*
+5. Framework : Next.js (détecté automatiquement)
 
 ## 2. Variables d'environnement
 
@@ -35,3 +36,12 @@ Clique sur **Deploy**. Une fois déployé, note l’URL (ex. `https://simpshopy-
 1. Dans Vercel → Storefront → **Settings** → **Environment Variables**
 2. Mets à jour `NEXT_PUBLIC_STOREFRONT_DOMAIN` avec l’URL réelle (ex. `simpshopy-storefront-xxx.vercel.app`)
 3. Redéploie si nécessaire
+
+## 6. Dépannage 404 sur la page d'accueil
+
+1. **Root Directory** : Doit être `storefront` (Settings → General → Root Directory)
+   - Si c'est la racine du repo, un `vercel.json` à la racine build le storefront — mais **préfère mettre `storefront`** pour éviter les 404
+
+2. **Include source files outside of the Root Directory** : activé (pour @simpshopy/shared)
+
+3. **Redéploiement complet** : Deployments → ⋮ → Redeploy → cocher « Clear cache and redeploy »

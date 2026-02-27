@@ -63,8 +63,11 @@ async function bootstrap() {
   }
 
   await app.listen(port);
-  console.log(`🚀 Backend API running on: http://localhost:${port}/${apiPrefix}/${apiVersion}`);
-  console.log(`📚 Swagger Docs: http://localhost:${port}/api/docs`);
+  const env = configService.get('NODE_ENV') || 'development';
+  console.log(`🚀 Backend API running on: http://localhost:${port}/${apiPrefix}/${apiVersion} (${env})`);
+  if (env !== 'production') {
+    console.log(`📚 Swagger Docs: http://localhost:${port}/api/docs`);
+  }
 }
 
 bootstrap();
