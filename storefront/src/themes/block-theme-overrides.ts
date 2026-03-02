@@ -66,16 +66,6 @@ export function blockDataToThemeOverrides(
           ctaHref: (d.ctaHref as string),
         },
       };
-    case 'separator':
-      return {
-        separatorSection: d.style
-          ? {
-              style: (d.style as 'line' | 'space' | 'dotted' | 'dashed'),
-              thickness: (d.thickness as number),
-              color: (d.color as string),
-            }
-          : baseTheme.separatorSection,
-      };
     case 'ctaButtons':
       return {
         ctaButtons:

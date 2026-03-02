@@ -79,8 +79,6 @@ function getLegacyBlockData(typeId: string, cust: ThemeCustomization): Record<st
       return (cust.video as Record<string, unknown>) ?? {};
     case 'imageText':
       return (cust.imageText as Record<string, unknown>) ?? {};
-    case 'separator':
-      return (cust.separator as Record<string, unknown>) ?? {};
     case 'ctaButtons':
       return (cust.ctaButtons as Record<string, unknown>) ?? {};
     case 'testimonials':

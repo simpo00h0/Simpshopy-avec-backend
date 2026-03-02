@@ -12,7 +12,6 @@ import { TestimonialsSection } from '../sections/TestimonialsSection';
 import { NewsletterSection } from '../sections/NewsletterSection';
 import { VideoSection } from '../sections/VideoSection';
 import { ImageTextSection } from '../sections/ImageTextSection';
-import { SeparatorSection } from '../sections/SeparatorSection';
 import { CtaButtonsSection } from '../sections/CtaButtonsSection';
 import { FaqSection } from '../sections/FaqSection';
 import { SocialLinksSection } from '../sections/SocialLinksSection';
@@ -23,7 +22,7 @@ import type { ThemeConfig } from '../theme-types';
 
 const DEFAULT_ORDER = [
   'promoBanner', 'hero', 'richText', 'categories', 'featuredCarousel', 'featuredProducts',
-  'countdown', 'video', 'imageText', 'separator', 'ctaButtons', 'testimonials', 'faq',
+  'countdown', 'video', 'imageText', 'ctaButtons', 'testimonials', 'faq',
   'socialLinks', 'trustBadges', 'newsletter',
 ];
 
@@ -37,7 +36,6 @@ const BLOCK_LABELS: Record<string, string> = {
   countdown: 'Countdown',
   video: 'Vidéo',
   imageText: 'Image + Texte',
-  separator: 'Séparateur',
   ctaButtons: 'Boutons CTA',
   testimonials: 'Témoignages',
   faq: 'FAQ',
@@ -56,7 +54,6 @@ const TYPE_TO_SECTION: Record<string, React.ComponentType> = {
   countdown: CountdownSection,
   video: VideoSection,
   imageText: ImageTextSection,
-  separator: SeparatorSection,
   ctaButtons: CtaButtonsSection,
   testimonials: TestimonialsSection,
   faq: FaqSection,
@@ -113,7 +110,6 @@ export function IndexTemplate() {
     { id: 'countdown', el: <CountdownSection key="countdown" /> },
     { id: 'video', el: <VideoSection key="video" /> },
     { id: 'imageText', el: <ImageTextSection key="imageText" /> },
-    { id: 'separator', el: <SeparatorSection key="separator" /> },
     { id: 'ctaButtons', el: <CtaButtonsSection key="ctaButtons" /> },
     { id: 'testimonials', el: <TestimonialsSection key="testimonials" title={theme.testimonialsTitle} items={theme.testimonialsItems} /> },
     { id: 'faq', el: <FaqSection key="faq" /> },

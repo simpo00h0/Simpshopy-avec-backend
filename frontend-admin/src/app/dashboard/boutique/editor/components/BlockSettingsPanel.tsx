@@ -40,7 +40,6 @@ function buildBlockAdapter(
     countdown: blockType === 'countdown' ? (blockData as ThemeCustomization['countdown']) : undefined,
     video: blockType === 'video' ? (blockData as ThemeCustomization['video']) : undefined,
     imageText: blockType === 'imageText' ? (blockData as ThemeCustomization['imageText']) : undefined,
-    separator: blockType === 'separator' ? (blockData as ThemeCustomization['separator']) : undefined,
     ctaButtons: blockType === 'ctaButtons' ? (blockData as ThemeCustomization['ctaButtons']) : undefined,
     testimonials: blockType === 'testimonials' ? (blockData as ThemeCustomization['testimonials']) : undefined,
     faq: blockType === 'faq' ? (blockData as ThemeCustomization['faq']) : undefined,

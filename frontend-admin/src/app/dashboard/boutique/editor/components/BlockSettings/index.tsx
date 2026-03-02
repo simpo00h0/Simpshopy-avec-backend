@@ -19,7 +19,6 @@ import { BlockImageTextSettings } from './BlockImageTextSettings';
 import { BlockNewsletterSettings } from './BlockNewsletterSettings';
 import { BlockPromoBannerSettings } from './BlockPromoBannerSettings';
 import { BlockRichTextSettings } from './BlockRichTextSettings';
-import { BlockSeparatorSettings } from './BlockSeparatorSettings';
 import { BlockSocialLinksSettings } from './BlockSocialLinksSettings';
 import { BlockTestimonialsSettings } from './BlockTestimonialsSettings';
 import { BlockTrustBadgesSettings } from './BlockTrustBadgesSettings';
@@ -42,7 +41,6 @@ const BLOCK_SETTINGS_MAP: Partial<Record<BlockId, React.ComponentType<BlockSetti
   categories: BlockCategoriesSettings,
   video: BlockVideoSettings,
   imageText: BlockImageTextSettings,
-  separator: BlockSeparatorSettings,
   countdown: BlockCountdownSettings,
   ctaButtons: BlockCtaButtonsSettings,
   faq: BlockFaqSettings,

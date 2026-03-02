@@ -12,7 +12,7 @@ export const LEAVE_FADE_MS = 180;
 
 export const DEFAULT_SECTION_ORDER = [
   'promoBanner', 'hero', 'richText', 'categories', 'featuredCarousel', 'featuredProducts',
-  'countdown', 'video', 'imageText', 'separator', 'ctaButtons', 'testimonials', 'faq',
+  'countdown', 'video', 'imageText', 'ctaButtons', 'testimonials', 'faq',
   'socialLinks', 'trustBadges', 'newsletter',
 ];
 
@@ -30,7 +30,6 @@ export const HOME_BLOCKS = [
   { id: 'countdown', label: 'Countdown', template: 'home', category: 'content' as const },
   { id: 'video', label: 'Vidéo', template: 'home', category: 'content' as const },
   { id: 'imageText', label: 'Image + Texte', template: 'home', category: 'content' as const },
-  { id: 'separator', label: 'Séparateur', template: 'home', category: 'content' as const },
   { id: 'ctaButtons', label: 'Boutons CTA', template: 'home', category: 'content' as const },
   { id: 'testimonials', label: 'Témoignages', template: 'home', category: 'content' as const },
   { id: 'faq', label: 'FAQ', template: 'home', category: 'content' as const },

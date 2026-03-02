@@ -130,13 +130,6 @@ function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null |
       ctaHref: cust.imageText.ctaHref,
     };
   }
-  if (cust.separator?.style) {
-    result.separatorSection = {
-      style: cust.separator.style,
-      thickness: cust.separator.thickness,
-      color: cust.separator.color,
-    };
-  }
   if (cust.ctaButtons?.primaryText && cust.ctaButtons?.primaryHref) {
     result.ctaButtons = {
       primaryText: cust.ctaButtons.primaryText,

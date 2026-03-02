@@ -53,7 +53,6 @@ export interface ThemeConfig {
     ctaText?: string;
     ctaHref?: string;
   };
-  separatorSection?: { style: 'line' | 'space' | 'dotted' | 'dashed'; thickness?: number; color?: string };
   countdownSection?: { endDate: string; label?: string; size?: 'grand' | 'moyen' | 'petit'; style?: string };
   ctaButtons?: { primaryText: string; primaryHref: string; secondaryText?: string; secondaryHref?: string };
   faqSection?: { title?: string; items: { question: string; answer: string }[] };
