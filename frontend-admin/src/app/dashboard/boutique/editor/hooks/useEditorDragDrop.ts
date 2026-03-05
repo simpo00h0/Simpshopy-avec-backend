@@ -1,12 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import {
-  CANVAS_SOURCE_INDEX_KEY,
-  DRAG_SOURCE_LIBRARY,
-  DRAG_SOURCE_CANVAS,
-  LOGO_BLOCK_ID,
-} from '../editor-constants';
+import { useState, useCallback, useEffect } from 'react';
+import { DRAG_SOURCE_LIBRARY, LOGO_BLOCK_ID } from '../editor-constants';
 import type { BlockId } from '../editor-types';
 
 const DRAG_BLOCK_ID_KEY = 'application/x-simpshopy-block-id';
@@ -26,6 +21,40 @@ export function useEditorDragDrop(params: UseEditorDragDropParams) {
   const { orderedHomeBlocks, selectedBlock, addBlockAt, removeBlock, reorderBlocks, setSelectedBlock, onLogoBlockSelect } = params;
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dropOverIndex, setDropOverIndex] = useState<number | null>(null);
+  const [canvasDragState, setCanvasDragState] = useState<{ blockId: string; index: number } | null>(null);
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'simpshopy-canvas-drag-start' && e.data.blockId != null && typeof e.data.index === 'number') {
+        setCanvasDragState({ blockId: e.data.blockId, index: e.data.index });
+        setDraggedId(e.data.blockId);
+      }
+      if (e.data?.type === 'simpshopy-canvas-drag-end') {
+        setCanvasDragState(null);
+        setDraggedId(null);
+      }
+      if (e.data?.type === 'simpshopy-canvas-drop' && typeof e.data.insertIndex === 'number' && typeof e.data.sourceIndex === 'number') {
+        const { insertIndex, blockId, sourceIndex } = e.data;
+        if (sourceIndex >= 0 && sourceIndex < orderedHomeBlocks.length) {
+          const order = [...orderedHomeBlocks];
+          const [removed] = order.splice(sourceIndex, 1);
+          if (removed) {
+            const adjIndex = insertIndex > sourceIndex ? insertIndex - 1 : insertIndex;
+            order.splice(Math.min(adjIndex, order.length), 0, removed);
+            reorderBlocks(order);
+          }
+        }
+        setCanvasDragState(null);
+        setDraggedId(null);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [orderedHomeBlocks, reorderBlocks]);
+
+  useEffect(() => {
+    if (!draggedId && canvasDragState) setCanvasDragState(null);
+  }, [draggedId, canvasDragState]);
 
   const removeBlockAtIndex = useCallback(
     (index: number) => {
@@ -47,46 +76,34 @@ export function useEditorDragDrop(params: UseEditorDragDropParams) {
   const handleDragEnd = useCallback((_e: React.DragEvent) => {
     setDraggedId(null);
     setDropOverIndex(null);
+    setCanvasDragState(null);
   }, []);
 
   const handleCanvasDrop = useCallback(
     (e: React.DragEvent, insertIndex: number) => {
       e.preventDefault();
-      setDraggedId(null);
       setDropOverIndex(null);
 
       const blockId = e.dataTransfer.getData(DRAG_BLOCK_ID_KEY) as string;
       const source = e.dataTransfer.getData(DRAG_SOURCE_KEY);
-      const sourceIndexRaw = e.dataTransfer.getData(CANVAS_SOURCE_INDEX_KEY);
-
-      if (source === DRAG_SOURCE_CANVAS && sourceIndexRaw !== '') {
-        const sourceIndex = parseInt(sourceIndexRaw, 10);
-        if (!Number.isNaN(sourceIndex) && sourceIndex >= 0 && sourceIndex < orderedHomeBlocks.length) {
-          const order = [...orderedHomeBlocks];
-          const [removed] = order.splice(sourceIndex, 1);
-          if (removed) {
-            const adjIndex = insertIndex > sourceIndex ? insertIndex - 1 : insertIndex;
-            order.splice(Math.min(adjIndex, order.length), 0, removed);
-            reorderBlocks(order);
-          }
-          return;
-        }
-      }
 
       if (blockId && source === DRAG_SOURCE_LIBRARY) {
         if (blockId === LOGO_BLOCK_ID && onLogoBlockSelect) {
           onLogoBlockSelect();
+          setDraggedId(null);
           return;
         }
         addBlockAt(blockId as BlockId, insertIndex);
       }
+      setDraggedId(null);
     },
-    [orderedHomeBlocks, addBlockAt, reorderBlocks, onLogoBlockSelect]
+    [addBlockAt, onLogoBlockSelect]
   );
 
   return {
     draggedId,
     dropOverIndex,
+    canvasDragState,
     setDropOverIndex,
     removeBlockAtIndex,
     handleLibraryDragStart,

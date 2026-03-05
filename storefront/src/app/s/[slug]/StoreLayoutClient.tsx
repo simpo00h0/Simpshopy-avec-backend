@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { ThemeCustomization } from '@simpshopy/shared';
 import { ThemeProvider } from '@/themes/ThemeContext';
+import { EditorCanvasDragProvider } from '@/themes/EditorCanvasDragContext';
 import { ThemeLayout } from '@/themes/ThemeLayout';
 import { themesData } from '@/themes/data';
 import type { ThemeConfig, MockProduct } from '@/themes/data';
@@ -223,7 +224,9 @@ export function StoreLayoutClient({
       isEditor={isEditor}
       isPreviewMode={isEditor && previewMode}
     >
-      <ThemeLayout>{children}</ThemeLayout>
+      <EditorCanvasDragProvider>
+        <ThemeLayout>{children}</ThemeLayout>
+      </EditorCanvasDragProvider>
     </ThemeProvider>
   );
 }

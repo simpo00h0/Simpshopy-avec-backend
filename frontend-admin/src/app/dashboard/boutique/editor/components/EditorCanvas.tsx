@@ -12,6 +12,7 @@ interface EditorCanvasProps {
   canvasReady: boolean;
   onIframeLoad: () => void;
   draggedId: string | null;
+  canvasDragState: { blockId: string; index: number } | null;
   dropOverIndex: number | null;
   orderedHomeBlocks: string[];
   setDropOverIndex: React.Dispatch<React.SetStateAction<number | null>>;
@@ -29,6 +30,7 @@ export function EditorCanvas(props: EditorCanvasProps) {
     canvasReady,
     onIframeLoad,
     draggedId,
+    canvasDragState,
     dropOverIndex,
     orderedHomeBlocks,
     setDropOverIndex,
@@ -75,7 +77,7 @@ export function EditorCanvas(props: EditorCanvasProps) {
           style={{ width: '100%', height: '100%', border: 'none' }}
           onLoad={onIframeLoad}
         />
-        {draggedId && (
+        {draggedId && !canvasDragState && (
           <Box
             style={{
               position: 'absolute',
@@ -111,7 +113,7 @@ export function EditorCanvas(props: EditorCanvasProps) {
             </Box>
             {orderedHomeBlocks.map((_, i) => (
               <Box
-                key={`drop-${i}`}
+                    key={`drop-${i}`}
                 style={{
                   flex: 1,
                   minHeight: 24,

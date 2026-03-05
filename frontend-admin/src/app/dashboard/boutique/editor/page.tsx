@@ -260,6 +260,7 @@ export default function BoutiqueEditorPage() {
             canvasReady={iframe.canvasReady}
             onIframeLoad={iframe.onIframeLoad}
             draggedId={dragDrop.draggedId}
+            canvasDragState={dragDrop.canvasDragState}
             dropOverIndex={dragDrop.dropOverIndex}
             orderedHomeBlocks={editorState.orderedHomeBlocks}
             setDropOverIndex={dragDrop.setDropOverIndex}

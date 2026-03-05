@@ -1,7 +1,10 @@
 'use client';
 
+import React from 'react';
 import { useTheme, BlockThemeProvider } from '../ThemeContext';
+import { useEditorCanvasDrag } from '../EditorCanvasDragContext';
 import { BlockWrapper } from '../BlockWrapper';
+import { CanvasDropZone } from '../CanvasDropZone';
 import { PromoBannerSection } from '../sections/PromoBannerSection';
 import { HeroSection } from '../sections/HeroSection';
 import { RichTextSection } from '../sections/RichTextSection';
@@ -77,24 +80,42 @@ export function IndexTemplate() {
 
   if (isInstanceMode(theme)) {
     const blocks = theme.blocks!;
-    const order = theme.sectionOrder!.filter((id) => blocks[id]);
+    const order = theme.sectionOrder!.filter((id) => blocks[id] && blocks[id].type !== 'logo' && isVisible(id));
+    const dragCtx = useEditorCanvasDrag();
+    const active = !!dragCtx?.canvasDrag;
+
     return (
       <>
-        {order.map((instanceId) => {
+        {order.map((instanceId, i) => {
           const block = blocks[instanceId];
-          if (!block || !isVisible(instanceId)) return null;
-          if (block.type === 'logo') return null;
+          if (!block) return null;
           const Section = TYPE_TO_SECTION[block.type];
           if (!Section) return null;
           const overrides = blockDataToThemeOverrides(block, theme);
           return (
-            <BlockWrapper key={instanceId} blockId={instanceId} label={BLOCK_LABELS[block.type] ?? block.type}>
-              <BlockThemeProvider overrides={overrides}>
-                <Section />
-              </BlockThemeProvider>
-            </BlockWrapper>
+            <React.Fragment key={instanceId}>
+              <CanvasDropZone
+                insertIndex={i}
+                active={active}
+                onDrop={(idx, blockId, srcIdx) => {
+                  window.parent?.postMessage({ type: 'simpshopy-canvas-drop', insertIndex: idx, blockId, sourceIndex: srcIdx }, '*');
+                }}
+              />
+              <BlockWrapper blockId={instanceId} label={BLOCK_LABELS[block.type] ?? block.type} index={i}>
+                <BlockThemeProvider overrides={overrides}>
+                  <Section />
+                </BlockThemeProvider>
+              </BlockWrapper>
+            </React.Fragment>
           );
         })}
+        <CanvasDropZone
+          insertIndex={order.length}
+          active={active}
+          onDrop={(idx, blockId, srcIdx) => {
+            window.parent?.postMessage({ type: 'simpshopy-canvas-drop', insertIndex: idx, blockId, sourceIndex: srcIdx }, '*');
+          }}
+        />
       </>
     );
   }
@@ -122,19 +143,37 @@ export function IndexTemplate() {
   const ordered = order
     .filter((id) => sections.some((s) => s.id === id))
     .concat(sections.filter((s) => !orderIds.has(s.id)).map((s) => s.id));
+  const visibleOrdered = ordered.filter((id) => isVisible(id));
+  const dragCtx = useEditorCanvasDrag();
+  const active = !!dragCtx?.canvasDrag;
 
   return (
     <>
-      {ordered.map((id, i) => {
-        if (!isVisible(id)) return null;
+      {visibleOrdered.map((id, i) => {
         const section = sections.find((s) => s.id === id);
         if (!section) return null;
         return (
-          <BlockWrapper key={`${section.id}-${i}`} blockId={section.id} label={BLOCK_LABELS[section.id] ?? section.id}>
-            {section.el}
-          </BlockWrapper>
+          <React.Fragment key={`${section.id}-${i}`}>
+            <CanvasDropZone
+              insertIndex={i}
+              active={active}
+              onDrop={(idx, blockId, srcIdx) => {
+                window.parent?.postMessage({ type: 'simpshopy-canvas-drop', insertIndex: idx, blockId, sourceIndex: srcIdx }, '*');
+              }}
+            />
+            <BlockWrapper blockId={section.id} label={BLOCK_LABELS[section.id] ?? section.id} index={i}>
+              {section.el}
+            </BlockWrapper>
+          </React.Fragment>
         );
       })}
+      <CanvasDropZone
+        insertIndex={visibleOrdered.length}
+        active={active}
+        onDrop={(idx, blockId, srcIdx) => {
+          window.parent?.postMessage({ type: 'simpshopy-canvas-drop', insertIndex: idx, blockId, sourceIndex: srcIdx }, '*');
+        }}
+      />
     </>
   );
 }

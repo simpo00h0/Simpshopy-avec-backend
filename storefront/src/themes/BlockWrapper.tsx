@@ -1,24 +1,31 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { IconTrash } from '@tabler/icons-react';
+import { IconGripVertical, IconTrash } from '@tabler/icons-react';
 import { useTheme } from './ThemeContext';
+import { useEditorCanvasDrag } from './EditorCanvasDragContext';
 
 const SIMPSHOPY_EDITOR_EVENT = 'simpshopy-block-select';
 const SIMPSHOPY_SCROLL_TO_BLOCK = 'simpshopy-scroll-to-block';
 const SIMPSHOPY_SELECTED_BLOCK = 'simpshopy-selected-block';
 export const SIMPSHOPY_BLOCK_DELETE = 'simpshopy-block-delete';
+const DRAG_BLOCK_ID_KEY = 'application/x-simpshopy-block-id';
+const DRAG_SOURCE_KEY = 'application/x-simpshopy-drag-source';
+const CANVAS_SOURCE_INDEX_KEY = 'application/x-simpshopy-source-index';
 
 export function BlockWrapper({
   blockId,
   label,
+  index,
   children,
 }: {
   blockId: string;
   label: string;
+  index?: number;
   children: React.ReactNode;
 }) {
   const { isEditor, isPreviewMode } = useTheme();
+  const dragCtx = useEditorCanvasDrag();
   const elRef = useRef<HTMLDivElement>(null);
   const touchedRef = useRef(false);
   const [isSelected, setIsSelected] = useState(false);
@@ -61,6 +68,48 @@ export function BlockWrapper({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData(DRAG_BLOCK_ID_KEY, blockId);
+    e.dataTransfer.setData(DRAG_SOURCE_KEY, 'canvas');
+    if (typeof index === 'number') {
+      e.dataTransfer.setData(CANVAS_SOURCE_INDEX_KEY, String(index));
+    }
+    e.dataTransfer.effectAllowed = 'move';
+    dragCtx?.setCanvasDrag({ blockId, index: index! });
+    window.parent?.postMessage({ type: 'simpshopy-canvas-drag-start', blockId, index }, '*');
+  };
+
+  const handleDragEnd = () => {
+    dragCtx?.setCanvasDrag(null);
+    window.parent?.postMessage({ type: 'simpshopy-canvas-drag-end' }, '*');
+  };
+
+  const isDraggable = typeof index === 'number';
+  const isCanvasDrag = !!dragCtx?.canvasDrag;
+  const isDraggingSelf = isCanvasDrag && dragCtx?.canvasDrag?.blockId === blockId;
+
+  const handleBlockDragOver = (e: React.DragEvent) => {
+    if (!isCanvasDrag || isDraggingSelf || typeof index !== 'number') return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleBlockDrop = (e: React.DragEvent) => {
+    if (!isCanvasDrag || isDraggingSelf || typeof index !== 'number') return;
+    e.preventDefault();
+    e.stopPropagation();
+    const blockIdData = e.dataTransfer.getData('application/x-simpshopy-block-id');
+    const srcRaw = e.dataTransfer.getData('application/x-simpshopy-source-index');
+    if (blockIdData && srcRaw !== '') {
+      const srcIdx = parseInt(srcRaw, 10);
+      if (!Number.isNaN(srcIdx)) {
+        window.parent?.postMessage({ type: 'simpshopy-canvas-drop', insertIndex: index, blockId: blockIdData, sourceIndex: srcIdx }, '*');
+      }
+    }
+    dragCtx?.setCanvasDrag(null);
+  };
+
   return (
     <div
       ref={elRef}
@@ -69,6 +118,9 @@ export function BlockWrapper({
       role="button"
       tabIndex={0}
       aria-label={`Bloc : ${label}. Cliquez pour modifier.`}
+      draggable={isDraggable}
+      onDragStart={isDraggable ? handleDragStart : undefined}
+      onDragEnd={isDraggable ? handleDragEnd : undefined}
       onClick={handleSelect}
       onKeyDown={handleKeyDown}
       onTouchEnd={(e) => {
@@ -77,11 +129,13 @@ export function BlockWrapper({
         e.stopPropagation();
         window.parent?.postMessage({ type: SIMPSHOPY_EDITOR_EVENT, blockId, label }, '*');
       }}
+      onDragOver={isCanvasDrag && !isDraggingSelf ? handleBlockDragOver : undefined}
+      onDrop={isCanvasDrag && !isDraggingSelf ? handleBlockDrop : undefined}
       style={{
         position: 'relative',
         outline: isSelected ? '3px solid #40c057' : '2px dashed rgba(34, 139, 34, 0.5)',
         outlineOffset: -2,
-        cursor: 'pointer',
+        cursor: isDraggable ? 'grab' : 'pointer',
         touchAction: 'manipulation',
         minHeight: 44,
         boxShadow: isSelected ? '0 0 0 2px rgba(64, 192, 87, 0.3)' : undefined,
@@ -105,6 +159,9 @@ export function BlockWrapper({
           top: 4,
           left: 8,
           zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
           background: '#40c057',
           color: 'white',
           fontSize: 11,
@@ -115,6 +172,7 @@ export function BlockWrapper({
           textTransform: 'uppercase',
         }}
       >
+        {isDraggable && <IconGripVertical size={14} style={{ opacity: 0.9 }} />}
         {label}
       </div>
       {isHovered && (
