@@ -4,6 +4,8 @@ import {
   IsOptional,
   MinLength,
   Min,
+  IsArray,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -42,4 +44,33 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   sku?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
+  @ApiProperty({ type: [String], required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  metaTitle?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  metaDescription?: string;
+
+  @ApiProperty({
+    enum: ['DRAFT', 'ACTIVE', 'OUT_OF_STOCK', 'ARCHIVED'],
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(['DRAFT', 'ACTIVE', 'OUT_OF_STOCK', 'ARCHIVED'])
+  status?: 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
 }

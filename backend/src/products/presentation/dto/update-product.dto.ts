@@ -4,6 +4,8 @@ import {
   IsOptional,
   MinLength,
   Min,
+  IsArray,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -45,6 +47,27 @@ export class UpdateProductDto {
     required: false,
   })
   @IsOptional()
-  @IsString()
+  @IsEnum(['DRAFT', 'ACTIVE', 'OUT_OF_STOCK', 'ARCHIVED'])
   status?: 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  categoryId?: string | null;
+
+  @ApiProperty({ type: [String], required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  metaTitle?: string | null;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  metaDescription?: string | null;
 }

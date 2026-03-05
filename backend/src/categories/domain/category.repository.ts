@@ -1,3 +1,9 @@
+export interface CategorySummary {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface ICategoryRepository {
-  // À implémenter selon les besoins métier
+  findByStore(storeId: string): Promise<CategorySummary[]>;
 }

@@ -32,6 +32,11 @@ export class ProductRepository implements IProductRepository {
         inventoryQty: data.inventoryQty ?? 0,
         sku: data.sku,
         storeId: data.storeId,
+        categoryId: data.categoryId,
+        images: data.images ?? [],
+        metaTitle: data.metaTitle,
+        metaDescription: data.metaDescription,
+        status: data.status ?? 'DRAFT',
       },
     });
     return product as Product;
@@ -74,6 +79,10 @@ export class ProductRepository implements IProductRepository {
         ...(data.inventoryQty != null && { inventoryQty: data.inventoryQty }),
         ...(data.sku != null && { sku: data.sku }),
         ...(data.status != null && { status: data.status }),
+        ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+        ...(data.images != null && { images: data.images }),
+        ...(data.metaTitle != null && { metaTitle: data.metaTitle }),
+        ...(data.metaDescription != null && { metaDescription: data.metaDescription }),
       },
     });
     return product as Product;

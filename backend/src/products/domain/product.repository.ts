@@ -9,6 +9,11 @@ export interface CreateProductData {
   inventoryQty?: number;
   sku?: string;
   storeId: string;
+  categoryId?: string;
+  images?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  status?: 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
 }
 
 export interface UpdateProductData {
@@ -19,6 +24,10 @@ export interface UpdateProductData {
   inventoryQty?: number;
   sku?: string;
   status?: 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
+  categoryId?: string | null;
+  images?: string[];
+  metaTitle?: string | null;
+  metaDescription?: string | null;
 }
 
 export interface IProductRepository {

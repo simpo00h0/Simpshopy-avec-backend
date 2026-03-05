@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Title,
@@ -13,32 +12,24 @@ import {
   Stack,
   TextInput,
   NumberInput,
-  Select,
   Textarea,
+  Select,
 } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
-import { LoadingScreen } from '@/components/LoadingScreen';
 import { useMultipleImageUpload } from '@/lib/hooks/useMultipleImageUpload';
 import { ProductImagesField } from '@/components/ProductImagesField';
 
 interface Product {
   id: string;
   name: string;
-  slug?: string;
+  slug: string;
   price: number;
   status: string;
-  inventoryQty?: number;
-  description?: string;
-  compareAtPrice?: number;
-  sku?: string;
-  categoryId?: string | null;
-  images?: string[];
-  metaTitle?: string | null;
-  metaDescription?: string | null;
+  inventoryQty: number;
 }
 
 interface Category {
@@ -47,11 +38,9 @@ interface Category {
   slug: string;
 }
 
-export default function ProductEditPage() {
-  const params = useParams();
+export default function ProductCreatePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const id = params.id as string;
 
   const form = useForm({
     initialValues: {
@@ -61,19 +50,16 @@ export default function ProductEditPage() {
       compareAtPrice: '',
       inventoryQty: 0,
       sku: '',
-      status: 'DRAFT',
       categoryId: null as string | null,
       images: [] as string[],
       metaTitle: '',
       metaDescription: '',
+      status: 'DRAFT' as 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED',
     },
-  });
-
-  const { data: product, isLoading, isError } = useQuery({
-    queryKey: ['product', id],
-    queryFn: () => api.get<Product>(`/products/${id}`).then((r) => r.data),
-    enabled: !!id,
-    staleTime: 30_000,
+    validate: {
+      name: (v) => (!v || v.length < 2 ? 'Nom requis (2 caractères min)' : null),
+      price: (v) => (v < 0 ? 'Prix invalide' : null),
+    },
   });
 
   const { data: categories = [] } = useQuery({
@@ -87,60 +73,27 @@ export default function ProductEditPage() {
       form.setFieldValue('images', [...form.values.images, url]),
   });
 
-  useEffect(() => {
-    if (product) {
-      form.setValues({
-        name: product.name,
-        description: product.description || '',
-        price: product.price,
-        compareAtPrice: product.compareAtPrice?.toString() || '',
-        inventoryQty: product.inventoryQty ?? 0,
-        sku: product.sku || '',
-        status: product.status || 'DRAFT',
-        categoryId: product.categoryId ?? null,
-        images: product.images ?? [],
-        metaTitle: product.metaTitle || '',
-        metaDescription: product.metaDescription || '',
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- form.setValues when product loads
-  }, [product]);
-
-  useEffect(() => {
-    if (isError) {
-      notifications.show({ title: 'Produit introuvable', message: '', color: 'red' });
-      router.push('/dashboard/products');
-    }
-  }, [isError, router]);
-
-  const updateMutation = useMutation({
+  const createMutation = useMutation({
     mutationFn: (values: typeof form.values) =>
-      api.patch(`/products/${id}`, {
+      api.post<Product>('/products', {
         name: values.name,
         description: values.description || undefined,
         price: values.price,
         compareAtPrice: values.compareAtPrice ? Number(values.compareAtPrice) : undefined,
         inventoryQty: values.inventoryQty,
         sku: values.sku || undefined,
+        categoryId: values.categoryId || undefined,
+        images: values.images.length > 0 ? values.images : undefined,
+        metaTitle: values.metaTitle || undefined,
+        metaDescription: values.metaDescription || undefined,
         status: values.status,
-        categoryId: values.categoryId || null,
-        images: values.images,
-        metaTitle: values.metaTitle || null,
-        metaDescription: values.metaDescription || null,
       }),
-    onMutate: (values) => {
-      queryClient.setQueryData<Product[]>(['products'], (old = []) =>
-        old.map((p) =>
-          p.id === id
-            ? { ...p, name: values.name, price: values.price, status: values.status, inventoryQty: values.inventoryQty }
-            : p
-        )
-      );
-    },
-    onSuccess: () => {
-      notifications.show({ title: 'Produit mis à jour', message: '', color: 'green' });
+    onSuccess: (res) => {
+      const created = res.data as Product;
       queryClient.invalidateQueries({ queryKey: ['products'] });
-      queryClient.invalidateQueries({ queryKey: ['product', id] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      notifications.show({ title: 'Produit créé', message: '', color: 'green' });
+      router.push(`/dashboard/products/${created.id}`);
     },
     onError: (err) => {
       notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
@@ -148,21 +101,8 @@ export default function ProductEditPage() {
   });
 
   const handleSubmit = (values: typeof form.values) => {
-    updateMutation.mutate(values);
+    createMutation.mutate(values);
   };
-
-  if (isLoading) {
-    return (
-      <Container fluid py="xl">
-        <Title order={2} mb="xl">Produits</Title>
-        <LoadingScreen />
-      </Container>
-    );
-  }
-
-  if (isError) {
-    return null;
-  }
 
   return (
     <Container fluid py="xl">
@@ -174,11 +114,23 @@ export default function ProductEditPage() {
         </Link>
       </Group>
       <Card shadow="sm" padding="xl" radius="md" withBorder>
-        <Title order={3} mb="lg">Modifier le produit</Title>
+        <Title order={3} mb="lg">
+          Nouveau produit
+        </Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="md">
-            <TextInput label="Nom" required {...form.getInputProps('name')} />
-            <Textarea label="Description" minRows={3} {...form.getInputProps('description')} />
+            <TextInput
+              label="Nom"
+              placeholder="T-shirt imprimé"
+              required
+              {...form.getInputProps('name')}
+            />
+            <Textarea
+              label="Description"
+              placeholder="Décrivez votre produit"
+              minRows={3}
+              {...form.getInputProps('description')}
+            />
             <ProductImagesField
               images={form.values.images}
               onRemove={(url) =>
@@ -191,12 +143,23 @@ export default function ProductEditPage() {
               loading={uploadLoading}
             />
             <Group grow>
-              <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />
-              <NumberInput label="Prix comparé (XOF)" min={0} {...form.getInputProps('compareAtPrice')} />
+              <NumberInput
+                label="Prix (XOF)"
+                placeholder="5000"
+                min={0}
+                required
+                {...form.getInputProps('price')}
+              />
+              <NumberInput
+                label="Prix comparé (XOF)"
+                placeholder="7000"
+                min={0}
+                {...form.getInputProps('compareAtPrice')}
+              />
             </Group>
             <Group grow>
-              <NumberInput label="Stock" min={0} {...form.getInputProps('inventoryQty')} />
-              <TextInput label="SKU" {...form.getInputProps('sku')} />
+              <NumberInput label="Stock" min={0} placeholder="0" {...form.getInputProps('inventoryQty')} />
+              <TextInput label="SKU" placeholder="SKU-001" {...form.getInputProps('sku')} />
             </Group>
             <Select
               label="Catégorie"
@@ -227,8 +190,8 @@ export default function ProductEditPage() {
               {...form.getInputProps('metaDescription')}
             />
             <Group mt="md">
-              <Button type="submit" color="green" loading={updateMutation.isPending}>
-                Enregistrer
+              <Button type="submit" color="green" loading={createMutation.isPending}>
+                Créer le produit
               </Button>
               <Link href="/dashboard/products" style={{ textDecoration: 'none' }}>
                 <Button variant="subtle">Annuler</Button>
