@@ -205,14 +205,7 @@ export default function FilesPage() {
                         padding: 10,
                       }}
                     >
-                      <Box
-                        p={8}
-                        style={{
-                          borderRadius: 10,
-                          backgroundColor: '#374151',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                        }}
-                      >
+                      <Box>
                         <Box
                           pos="relative"
                           style={{
