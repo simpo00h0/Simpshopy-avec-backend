@@ -1,32 +1,25 @@
 'use client';
 
 import { Select, Stack, Text, TextInput } from '@mantine/core';
-import { useImageUpload } from '@/lib/hooks/useImageUpload';
+import { ImageLibraryPicker } from '@/components/ImageLibraryPicker';
 import type { BlockSettingsProps } from '../../editor-types';
-import { ImageDropzone } from './ImageDropzone';
 
 export function BlockHeroSettings({ customization, update, updateNested }: BlockSettingsProps) {
   const hero = customization.hero ?? {};
   const upd = (k: keyof typeof hero, v: string) => updateNested('hero', k, v);
-  const { handleDrop, loading } = useImageUpload({
-    onUpdate: (url) => updateNested('hero', 'image', url),
-    successTitle: 'Image importée',
-  });
 
   return (
     <Stack gap="sm">
       <TextInput label="Titre" placeholder="Bienvenue" value={hero.title ?? ''} onChange={(e) => upd('title', e.target.value)} />
       <TextInput label="Sous-titre" placeholder="Découvrez..." value={hero.subtitle ?? ''} onChange={(e) => upd('subtitle', e.target.value)} />
       <Text size="sm" fw={500}>Image bannière</Text>
-      <Text size="xs" c="dimmed" mb={4}>JPEG, PNG, GIF ou WebP — max 5 Mo</Text>
-      <ImageDropzone
+      <Text size="xs" c="dimmed" mb={4}>Sélectionnez une image depuis la bibliothèque.</Text>
+      <ImageLibraryPicker
         imageUrl={hero.image ?? ''}
-        onDrop={handleDrop}
+        onSelect={(url) => updateNested('hero', 'image', url)}
         onRemove={() => updateNested('hero', 'image', '')}
-        loading={loading}
-        placeholder="Glissez une image ici ou cliquez pour choisir"
+        placeholder="Cliquez pour choisir une image"
         imageStyle={{ maxWidth: 280, maxHeight: 120, objectFit: 'contain' }}
-        maxSize={5 * 1024 * 1024}
       />
       <TextInput label="Texte du bouton" placeholder="Voir les produits" value={hero.cta ?? ''} onChange={(e) => upd('cta', e.target.value)} />
       <TextInput label="Lien du bouton" placeholder="/collections/all" value={hero.ctaHref ?? ''} onChange={(e) => upd('ctaHref', e.target.value)} />
