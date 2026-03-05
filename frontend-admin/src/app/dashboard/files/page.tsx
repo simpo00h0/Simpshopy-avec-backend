@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Container,
   Title,
@@ -32,9 +32,24 @@ interface MediaItem {
   createdAt: string;
 }
 
+interface PendingUpload {
+  id: string;
+  file: File;
+  blobUrl: string;
+  status: 'uploading' | 'done' | 'error';
+}
+
 export default function FilesPage() {
   const queryClient = useQueryClient();
-  const [uploading, setUploading] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
+  const pendingRef = useRef<PendingUpload[]>([]);
+  pendingRef.current = pendingUploads;
+
+  useEffect(() => {
+    return () => {
+      pendingRef.current.forEach((p) => URL.revokeObjectURL(p.blobUrl));
+    };
+  }, []);
 
   const { data: mediaList = [], isLoading } = useQuery({
     queryKey: ['media'],
@@ -53,23 +68,68 @@ export default function FilesPage() {
     },
   });
 
-  const handleDrop = async (files: File[]) => {
-    setUploading(true);
-    let added = 0;
-    for (const file of files) {
-      const media = await uploadMediaToLibrary(file);
-      if (media) added++;
-    }
-    setUploading(false);
-    if (added > 0) {
-      queryClient.invalidateQueries({ queryKey: ['media'] });
-      notifications.show({
-        title: 'Images ajoutées',
-        message: `${added} image(s) ajoutée(s) à la bibliothèque`,
-        color: 'green',
+  const startUploads = useCallback(
+    (files: File[]) => {
+      const newPending: PendingUpload[] = files.map((file, idx) => ({
+        id: `pending-${Date.now()}-${idx}-${Math.random().toString(36).slice(2)}`,
+        file,
+        blobUrl: URL.createObjectURL(file),
+        status: 'uploading' as const,
+      }));
+      setPendingUploads((prev) => [...prev, ...newPending]);
+
+      const removePending = (id: string, blobUrl: string) => {
+        URL.revokeObjectURL(blobUrl);
+        setPendingUploads((prev) => prev.filter((p) => p.id !== id));
+      };
+
+      Promise.all(
+        newPending.map(async (p) => {
+          try {
+            const media = await uploadMediaToLibrary(p.file);
+            setPendingUploads((prev) =>
+              prev.map((item) => (item.id === p.id ? { ...item, status: 'done' as const } : item))
+            );
+            if (media) {
+              queryClient.invalidateQueries({ queryKey: ['media'] });
+              setTimeout(() => removePending(p.id, p.blobUrl), 300);
+              return true;
+            }
+          } catch {
+            notifications.show({ title: 'Échec', message: p.file.name, color: 'red' });
+          }
+          removePending(p.id, p.blobUrl);
+          return false;
+        })
+      ).then((results) => {
+        const added = results.filter(Boolean).length;
+        if (added > 0) {
+          notifications.show({
+            title: 'Images ajoutées',
+            message: `${added} image(s) ajoutée(s) à la bibliothèque`,
+            color: 'green',
+          });
+        }
       });
-    }
+    },
+    [queryClient]
+  );
+
+  const handleDrop = (files: File[]) => {
+    if (files.length > 0) startUploads(Array.from(files));
   };
+
+  const displayItems = [
+    ...mediaList.map((m) => ({ ...m, isPending: false })),
+    ...pendingUploads.map((p) => ({
+      id: p.id,
+      url: p.blobUrl,
+      filename: p.file.name,
+      mimeType: p.file.type,
+      isPending: true,
+      status: p.status,
+    })),
+  ];
 
   return (
     <Container fluid py="xl">
@@ -78,22 +138,22 @@ export default function FilesPage() {
       </Title>
 
       <Card shadow="sm" padding="md" radius="md" withBorder mb="xl">
-        <Dropzone onDrop={handleDrop} maxSize={5 * 1024 * 1024} accept={IMAGE_MIME_TYPE} loading={uploading}>
+        <Dropzone onDrop={handleDrop} maxSize={5 * 1024 * 1024} accept={IMAGE_MIME_TYPE}>
           <Group justify="center" gap="xs" py="xl" style={{ pointerEvents: 'none' }}>
             <IconPhoto size={40} color="var(--mantine-color-dimmed)" stroke={1.5} />
             <Text size="sm" c="dimmed">
               Glissez des images ici ou cliquez pour uploader
             </Text>
             <Text size="xs" c="dimmed">
-              JPEG, PNG, GIF, WebP — max 5 Mo par fichier
+              JPEG, PNG, GIF, WebP — max 5 Mo. Les images s&apos;affichent immédiatement, l&apos;upload se fait en arrière-plan.
             </Text>
           </Group>
         </Dropzone>
       </Card>
 
-      {isLoading ? (
+      {isLoading && displayItems.length === 0 ? (
         <LoadingScreen />
-      ) : mediaList.length === 0 ? (
+      ) : displayItems.length === 0 ? (
         <EmptyState
           icon={IconPhoto}
           title="Aucun fichier"
@@ -101,8 +161,8 @@ export default function FilesPage() {
         />
       ) : (
         <SimpleGrid cols={{ base: 2, sm: 4, md: 6 }} spacing="md">
-          {mediaList.map((m) => (
-            <Card key={m.id} shadow="sm" padding="xs" radius="md" withBorder>
+          {displayItems.map((item) => (
+            <Card key={item.id} shadow="sm" padding="xs" radius="md" withBorder>
               <Box
                 pos="relative"
                 style={{
@@ -110,36 +170,53 @@ export default function FilesPage() {
                   borderRadius: 4,
                   overflow: 'hidden',
                   backgroundColor: 'var(--mantine-color-gray-1)',
+                  border: item.isPending ? '2px solid var(--mantine-color-blue-4)' : undefined,
                 }}
               >
                 <Box
                   component="img"
-                  src={m.url}
-                  alt={m.altText || m.filename}
+                  src={item.url}
+                  alt={item.filename}
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
                   }}
                 />
-                <ActionIcon
-                  size="sm"
-                  color="red"
-                  variant="filled"
-                  aria-label="Supprimer"
-                  onClick={() => deleteMutation.mutate(m.id)}
-                  loading={deleteMutation.isPending && deleteMutation.variables === m.id}
-                  style={{
-                    position: 'absolute',
-                    top: 4,
-                    right: 4,
-                  }}
-                >
-                  <IconTrash size={12} />
-                </ActionIcon>
+                {item.isPending && item.status === 'uploading' && (
+                  <Box
+                    pos="absolute"
+                    inset={0}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(255,255,255,0.7)',
+                    }}
+                  >
+                    <Loader size="md" />
+                  </Box>
+                )}
+                {!item.isPending && (
+                  <ActionIcon
+                    size="sm"
+                    color="red"
+                    variant="filled"
+                    aria-label="Supprimer"
+                    onClick={() => deleteMutation.mutate(item.id)}
+                    loading={deleteMutation.isPending && deleteMutation.variables === item.id}
+                    style={{
+                      position: 'absolute',
+                      top: 4,
+                      right: 4,
+                    }}
+                  >
+                    <IconTrash size={12} />
+                  </ActionIcon>
+                )}
               </Box>
-              <Text size="xs" c="dimmed" mt="xs" lineClamp={1} title={m.filename}>
-                {m.filename}
+              <Text size="xs" c="dimmed" mt="xs" lineClamp={1} title={item.filename}>
+                {item.filename}
               </Text>
             </Card>
           ))}
