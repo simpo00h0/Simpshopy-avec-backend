@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Title, Text, Group, Box, Burger, Drawer, Stack, UnstyledButton } from '@mantine/core';
 import { IconShoppingCart } from '@tabler/icons-react';
 import Image from 'next/image';
@@ -12,9 +12,12 @@ import { useCartStore } from '@/stores/cartStore';
 
 export function ThemeLayout({ children }: { children: React.ReactNode }) {
   const [opened, setOpened] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { theme, basePath, isPreview, storeSubdomain } = useTheme();
   const getItems = useCartStore((s) => s.getItems);
-  const cartCount = getItems(storeSubdomain).reduce((sum, i) => sum + i.quantity, 0);
+  const rawCount = getItems(storeSubdomain).reduce((sum, i) => sum + i.quantity, 0);
+  const cartCount = mounted ? rawCount : 0;
+  useEffect(() => setMounted(true), []);
   const { storeName, logo, logoAlignment, logoBlockId, footerTagline, footerLinks, colors } = theme;
   const logoAlign = logoAlignment ?? 'left';
 
