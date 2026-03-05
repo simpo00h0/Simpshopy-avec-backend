@@ -20,7 +20,6 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
-import { useMultipleImageUpload } from '@/lib/hooks/useMultipleImageUpload';
 import { ProductImagesField } from '@/components/ProductImagesField';
 
 interface Product {
@@ -66,11 +65,6 @@ export default function ProductCreatePage() {
     queryKey: ['categories'],
     queryFn: () => api.get<Category[]>('/categories').then((r) => r.data || []),
     staleTime: 60_000,
-  });
-
-  const { handleDrop, loading: uploadLoading } = useMultipleImageUpload({
-    onAdd: (url) =>
-      form.setFieldValue('images', [...form.values.images, url]),
   });
 
   const createMutation = useMutation({
@@ -142,8 +136,6 @@ export default function ProductCreatePage() {
               onAdd={(url) =>
                 form.setFieldValue('images', [...form.values.images, url])
               }
-              onDrop={handleDrop}
-              loading={uploadLoading}
             />
             <Group grow>
               <NumberInput

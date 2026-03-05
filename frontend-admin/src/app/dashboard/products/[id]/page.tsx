@@ -22,7 +22,6 @@ import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
 import { LoadingScreen } from '@/components/LoadingScreen';
-import { useMultipleImageUpload } from '@/lib/hooks/useMultipleImageUpload';
 import { ProductImagesField } from '@/components/ProductImagesField';
 
 interface Product {
@@ -80,11 +79,6 @@ export default function ProductEditPage() {
     queryKey: ['categories'],
     queryFn: () => api.get<Category[]>('/categories').then((r) => r.data || []),
     staleTime: 60_000,
-  });
-
-  const { handleDrop, loading: uploadLoading } = useMultipleImageUpload({
-    onAdd: (url) =>
-      form.setFieldValue('images', [...form.values.images, url]),
   });
 
   useEffect(() => {
@@ -190,8 +184,6 @@ export default function ProductEditPage() {
               onAdd={(url) =>
                 form.setFieldValue('images', [...form.values.images, url])
               }
-              onDrop={handleDrop}
-              loading={uploadLoading}
             />
             <Group grow>
               <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />

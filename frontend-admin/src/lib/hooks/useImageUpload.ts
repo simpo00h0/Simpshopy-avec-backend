@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 import { notifications } from '@mantine/notifications';
-import { uploadImage } from '../upload-service';
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('Lecture impossible'));
-    reader.readAsDataURL(file);
-  });
-}
+import { uploadMediaToLibrary } from '../upload-service';
 
 export interface UseImageUploadOptions {
   onUpdate: (url: string) => void;
@@ -22,7 +13,7 @@ export interface UseImageUploadOptions {
 
 export function useImageUpload({
   onUpdate,
-  successTitle = 'Image importée',
+  successTitle = 'Image ajoutée à la bibliothèque',
   successMessage = '',
   onError,
 }: UseImageUploadOptions) {
@@ -31,16 +22,13 @@ export function useImageUpload({
   const handleDrop = async (files: File[]) => {
     const file = files[0];
     if (!file) return;
-    const dataUrl = await readFileAsDataUrl(file);
-    onUpdate(dataUrl);
     setLoading(true);
-    const result = await uploadImage(file);
+    const media = await uploadMediaToLibrary(file);
     setLoading(false);
-    if (result.success && result.url) {
-      onUpdate(result.url);
+    if (media?.url) {
+      onUpdate(media.url);
       notifications.show({ title: successTitle, message: successMessage, color: 'green' });
     } else {
-      onUpdate('');
       onError?.();
     }
   };

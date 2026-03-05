@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, Group, SimpleGrid, Text, Button } from '@mantine/core';
-import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { IconPhoto, IconTrash, IconLibrary } from '@tabler/icons-react';
+import { Box, SimpleGrid, Text, Button } from '@mantine/core';
+import { IconLibrary, IconTrash } from '@tabler/icons-react';
 import { ActionIcon } from '@mantine/core';
 import { MediaPicker } from './MediaPicker';
 
@@ -11,16 +10,12 @@ export interface ProductImagesFieldProps {
   images: string[];
   onRemove: (url: string) => void;
   onAdd: (url: string) => void;
-  onDrop: (files: File[]) => Promise<void>;
-  loading: boolean;
 }
 
 export function ProductImagesField({
   images,
   onRemove,
   onAdd,
-  onDrop,
-  loading,
 }: ProductImagesFieldProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -30,7 +25,7 @@ export function ProductImagesField({
         Images du produit
       </Text>
       <Text size="xs" c="dimmed" mb="xs">
-        JPEG, PNG, GIF ou WebP — max 5 Mo. Upload ou sélection depuis la bibliothèque.
+        Sélectionnez les images depuis la bibliothèque.
       </Text>
       <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="sm" mb="sm">
         {images.map((url) => (
@@ -70,26 +65,6 @@ export function ProductImagesField({
             </ActionIcon>
           </Box>
         ))}
-        <Dropzone
-          onDrop={onDrop}
-          maxSize={5 * 1024 * 1024}
-          accept={IMAGE_MIME_TYPE}
-          loading={loading}
-          style={{
-            minHeight: 100,
-            aspectRatio: '1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Group justify="center" gap="xs" style={{ pointerEvents: 'none' }}>
-            <IconPhoto size={32} color="var(--mantine-color-dimmed)" stroke={1.5} />
-            <Text size="xs" c="dimmed">
-              Upload
-            </Text>
-          </Group>
-        </Dropzone>
       </SimpleGrid>
       <Button
         variant="light"
