@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, SimpleGrid, Text, Button } from '@mantine/core';
-import { IconLibrary, IconTrash } from '@tabler/icons-react';
+import { Box, SimpleGrid, Stack, Text } from '@mantine/core';
+import { IconPhoto, IconTrash } from '@tabler/icons-react';
 import { ActionIcon } from '@mantine/core';
 import { MediaPicker } from './MediaPicker';
 
@@ -65,15 +65,39 @@ export function ProductImagesField({
             </ActionIcon>
           </Box>
         ))}
+        <Box
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && setPickerOpen(true)}
+          onClick={() => setPickerOpen(true)}
+          style={{
+            aspectRatio: '1',
+            borderRadius: 8,
+            border: '2px dashed var(--mantine-color-default-border)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'var(--mantine-color-gray-0)',
+            transition: 'border-color 0.15s, background-color 0.15s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--mantine-color-blue-4)';
+            e.currentTarget.style.backgroundColor = 'var(--mantine-color-blue-0)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--mantine-color-default-border)';
+            e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)';
+          }}
+        >
+          <Stack align="center" gap={4}>
+            <IconPhoto size={32} color="var(--mantine-color-dimmed)" stroke={1.5} />
+            <Text size="xs" c="dimmed" ta="center">
+              Ajouter une image
+            </Text>
+          </Stack>
+        </Box>
       </SimpleGrid>
-      <Button
-        variant="light"
-        size="xs"
-        leftSection={<IconLibrary size={14} />}
-        onClick={() => setPickerOpen(true)}
-      >
-        Choisir depuis la bibliothèque
-      </Button>
       <MediaPicker
         opened={pickerOpen}
         onClose={() => setPickerOpen(false)}
