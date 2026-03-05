@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Modal, Tabs, SimpleGrid, Box, Text, Group, Loader } from '@mantine/core';
+import { Modal, Tabs, SimpleGrid, Box, Text, Group } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { IconPhoto, IconUpload } from '@tabler/icons-react';
+import { IconPhoto, IconUpload, IconCloudUpload } from '@tabler/icons-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
@@ -25,6 +25,7 @@ interface PendingUpload {
   file: File;
   blobUrl: string;
   status: 'uploading' | 'done' | 'error';
+  progress: number;
   media?: Media | null;
 }
 
@@ -51,10 +52,16 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
     (file: File) => {
       const blobUrl = URL.createObjectURL(file);
       const id = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      const pending: PendingUpload = { id, file, blobUrl, status: 'uploading' };
+      const pending: PendingUpload = { id, file, blobUrl, status: 'uploading', progress: 0 };
       setPendingUploads((prev) => [...prev, pending]);
 
-      uploadMediaToLibrary(file)
+      uploadMediaToLibrary(file, undefined, {
+        onProgress: (percent) => {
+          setPendingUploads((prev) =>
+            prev.map((p) => (p.id === id ? { ...p, progress: percent } : p))
+          );
+        },
+      })
         .then((media) => {
           setPendingUploads((prev) =>
             prev.map((p) => (p.id === id ? { ...p, status: 'done' as const, media } : p))
@@ -181,6 +188,7 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
                     borderRadius: 8,
                     overflow: 'hidden',
                     border: '2px solid var(--mantine-color-blue-4)',
+                    boxShadow: '0 0 12px rgba(59, 130, 246, 0.3)',
                     backgroundColor: 'var(--mantine-color-gray-1)',
                   }}
                 >
@@ -200,12 +208,55 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
                       inset={0}
                       style={{
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'rgba(255,255,255,0.7)',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
+                        padding: 10,
                       }}
                     >
-                      <Loader size="md" />
+                      <Box
+                        p={8}
+                        style={{
+                          borderRadius: 10,
+                          backgroundColor: '#374151',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                        }}
+                      >
+                        <Box
+                          pos="relative"
+                          style={{
+                            height: 12,
+                            borderRadius: 6,
+                            backgroundColor: '#fff',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <Box
+                            style={{
+                              position: 'absolute',
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              width: `${p.progress}%`,
+                              backgroundColor: 'var(--mantine-color-blue-5)',
+                              borderRadius: 6,
+                              transition: 'width 0.2s ease',
+                            }}
+                          />
+                          <Box
+                            pos="absolute"
+                            style={{
+                              left: `clamp(0px, ${p.progress}% - 10px, calc(100% - 20px))`,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              transition: 'left 0.2s ease',
+                              zIndex: 1,
+                            }}
+                          >
+                            <IconCloudUpload size={20} color="var(--mantine-color-blue-5)" stroke={2.5} />
+                          </Box>
+                        </Box>
+                      </Box>
                     </Box>
                   )}
                 </Box>
