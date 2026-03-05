@@ -11,6 +11,7 @@ import {
   IconDiscount2,
   IconShoppingBag,
   IconPalette,
+  IconPhoto,
 } from '@tabler/icons-react';
 import type { QueryClient } from '@tanstack/react-query';
 import {
@@ -56,6 +57,12 @@ export function getNavItems(
       label: 'Thèmes',
       icon: IconPalette,
       onPrefetch: () => prefetchRoute('/dashboard/themes'),
+    },
+    {
+      href: '/dashboard/files',
+      label: 'Fichiers',
+      icon: IconPhoto,
+      onPrefetch: () => prefetchRoute('/dashboard/files'),
     },
     {
       href: '/dashboard/orders',

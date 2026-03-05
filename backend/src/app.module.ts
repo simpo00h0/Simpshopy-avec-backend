@@ -14,6 +14,7 @@ import { PagesModule } from './pages/pages.module';
 import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { UploadModule } from './upload/upload.module';
+import { MediaModule } from './media/media.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { WalletModule } from './wallet/wallet.module';
 import { CommissionsModule } from './commissions/commissions.module';
@@ -49,6 +50,7 @@ import { EventsModule } from './events/events.module';
     CartModule,
     ReviewsModule,
     UploadModule,
+    MediaModule,
     NotificationsModule,
     WalletModule,
     CommissionsModule,

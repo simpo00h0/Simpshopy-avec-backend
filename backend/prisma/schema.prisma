@@ -115,6 +115,7 @@ model Store {
   products        Product[]
   orders          Order[]
   categories      Category[]
+  media           Media[]
   pages           Page[]
   settings        StoreSettings?
   wallet          Wallet?
@@ -131,6 +132,25 @@ model Store {
   @@index([subdomain])
   @@index([status])
   @@map("stores")
+}
+
+// Bibliothèque média (images hébergées sur ImageKit)
+model Media {
+  id              String   @id @default(uuid())
+  storeId         String
+  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  url             String   // URL ImageKit (hébergement externe)
+  imagekitFileId  String?  // ID ImageKit pour suppression éventuelle
+  filename        String
+  mimeType        String
+  size            Int?     // octets
+  altText         String?
+
+  createdAt       DateTime @default(now())
+
+  @@index([storeId])
+  @@index([storeId, createdAt])
+  @@map("media")
 }
 
 model StoreSettings {

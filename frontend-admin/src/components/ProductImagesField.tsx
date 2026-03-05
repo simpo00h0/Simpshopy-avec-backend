@@ -1,13 +1,16 @@
 'use client';
 
-import { Box, Group, SimpleGrid, Text } from '@mantine/core';
+import { useState } from 'react';
+import { Box, Group, SimpleGrid, Text, Button } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { IconPhoto, IconTrash } from '@tabler/icons-react';
+import { IconPhoto, IconTrash, IconLibrary } from '@tabler/icons-react';
 import { ActionIcon } from '@mantine/core';
+import { MediaPicker } from './MediaPicker';
 
 export interface ProductImagesFieldProps {
   images: string[];
   onRemove: (url: string) => void;
+  onAdd: (url: string) => void;
   onDrop: (files: File[]) => Promise<void>;
   loading: boolean;
 }
@@ -15,16 +18,19 @@ export interface ProductImagesFieldProps {
 export function ProductImagesField({
   images,
   onRemove,
+  onAdd,
   onDrop,
   loading,
 }: ProductImagesFieldProps) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   return (
     <Box>
       <Text size="sm" fw={500} mb={4}>
         Images du produit
       </Text>
       <Text size="xs" c="dimmed" mb="xs">
-        JPEG, PNG, GIF ou WebP — max 5 Mo par image
+        JPEG, PNG, GIF ou WebP — max 5 Mo. Upload ou sélection depuis la bibliothèque.
       </Text>
       <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="sm" mb="sm">
         {images.map((url) => (
@@ -80,11 +86,27 @@ export function ProductImagesField({
           <Group justify="center" gap="xs" style={{ pointerEvents: 'none' }}>
             <IconPhoto size={32} color="var(--mantine-color-dimmed)" stroke={1.5} />
             <Text size="xs" c="dimmed">
-              Ajouter
+              Upload
             </Text>
           </Group>
         </Dropzone>
       </SimpleGrid>
+      <Button
+        variant="light"
+        size="xs"
+        leftSection={<IconLibrary size={14} />}
+        onClick={() => setPickerOpen(true)}
+      >
+        Choisir depuis la bibliothèque
+      </Button>
+      <MediaPicker
+        opened={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={(url) => {
+          onAdd(url);
+          setPickerOpen(false);
+        }}
+      />
     </Box>
   );
 }

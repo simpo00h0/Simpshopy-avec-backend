@@ -139,6 +139,9 @@ export default function ProductCreatePage() {
                   form.values.images.filter((u) => u !== url)
                 )
               }
+              onAdd={(url) =>
+                form.setFieldValue('images', [...form.values.images, url])
+              }
               onDrop={handleDrop}
               loading={uploadLoading}
             />

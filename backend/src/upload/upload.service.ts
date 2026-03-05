@@ -15,6 +15,13 @@ export class UploadService {
   }
 
   async saveImage(file: Express.Multer.File): Promise<string> {
+    const result = await this.saveImageWithMetadata(file);
+    return result.url;
+  }
+
+  async saveImageWithMetadata(
+    file: Express.Multer.File,
+  ): Promise<{ url: string; fileId?: string }> {
     if (!this.imagekit) {
       throw new Error('ImageKit non configuré. Définissez IMAGEKIT_PRIVATE_KEY dans .env');
     }
@@ -28,6 +35,7 @@ export class UploadService {
     if (!response.url) {
       throw new Error('ImageKit n\'a pas renvoyé l\'URL de l\'image');
     }
-    return response.url;
+    const fileId = (response as { fileId?: string }).fileId;
+    return { url: response.url, fileId };
   }
 }

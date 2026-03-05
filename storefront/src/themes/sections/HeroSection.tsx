@@ -52,6 +52,7 @@ export function HeroSection() {
               alt=""
               fill
               priority
+              loading="eager"
               sizes="100vw"
               style={{ objectFit: 'cover' }}
               unoptimized={heroImage.startsWith('data:')}
