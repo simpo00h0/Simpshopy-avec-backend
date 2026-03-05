@@ -69,8 +69,17 @@ export function ProductImagesField({
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && setPickerOpen(true)}
-          onClick={() => setPickerOpen(true)}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setPickerOpen(true);
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setPickerOpen(true);
+          }}
           style={{
+            touchAction: 'manipulation',
             aspectRatio: '1',
             borderRadius: 8,
             border: '2px dashed var(--mantine-color-default-border)',

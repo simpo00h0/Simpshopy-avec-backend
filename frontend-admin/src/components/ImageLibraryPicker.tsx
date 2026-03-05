@@ -31,6 +31,17 @@ export function ImageLibraryPicker({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         onKeyDown={(e) => e.key === 'Enter' && setPickerOpen(true)}
+        onPointerDown={(e) => {
+          if ((e.target as HTMLElement).closest('[data-delete-image]')) return;
+          e.stopPropagation();
+          e.preventDefault();
+          setPickerOpen(true);
+        }}
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest('[data-delete-image]')) return;
+          e.stopPropagation();
+          setPickerOpen(true);
+        }}
         style={{
           position: 'relative',
           minHeight: 120,
@@ -41,17 +52,18 @@ export function ImageLibraryPicker({
           border: '2px dashed var(--mantine-color-default-border)',
           cursor: 'pointer',
           padding: 24,
+          touchAction: 'manipulation',
           backgroundColor: hovered ? 'var(--mantine-color-blue-0)' : 'var(--mantine-color-gray-0)',
           transition: 'border-color 0.15s, background-color 0.15s',
           borderColor: hovered ? 'var(--mantine-color-blue-4)' : undefined,
         }}
-        onClick={() => setPickerOpen(true)}
       >
         {imageUrl ? (
           <>
             <Box component="img" src={imageUrl} alt="" style={imageStyle} />
             {hovered && (
               <ActionIcon
+                data-delete-image
                 size="sm"
                 color="red"
                 variant="filled"
@@ -60,6 +72,7 @@ export function ImageLibraryPicker({
                   e.stopPropagation();
                   onRemove();
                 }}
+                onPointerDown={(e) => e.stopPropagation()}
                 style={{ position: 'absolute', top: 8, right: 8 }}
               >
                 <IconTrash size={14} />

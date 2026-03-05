@@ -60,6 +60,7 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
       onClose={onClose}
       title="Bibliothèque média"
       size="xl"
+      zIndex={10000}
     >
       <Tabs defaultValue="library">
         <Tabs.List>
