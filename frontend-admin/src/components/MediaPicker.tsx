@@ -36,7 +36,6 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
   const { data: mediaList = [], isLoading } = useQuery({
     queryKey: ['media'],
     queryFn: () => api.get<MediaItem[]>('/media').then((r) => r.data || []),
-    enabled: opened,
     staleTime: 30_000,
   });
 
