@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getSubdomain } from '@/lib/subdomain';
 
+const PATH_ONLY_DOMAINS = ['vercel.app', 'localhost'];
+
+function isPathOnlyHost(host: string): boolean {
+  const hostname = host.split(':')[0];
+  return PATH_ONLY_DOMAINS.some((d) => hostname.endsWith(d));
+}
+
 function getBaseDomain(): string {
   return process.env.NEXT_PUBLIC_STOREFRONT_DOMAIN || 'localhost:3002';
 }
@@ -19,7 +26,7 @@ export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const sMatch = pathname.match(/^\/s\/([^/]+)(\/.*)?$/);
-  if (sMatch) {
+  if (sMatch && !isPathOnlyHost(host)) {
     const slug = sMatch[1];
     const rest = sMatch[2] || '';
     const search = request.nextUrl.search;
