@@ -6,6 +6,7 @@ import { CreateStoreUseCase } from './application/create-store.usecase';
 import { FindStoresByOwnerUseCase } from './application/find-stores-by-owner.usecase';
 import { FindFirstStoreByOwnerUseCase } from './application/find-first-store-by-owner.usecase';
 import { FindStoreBySubdomainPublicUseCase } from './application/find-store-by-subdomain-public.usecase';
+import { FindActiveSubdomainsUseCase } from './application/find-active-subdomains.usecase';
 import { FindStoreUseCase } from './application/find-store.usecase';
 import { UpdateStoreUseCase } from './application/update-store.usecase';
 import { UpdateStoreSettingsUseCase } from './application/update-store-settings.usecase';
@@ -21,6 +22,7 @@ import { IStoreRepository } from './domain/store.repository';
     FindStoresByOwnerUseCase,
     FindFirstStoreByOwnerUseCase,
     FindStoreBySubdomainPublicUseCase,
+    FindActiveSubdomainsUseCase,
     FindStoreUseCase,
     UpdateStoreUseCase,
     UpdateStoreSettingsUseCase,

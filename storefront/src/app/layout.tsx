@@ -4,8 +4,18 @@ import { MantineProvider, ColorSchemeScript, mantineHtmlProps } from '@mantine/c
 import { ReactQueryProvider } from '@/providers/ReactQueryProvider';
 
 export const metadata = {
-  title: 'Simpshopy - Boutique en ligne',
-  description: 'Découvrez nos produits',
+  title: {
+    default: 'Simpshopy - Créez votre boutique en ligne',
+    template: '%s | Simpshopy',
+  },
+  description:
+    'Plateforme e-commerce pour créer et gérer votre boutique en ligne. Référencement SEO optimisé, paiement Mobile Money, livraison.',
+  keywords: ['boutique en ligne', 'e-commerce', 'créer boutique', 'vente en ligne', 'Mobile Money'],
+  openGraph: {
+    type: 'website',
+    locale: 'fr_FR',
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

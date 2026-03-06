@@ -34,6 +34,8 @@ export interface UpdateStoreSettingsData {
 }
 
 export interface IStoreRepository {
+  findActiveSubdomains(): Promise<string[]>;
+
   findBySubdomain(subdomain: string): Promise<Store | null>;
 
   create(data: CreateStoreData): Promise<Store>;

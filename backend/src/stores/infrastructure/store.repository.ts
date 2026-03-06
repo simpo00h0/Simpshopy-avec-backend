@@ -12,6 +12,14 @@ import { Store, StorePublic, StoreCustomer } from '../domain/store.entity';
 export class StoreRepository implements IStoreRepository {
   constructor(private prisma: PrismaService) {}
 
+  async findActiveSubdomains(): Promise<string[]> {
+    const stores = await this.prisma.store.findMany({
+      where: { status: { in: ['ACTIVE', 'DRAFT'] } },
+      select: { subdomain: true },
+    });
+    return stores.map((s) => s.subdomain);
+  }
+
   async findBySubdomain(subdomain: string): Promise<Store | null> {
     const store = await this.prisma.store.findUnique({
       where: { subdomain },
