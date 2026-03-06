@@ -16,6 +16,7 @@ import {
   Textarea,
   Select,
   Divider,
+  Badge,
 } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -247,6 +248,54 @@ export default function ProductCreatePage() {
               {...form.getInputProps('metaDescription')}
             />
               </Stack>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Title order={4} mb="xs">Résumé</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                Aperçu rapide avant de créer le produit.
+              </Text>
+              <Card padding="md" radius="md" withBorder>
+                <Group justify="space-between" mb="xs" align="flex-start">
+                  <div>
+                    <Text fw={500}>
+                      {form.values.name || 'Nouveau produit'}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      {form.values.sku || 'SKU non défini'}
+                    </Text>
+                  </div>
+                  <Text fw={600}>
+                    {form.values.price > 0
+                      ? `${form.values.price.toLocaleString('fr-FR')} XOF`
+                      : 'Prix non défini'}
+                  </Text>
+                </Group>
+                <Group gap="xs">
+                  <Badge
+                    size="xs"
+                    color={
+                      form.values.status === 'ACTIVE'
+                        ? 'green'
+                        : form.values.status === 'OUT_OF_STOCK'
+                          ? 'yellow'
+                          : 'gray'
+                    }
+                  >
+                    {form.values.status}
+                  </Badge>
+                  <Text size="xs" c="dimmed">
+                    Stock: {form.values.inventoryQty}
+                  </Text>
+                  {form.values.compareAtPrice && (
+                    <Text size="xs" c="dimmed">
+                      Prix comparé: {Number(form.values.compareAtPrice).toLocaleString('fr-FR')} XOF
+                    </Text>
+                  )}
+                </Group>
+              </Card>
             </div>
 
             <Group mt="md">
