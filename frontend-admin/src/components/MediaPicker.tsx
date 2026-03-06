@@ -59,9 +59,7 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
           );
           if (media) {
             queryClient.invalidateQueries({ queryKey: ['media'] });
-            onSelect(media.url);
-            onClose();
-            notifications.show({ title: 'Image ajoutée', message: '', color: 'green' });
+            notifications.show({ title: 'Image ajoutée à la bibliothèque', message: '', color: 'green' });
           }
           URL.revokeObjectURL(blobUrl);
           setPendingUploads((prev) => prev.filter((p) => p.id !== id));
@@ -72,12 +70,11 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
           setPendingUploads((prev) => prev.filter((p) => p.id !== id));
         });
     },
-    [queryClient, onSelect, onClose]
+    [queryClient]
   );
 
   const handleDrop = (files: File[]) => {
-    const file = files[0];
-    if (file) startUpload(file);
+    files.forEach((file) => startUpload(file));
   };
 
   useEffect(() => {
@@ -156,15 +153,17 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
           <Dropzone
             onDrop={handleDrop}
             maxSize={5 * 1024 * 1024}
+            maxFiles={20}
+            multiple
             accept={IMAGE_MIME_TYPE}
           >
             <Group justify="center" gap="xs" style={{ pointerEvents: 'none' }}>
               <IconUpload size={40} color="var(--mantine-color-dimmed)" stroke={1.5} />
               <Text size="sm" c="dimmed">
-                Glissez une image ici ou cliquez pour choisir
+                Glissez des images ici ou cliquez pour choisir (jusqu&apos;à 20)
               </Text>
               <Text size="xs" c="dimmed">
-                JPEG, PNG, GIF, WebP — max 5 Mo. L&apos;image s&apos;affiche immédiatement, l&apos;upload se fait en arrière-plan.
+                JPEG, PNG, GIF, WebP — max 5 Mo par image. Affichage immédiat, upload en arrière-plan.
               </Text>
             </Group>
           </Dropzone>
