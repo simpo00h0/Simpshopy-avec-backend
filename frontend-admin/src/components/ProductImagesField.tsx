@@ -24,14 +24,14 @@ export function ProductImagesField({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
-    <Box style={{ maxWidth: 320 }}>
+    <Box style={{ maxWidth: 420 }}>
       <Text size="sm" fw={500} mb={4}>
         Images du produit
       </Text>
-      <Text size="xs" c="dimmed" mb="xs">
+      <Text size="xs" c="dimmed" mb="sm">
         La première image est mise en avant (cartes, listes). Utilisez les flèches pour réordonner.
       </Text>
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="xs" mb="xs">
+      <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm" mb="sm">
         {images.map((url, index) => {
           const canMoveUp = onReorder && index > 0;
           const canMoveDown = onReorder && index < images.length - 1;
@@ -145,8 +145,8 @@ export function ProductImagesField({
             e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)';
           }}
         >
-          <Stack align="center" gap={2}>
-            <IconPhoto size={24} color="var(--mantine-color-dimmed)" stroke={1.5} />
+          <Stack align="center" gap={4}>
+            <IconPhoto size={28} color="var(--mantine-color-dimmed)" stroke={1.5} />
             <Text size="xs" c="dimmed" ta="center">
               Ajouter une image
             </Text>
