@@ -8,6 +8,14 @@ export interface StoreProduct {
   price: number;
   compareAtPrice?: number;
   images?: string[];
+  variants?: Array<{
+    id: string;
+    name: string;
+    attributes: Record<string, string> | null;
+    price: number | null;
+    inventoryQty: number;
+    imageUrl: string | null;
+  }>;
 }
 
 export interface StoreCollection {
@@ -23,6 +31,8 @@ export interface StorePublic {
   subdomain: string;
   description?: string | null;
   logo?: string | null;
+  themeId: string;
+  themeCustomization?: object | null;
   products: StoreProduct[];
   collections?: StoreCollection[];
 }
