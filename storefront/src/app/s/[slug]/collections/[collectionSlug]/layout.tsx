@@ -1,13 +1,9 @@
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { fetchStore } from '@/lib/store-api';
+import { getCachedStore } from '@/lib/store-cache';
 import { buildStorePageUrl } from '@/lib/seo';
 import type { StoreCollection } from '@/lib/store-api';
-
-async function getStore(slug: string) {
-  return fetchStore(slug);
-}
 
 export async function generateMetadata({
   params,
@@ -15,7 +11,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string; collectionSlug: string }>;
 }): Promise<Metadata> {
   const { slug, collectionSlug } = await params;
-  const store = await getStore(slug);
+  const store = await getCachedStore(slug);
   if (!store) return { title: 'Boutique introuvable' };
 
   const collection = store.collections?.find(
@@ -65,7 +61,7 @@ export default async function CollectionLayout({
   params: Promise<{ slug: string; collectionSlug: string }>;
 }) {
   const { slug, collectionSlug } = await params;
-  const store = await getStore(slug);
+  const store = await getCachedStore(slug);
   if (!store) notFound();
 
   const collection = store.collections?.find(

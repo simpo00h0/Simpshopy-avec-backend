@@ -1,24 +1,8 @@
-import { Suspense } from 'react';
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
-import { unstable_cache } from 'next/cache';
 import type { Metadata } from 'next';
-import { StoreLayoutClient } from './StoreLayoutClient';
-import { StorefrontSkeleton } from '@/components/StorefrontSkeleton';
-import { fetchStore } from '@/lib/store-api';
-import { getSubdomain } from '@/lib/subdomain';
+import { StoreLayoutShell } from './StoreLayoutShell';
+import { getCachedStore } from '@/lib/store-cache';
 import { buildStorePageUrl } from '@/lib/seo';
-
-export const dynamic = 'force-dynamic';
-
-async function getStore(subdomain: string) {
-  const cached = unstable_cache(
-    () => fetchStore(subdomain),
-    [`store-${subdomain}`],
-    { tags: [`store-${subdomain}`], revalidate: 60 }
-  );
-  return cached();
-}
 
 export async function generateMetadata({
   params,
@@ -26,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const store = await getStore(slug);
+  const store = await getCachedStore(slug);
   if (!store) return { title: 'Boutique introuvable' };
 
   const headersList = await headers();
@@ -68,39 +52,38 @@ export default async function StoreLayout({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const store = await getStore(slug);
-  if (!store) notFound();
+  const store = await getCachedStore(slug);
 
   const headersList = await headers();
   const host = headersList.get('host') || '';
-  const subdomain = getSubdomain(host);
-  const basePath = subdomain ? '' : `/s/${slug}`;
   const url = buildStorePageUrl(host, slug);
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: store.name,
-    url,
-    description: store.description || undefined,
-    logo: store.logo || undefined,
-  };
+  const jsonLd = store
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: store.name,
+        url,
+        description: store.description || undefined,
+        logo: store.logo || undefined,
+      }
+    : null;
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <script
         dangerouslySetInnerHTML={{
           __html: `if(new URLSearchParams(window.location.search).get("editor")==="1"){window.parent?.postMessage({type:"simpshopy-editor-ready"},"*");}`,
         }}
       />
-      <Suspense fallback={<StorefrontSkeleton />}>
-        <StoreLayoutClient store={store} subdomain={slug} basePath={basePath}>
-          {children}
-        </StoreLayoutClient>
-      </Suspense>
+      <StoreLayoutShell initialStore={store ?? undefined}>
+        {children}
+      </StoreLayoutShell>
     </>
   );
 }
