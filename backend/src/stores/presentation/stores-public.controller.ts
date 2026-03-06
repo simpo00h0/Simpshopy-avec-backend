@@ -1,4 +1,11 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  NotFoundException,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { FindStoreBySubdomainPublicUseCase } from '../application/find-store-by-subdomain-public.usecase';
 import { FindActiveSubdomainsUseCase } from '../application/find-active-subdomains.usecase';
@@ -6,6 +13,8 @@ import { FindActiveSubdomainsUseCase } from '../application/find-active-subdomai
 @ApiTags('storefront')
 @Controller('storefront')
 export class StoresPublicController {
+  private readonly logger = new Logger(StoresPublicController.name);
+
   constructor(
     private readonly findStoreBySubdomainPublicUseCase: FindStoreBySubdomainPublicUseCase,
     private readonly findActiveSubdomainsUseCase: FindActiveSubdomainsUseCase,
@@ -23,11 +32,26 @@ export class StoresPublicController {
     summary: "Données publiques d'une boutique (par sous-domaine)",
   })
   async findBySubdomain(@Param('subdomain') subdomain: string) {
-    const store =
-      await this.findStoreBySubdomainPublicUseCase.execute(subdomain);
-    if (!store) {
-      throw new NotFoundException('Boutique introuvable');
+    try {
+      const store =
+        await this.findStoreBySubdomainPublicUseCase.execute(subdomain);
+      if (!store) {
+        throw new NotFoundException('Boutique introuvable');
+      }
+      return store;
+    } catch (err) {
+      if (err instanceof NotFoundException) throw err;
+      this.logger.error(
+        `Erreur storefront/${subdomain}: ${err instanceof Error ? err.message : String(err)}`,
+        err instanceof Error ? err.stack : undefined,
+      );
+      throw new InternalServerErrorException(
+        process.env.NODE_ENV === 'production'
+          ? 'Erreur lors du chargement de la boutique'
+          : err instanceof Error
+            ? err.message
+            : 'Erreur inconnue',
+      );
     }
-    return store;
   }
 }
