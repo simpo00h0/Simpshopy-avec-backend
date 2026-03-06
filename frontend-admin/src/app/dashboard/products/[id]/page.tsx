@@ -31,6 +31,7 @@ import { ProductImagesField } from '@/components/ProductImagesField';
 import {
   ProductVariantsField,
   variantsFromApi,
+  buildVariantsForSubmit,
   type ProductOption,
   type VariantRow,
 } from '@/app/dashboard/products/components/ProductVariantsField';
@@ -127,8 +128,13 @@ export default function ProductEditPage() {
   }, [isError, router]);
 
   const updateMutation = useMutation({
-    mutationFn: (values: typeof form.values) =>
-      api.patch(`/products/${id}`, {
+    mutationFn: (values: typeof form.values) => {
+      const variantsToSend = buildVariantsForSubmit(
+        values.productOptions,
+        values.variants,
+        values.price
+      );
+      return api.patch(`/products/${id}`, {
         name: values.name,
         description: values.description || undefined,
         price: values.price,
@@ -139,16 +145,16 @@ export default function ProductEditPage() {
         categoryId: values.categoryId || null,
         images: values.images,
         variants:
-          values.variants.length > 0
-            ? values.variants.map((v) => ({
+          variantsToSend.length > 0
+            ? variantsToSend.map((v) => ({
                 attributes: v.attributes,
                 price: v.price,
                 inventoryQty: v.inventoryQty,
                 sku: v.sku || undefined,
-                imageUrl: v.imageUrl || undefined,
               }))
             : undefined,
-      }),
+      });
+    },
     onMutate: (values) => {
       queryClient.setQueryData<Product[]>(['products'], (old = []) =>
         old.map((p) =>
@@ -219,12 +225,11 @@ export default function ProductEditPage() {
         status: 'DRAFT',
         variants:
           variants.length > 0
-            ? variants.map((v) => ({
+            ? variants.map((v: VariantRow) => ({
                 attributes: v.attributes,
                 price: v.price,
                 inventoryQty: v.inventoryQty,
                 sku: v.sku || undefined,
-                imageUrl: v.imageUrl || undefined,
               }))
             : undefined,
       });

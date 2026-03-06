@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,7 +12,8 @@ import {
   TextInput,
   Title,
 } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPhoto, IconPlus } from '@tabler/icons-react';
+import { MediaPicker } from '@/components/MediaPicker';
 
 export interface ProductOption {
   name: string;
@@ -24,6 +25,7 @@ export interface VariantRow {
   price?: number;
   inventoryQty: number;
   sku: string;
+  imageUrl?: string;
 }
 
 function cartesian<T>(arrays: T[][]): T[][] {
@@ -44,20 +46,53 @@ function variantDisplayName(attributes: Record<string, string>): string {
   return Object.values(attributes).filter(Boolean).join(' / ') || 'Default';
 }
 
+/** Liste des variantes à envoyer à l'API, calculée à partir des options + overrides. Utiliser au submit. */
+export function buildVariantsForSubmit(
+  options: ProductOption[],
+  variantsOverride: VariantRow[],
+  basePrice: number
+): VariantRow[] {
+  if (options.length === 0 || options.every((o) => o.values.length === 0)) return [];
+  const valueArrays = options
+    .filter((o) => o.name && o.values.length > 0)
+    .map((o) => o.values.filter(Boolean));
+  if (valueArrays.length === 0) return [];
+  const combinations = cartesian(valueArrays) as string[][];
+  const newOptNames = options.filter((o) => o.name && o.values.length > 0).map((o) => o.name);
+  const existingByKey = new Map(
+    variantsOverride.map((v) => [variantKey(v.attributes), v])
+  );
+  return combinations.map((combo) => {
+    const attributes: Record<string, string> = {};
+    newOptNames.forEach((name, i) => {
+      attributes[name] = combo[i] ?? '';
+    });
+    const key = variantKey(attributes);
+    const existing = existingByKey.get(key);
+    return {
+      attributes,
+      price: existing?.price ?? basePrice,
+      inventoryQty: existing?.inventoryQty ?? 0,
+      sku: existing?.sku ?? '',
+      imageUrl: existing?.imageUrl ?? '',
+    };
+  });
+}
+
 /** Dérive options et lignes éditables à partir des variantes renvoyées par l’API (édition). */
 export function variantsFromApi(
-  apiVariants: { attributes?: Record<string, string>; price?: number; inventoryQty?: number; sku?: string }[]
+  apiVariants: { attributes?: Record<string, string>; price?: number; inventoryQty?: number; sku?: string; imageUrl?: string }[]
 ): { options: ProductOption[]; variants: VariantRow[] } {
   if (!apiVariants?.length) return { options: [], variants: [] };
-  const optionNames = [
-    ...new Set(apiVariants.flatMap((v) => Object.keys(v.attributes ?? {}))),
-  ].sort();
+  const optionNames = Array.from(
+    new Set(apiVariants.flatMap((v) => Object.keys(v.attributes ?? {})))
+  ).sort();
   const options: ProductOption[] = optionNames.map((name) => {
-    const values = [
-      ...new Set(
+    const values = Array.from(
+      new Set(
         apiVariants.map((v) => (v.attributes ?? {})[name]).filter(Boolean)
-      ),
-    ];
+      )
+    );
     return { name, values };
   });
   const variants: VariantRow[] = apiVariants.map((v) => ({
@@ -65,6 +100,7 @@ export function variantsFromApi(
     price: v.price,
     inventoryQty: v.inventoryQty ?? 0,
     sku: v.sku ?? '',
+    imageUrl: (v as { imageUrl?: string }).imageUrl ?? '',
   }));
   return { options, variants };
 }
@@ -125,7 +161,7 @@ export function ProductVariantsField({
     const rowKeys = new Set(variantRows.map((r) => variantKey(r.attributes)));
     const same =
       currentKeys.size === rowKeys.size &&
-      [...rowKeys].every((k) => currentKeys.has(k));
+      Array.from(rowKeys).every((k) => currentKeys.has(k));
     if (!same) onVariantsChange(variantRows);
   }, [optionsSignature, variantRows.length]);
 

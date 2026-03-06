@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   IProductRepository,
@@ -13,6 +13,8 @@ function variantNameFromAttributes(attributes: Record<string, string>): string {
 
 @Injectable()
 export class ProductRepository implements IProductRepository {
+  private readonly logger = new Logger(ProductRepository.name);
+
   constructor(private prisma: PrismaService) {}
 
   async findByStoreAndSlug(
@@ -53,7 +55,6 @@ export class ProductRepository implements IProductRepository {
           price: v.price ?? null,
           inventoryQty: v.inventoryQty ?? 0,
           sku: v.sku ?? null,
-          imageUrl: v.imageUrl ?? null,
         })),
       });
     }
@@ -79,7 +80,10 @@ export class ProductRepository implements IProductRepository {
   async findById(id: string): Promise<Product | null> {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      include: { variants: true, category: true },
+      include: {
+        variants: { select: { id: true, name: true, attributes: true, price: true, inventoryQty: true, sku: true } },
+        category: true,
+      },
     });
     return product as Product | null;
   }
@@ -108,6 +112,9 @@ export class ProductRepository implements IProductRepository {
       if (data.variants !== undefined) {
         await tx.productVariant.deleteMany({ where: { productId: id } });
         if (data.variants.length > 0) {
+          this.logger.log(
+            `[Variantes] Création de ${data.variants.length} variante(s) pour produit ${id}`,
+          );
           await tx.productVariant.createMany({
             data: data.variants.map((v) => ({
               productId: id,
@@ -116,7 +123,6 @@ export class ProductRepository implements IProductRepository {
               price: v.price ?? null,
               inventoryQty: v.inventoryQty ?? 0,
               sku: v.sku ?? null,
-              imageUrl: v.imageUrl ?? null,
             })),
           });
         }

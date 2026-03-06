@@ -78,7 +78,6 @@ export class StoreRepository implements IStoreRepository {
                 attributes: true,
                 price: true,
                 inventoryQty: true,
-                imageUrl: true,
               },
             },
           },
