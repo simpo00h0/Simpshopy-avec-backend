@@ -15,7 +15,7 @@ import {
 } from '@mantine/core';
 import { IconShoppingCart } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { TableSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { ORDER_STATUS_COLORS } from '@/lib/constants';
 
@@ -59,7 +59,9 @@ export default function OrdersPage() {
       </Group>
 
       {loading ? (
-        <LoadingScreen />
+        <Card shadow="sm" padding="0" radius="md" withBorder>
+          <TableSkeleton rows={6} />
+        </Card>
       ) : orders.length === 0 ? (
         <EmptyState
           icon={IconShoppingCart}

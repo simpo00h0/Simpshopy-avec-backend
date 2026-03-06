@@ -21,7 +21,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { PageSkeleton } from '@/components/PageSkeleton';
 import { ProductImagesField } from '@/components/ProductImagesField';
 
 interface Product {
@@ -149,7 +149,7 @@ export default function ProductEditPage() {
     return (
       <Container fluid py="xl">
         <Title order={2} mb="xl">Produits</Title>
-        <LoadingScreen />
+        <PageSkeleton />
       </Container>
     );
   }

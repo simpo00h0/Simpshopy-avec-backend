@@ -17,7 +17,7 @@ import {
 import { IconArrowLeft } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import { ORDER_STATUS_COLORS } from '@/lib/constants';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface Order {
   id: string;
@@ -49,7 +49,7 @@ export default function OrderDetailPage() {
     return (
       <Container fluid py="xl">
         <Title order={2} mb="xl">Commandes</Title>
-        <LoadingScreen />
+        <PageSkeleton />
       </Container>
     );
   }

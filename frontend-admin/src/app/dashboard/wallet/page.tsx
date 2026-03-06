@@ -5,7 +5,7 @@ import { notifications } from '@mantine/notifications';
 import { Container, Title, Text, Card, Group, Table } from '@mantine/core';
 import { IconWallet } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface Transaction {
   id: string;
@@ -43,7 +43,7 @@ export default function WalletPage() {
     return (
       <Container fluid py="xl">
         <Title order={2} mb="xl">Portefeuille</Title>
-        <LoadingScreen />
+        <PageSkeleton />
       </Container>
     );
   }

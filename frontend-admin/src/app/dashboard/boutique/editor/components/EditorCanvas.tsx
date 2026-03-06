@@ -1,7 +1,6 @@
 'use client';
 
-import { Box } from '@mantine/core';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { Box, Skeleton, Stack } from '@mantine/core';
 
 interface EditorCanvasProps {
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
@@ -55,17 +54,19 @@ export function EditorCanvas(props: EditorCanvasProps) {
       >
         {iframeSrc && showCanvasLoader && !canvasReady && (
           <Box
+            p="md"
             style={{
               position: 'absolute',
               inset: 0,
               zIndex: 10,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
               backgroundColor: 'var(--mantine-color-gray-0)',
             }}
           >
-            <LoadingScreen />
+            <Stack gap="sm">
+              <Skeleton height={48} width="60%" radius="sm" />
+              <Skeleton height={120} radius="sm" />
+              <Skeleton height={80} radius="sm" />
+            </Stack>
           </Box>
         )}
         <iframe

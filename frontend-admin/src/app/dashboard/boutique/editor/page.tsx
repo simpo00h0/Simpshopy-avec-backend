@@ -6,7 +6,7 @@ import { Box, Button, Group, Text, Alert } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { PageSkeleton } from '@/components/PageSkeleton';
 import { useStoreStore } from '@/stores/storeStore';
 import { useEditorState, useEditorLoad, useEditorSave, useEditorIframe, useEditorDragDrop, useEditorKeyboardShortcuts } from './hooks';
 import { LeaveConfirmPortal } from './components/LeaveConfirmPortal';
@@ -184,7 +184,7 @@ export default function BoutiqueEditorPage() {
             backgroundColor: 'var(--mantine-color-gray-0)',
           }}
         >
-          <LoadingScreen />
+          <PageSkeleton />
         </Box>
       )}
       <Box className={styles.root}>

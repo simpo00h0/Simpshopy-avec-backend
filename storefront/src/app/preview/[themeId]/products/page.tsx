@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { StorefrontSkeleton } from '@/components/StorefrontSkeleton';
 import { CollectionTemplate } from '@/themes/templates/CollectionTemplate';
 
 function ProductsContent() {
@@ -12,7 +13,7 @@ function ProductsContent() {
 
 export default function PreviewProductsPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div>}>
+    <Suspense fallback={<StorefrontSkeleton />}>
       <ProductsContent />
     </Suspense>
   );

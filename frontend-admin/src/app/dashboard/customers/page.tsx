@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Container, Title, Text, Card, Table } from '@mantine/core';
 import { IconUsers } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { TableSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 
 interface CustomerRow {
@@ -26,7 +26,9 @@ export default function CustomersPage() {
         Clients
       </Title>
       {loading ? (
-        <LoadingScreen />
+        <Card shadow="sm" padding="0" radius="md" withBorder>
+          <TableSkeleton rows={6} />
+        </Card>
       ) : customers.length === 0 ? (
         <EmptyState
           icon={IconUsers}

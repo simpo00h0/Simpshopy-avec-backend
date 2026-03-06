@@ -17,7 +17,7 @@ import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { uploadMediaToLibrary } from '@/lib/upload-service';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { MediaGridSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { getApiErrorMessage } from '@/lib/api-utils';
 import type { PendingUpload } from '@/lib/types/upload';
@@ -151,7 +151,7 @@ export default function FilesPage() {
       </Card>
 
       {isLoading && displayItems.length === 0 ? (
-        <LoadingScreen />
+        <MediaGridSkeleton count={8} />
       ) : displayItems.length === 0 ? (
         <EmptyState
           icon={IconPhoto}

@@ -7,7 +7,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreStore } from '@/stores/storeStore';
 import { supabase } from '@/lib/supabase';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { PageSkeleton } from '@/components/PageSkeleton';
 import { useDashboardAuth } from './hooks/useDashboardAuth';
 import { useDashboardNavigation } from './hooks/useDashboardNavigation';
 import { useDashboardPrefetch } from './hooks/useDashboardPrefetch';
@@ -41,9 +41,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const mainContent = isEditorPath
     ? children
     : hasStore === null || hasStore === false
-      ? <LoadingScreen />
+      ? <PageSkeleton />
       : showNavLoader && navigatingTo
-        ? <LoadingScreen />
+        ? <PageSkeleton />
         : children;
 
   if (!hasSession) {
@@ -55,7 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Group>
         </AppShell.Header>
         <AppShell.Main>
-          <LoadingScreen />
+          <PageSkeleton />
         </AppShell.Main>
       </AppShell>
     );

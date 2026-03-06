@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { unstable_cache } from 'next/cache';
 import { StoreLayoutClient } from './StoreLayoutClient';
+import { StorefrontSkeleton } from '@/components/StorefrontSkeleton';
 import { API_BASE_URL } from '@/lib/constants';
 import { getSubdomain } from '@/lib/subdomain';
 
@@ -55,7 +56,7 @@ export default async function StoreLayout({
           __html: `if(new URLSearchParams(window.location.search).get("editor")==="1"){window.parent?.postMessage({type:"simpshopy-editor-ready"},"*");}`,
         }}
       />
-      <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Chargement...</div>}>
+      <Suspense fallback={<StorefrontSkeleton />}>
         <StoreLayoutClient store={store} subdomain={slug} basePath={basePath}>
           {children}
         </StoreLayoutClient>

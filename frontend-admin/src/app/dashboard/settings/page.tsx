@@ -21,7 +21,7 @@ import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
 import { revalidateStorefrontCache } from '@/lib/revalidate-storefront';
 import { useStoreStore } from '@/stores/storeStore';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface StoreData {
   name: string;
@@ -191,7 +191,7 @@ export default function SettingsPage() {
     return (
       <Container fluid py="xl">
         <Title order={2} mb="xl">Paramètres</Title>
-        <LoadingScreen />
+        <PageSkeleton />
       </Container>
     );
   }

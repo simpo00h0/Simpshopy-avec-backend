@@ -14,7 +14,7 @@ import {
 } from '@mantine/core';
 import { IconPackage, IconPlus } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import { LoadingScreen } from '@/components/LoadingScreen';
+import { TableSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 
 interface Product {
@@ -46,7 +46,9 @@ export default function ProductsPage() {
       </Group>
 
       {loading ? (
-        <LoadingScreen />
+        <Card shadow="sm" padding="md" radius="md" withBorder>
+          <TableSkeleton rows={6} />
+        </Card>
       ) : products.length === 0 ? (
         <EmptyState
           icon={IconPackage}
