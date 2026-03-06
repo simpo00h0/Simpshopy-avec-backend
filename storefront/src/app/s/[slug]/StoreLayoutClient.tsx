@@ -45,6 +45,7 @@ function mapProducts(products: StoreData['products']): MockProduct[] {
     description: p.description ?? '',
     imagePlaceholder: '📦',
     imageUrl: p.images?.[0],
+    images: p.images ?? [],
   }));
 }
 

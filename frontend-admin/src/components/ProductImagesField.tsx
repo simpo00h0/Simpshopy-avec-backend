@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Box, SimpleGrid, Stack, Text } from '@mantine/core';
-import { IconPhoto, IconTrash } from '@tabler/icons-react';
+import { Box, Group, SimpleGrid, Stack, Text } from '@mantine/core';
+import { IconPhoto, IconTrash, IconArrowUp, IconArrowDown } from '@tabler/icons-react';
 import { ActionIcon } from '@mantine/core';
 import { MediaPicker } from './MediaPicker';
 
@@ -11,6 +11,7 @@ export interface ProductImagesFieldProps {
   onRemove: (url: string) => void;
   onAdd: (url: string) => void;
   onAddMultiple?: (urls: string[]) => void;
+  onReorder?: (urls: string[]) => void;
 }
 
 export function ProductImagesField({
@@ -18,6 +19,7 @@ export function ProductImagesField({
   onRemove,
   onAdd,
   onAddMultiple,
+  onReorder,
 }: ProductImagesFieldProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -27,46 +29,88 @@ export function ProductImagesField({
         Images du produit
       </Text>
       <Text size="xs" c="dimmed" mb="xs">
-        Sélectionnez les images depuis la bibliothèque.
+        La première image est mise en avant (cartes, listes). Utilisez les flèches pour réordonner.
       </Text>
       <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="sm" mb="sm">
-        {images.map((url) => (
-          <Box
-            key={url}
-            pos="relative"
-            style={{
-              aspectRatio: '1',
-              borderRadius: 8,
-              overflow: 'hidden',
-              border: '1px solid var(--mantine-color-default-border)',
-            }}
-          >
+        {images.map((url, index) => {
+          const canMoveUp = onReorder && index > 0;
+          const canMoveDown = onReorder && index < images.length - 1;
+          const moveUp = () => {
+            if (!onReorder || !canMoveUp) return;
+            const next = [...images];
+            [next[index - 1], next[index]] = [next[index], next[index - 1]];
+            onReorder(next);
+          };
+          const moveDown = () => {
+            if (!onReorder || !canMoveDown) return;
+            const next = [...images];
+            [next[index], next[index + 1]] = [next[index + 1], next[index]];
+            onReorder(next);
+          };
+          return (
             <Box
-              component="img"
-              src={url}
-              alt=""
+              key={url}
+              pos="relative"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-            <ActionIcon
-              size="sm"
-              color="red"
-              variant="filled"
-              aria-label="Supprimer"
-              onClick={() => onRemove(url)}
-              style={{
-                position: 'absolute',
-                top: 4,
-                right: 4,
+                aspectRatio: '1',
+                borderRadius: 8,
+                overflow: 'hidden',
+                border: `1px solid ${index === 0 ? 'var(--mantine-color-green-5)' : 'var(--mantine-color-default-border)'}`,
+                boxShadow: index === 0 ? '0 0 0 2px var(--mantine-color-green-3)' : undefined,
               }}
             >
-              <IconTrash size={12} />
-            </ActionIcon>
-          </Box>
-        ))}
+              {index === 0 && (
+                <Text
+                  size="xs"
+                  fw={600}
+                  style={{
+                    position: 'absolute',
+                    top: 4,
+                    left: 4,
+                    zIndex: 1,
+                    backgroundColor: 'var(--mantine-color-green-6)',
+                    color: 'white',
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                  }}
+                >
+                  Mise en avant
+                </Text>
+              )}
+              <Box
+                component="img"
+                src={url}
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+              <Group gap={4} style={{ position: 'absolute', top: 4, right: 4, zIndex: 1 }}>
+                {canMoveUp && (
+                  <ActionIcon size="xs" variant="filled" aria-label="Monter" onClick={moveUp}>
+                    <IconArrowUp size={10} />
+                  </ActionIcon>
+                )}
+                {canMoveDown && (
+                  <ActionIcon size="xs" variant="filled" aria-label="Descendre" onClick={moveDown}>
+                    <IconArrowDown size={10} />
+                  </ActionIcon>
+                )}
+                <ActionIcon
+                  size="xs"
+                  color="red"
+                  variant="filled"
+                  aria-label="Supprimer"
+                  onClick={() => onRemove(url)}
+                >
+                  <IconTrash size={10} />
+                </ActionIcon>
+              </Group>
+            </Box>
+          );
+        })}
         <Box
           role="button"
           tabIndex={0}

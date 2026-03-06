@@ -7,7 +7,10 @@ export interface MockProduct {
   priceLabel: string;
   description: string;
   imagePlaceholder: string;
+  /** Image principale (première de la galerie). Utilisée sur les cartes et listes. */
   imageUrl?: string;
+  /** Toutes les images du produit. La première est mise en avant. */
+  images?: string[];
   category?: string;
 }
 

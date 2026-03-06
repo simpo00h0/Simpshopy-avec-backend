@@ -16,10 +16,13 @@ interface ProductTemplateProps {
 export function ProductTemplate({ product }: ProductTemplateProps) {
   const [imgError, setImgError] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const { theme, basePath, storeSubdomain } = useTheme();
   const addItem = useCartStore((s) => s.addItem);
   const { colors } = theme;
-  const showImage = product.imageUrl && !imgError;
+  const gallery = product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [];
+  const mainImage = gallery[selectedIndex];
+  const showImage = mainImage && !imgError;
 
   const relatedProducts = theme.products.filter((p) => p.id !== product.id).slice(0, 3);
 
@@ -51,30 +54,75 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
 
       <Grid gutter="xl">
         <Grid.Col span={{ base: 12, md: 6 }}>
-          <Box
-            style={{
-              height: 400,
-              position: 'relative',
-              borderRadius: 8,
-              overflow: 'hidden',
-              background: showImage ? undefined : `linear-gradient(145deg, ${colors.primary}20, ${colors.accent}30)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {showImage ? (
-              <Image
-                src={product.imageUrl!}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                style={{ objectFit: 'cover' }}
-                onError={() => setImgError(true)}
-                unoptimized={!product.imageUrl?.includes('images.unsplash.com')}
-              />
-            ) : (
-              <span style={{ fontSize: 120 }}>{product.imagePlaceholder}</span>
+          <Box>
+            <Box
+              style={{
+                height: 400,
+                position: 'relative',
+                borderRadius: 8,
+                overflow: 'hidden',
+                background: showImage ? undefined : `linear-gradient(145deg, ${colors.primary}20, ${colors.accent}30)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {showImage ? (
+                <Image
+                  key={mainImage}
+                  src={mainImage}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: 'cover' }}
+                  onError={() => setImgError(true)}
+                  unoptimized={!mainImage?.includes('images.unsplash.com')}
+                />
+              ) : (
+                <span style={{ fontSize: 120 }}>{product.imagePlaceholder}</span>
+              )}
+            </Box>
+            {gallery.length > 1 && (
+              <Box
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  marginTop: 8,
+                  overflowX: 'auto',
+                  paddingBottom: 4,
+                }}
+              >
+                {gallery.map((url, i) => (
+                  <Box
+                    key={url}
+                    component="button"
+                    type="button"
+                    onClick={() => {
+                      setSelectedIndex(i);
+                      setImgError(false);
+                    }}
+                    style={{
+                      flex: '0 0 64px',
+                      height: 64,
+                      borderRadius: 6,
+                      overflow: 'hidden',
+                      border: `2px solid ${i === selectedIndex ? colors.primary : 'var(--mantine-color-default-border)'}`,
+                      cursor: 'pointer',
+                      padding: 0,
+                      background: 'transparent',
+                    }}
+                  >
+                    <Image
+                      src={url}
+                      alt=""
+                      width={64}
+                      height={64}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                      unoptimized={!url?.includes('images.unsplash.com')}
+                    />
+                  </Box>
+                ))}
+              </Box>
             )}
           </Box>
         </Grid.Col>

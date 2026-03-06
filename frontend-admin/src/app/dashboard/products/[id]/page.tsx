@@ -187,6 +187,7 @@ export default function ProductEditPage() {
               onAddMultiple={(urls) =>
                 form.setFieldValue('images', [...form.values.images, ...urls])
               }
+              onReorder={(urls) => form.setFieldValue('images', urls)}
             />
             <Group grow>
               <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />
