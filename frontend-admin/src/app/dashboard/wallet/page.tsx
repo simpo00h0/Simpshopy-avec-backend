@@ -35,6 +35,7 @@ async function fetchWallet(): Promise<WalletData> {
 }
 
 export default function WalletPage() {
+  const currency = useStoreStore((s) => s.currentStore?.currency) ?? 'XOF';
   const { data, isLoading, isError } = useQuery({
     queryKey: ['wallet'],
     queryFn: fetchWallet,
