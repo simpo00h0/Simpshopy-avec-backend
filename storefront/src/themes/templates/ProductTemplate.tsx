@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Title, Text, Button, Grid, Box, Breadcrumbs, NumberInput, Divider, Group, Stack } from '@mantine/core';
+import { Container, Title, Text, Button, Grid, Box, NumberInput, Divider, Group, Stack } from '@mantine/core';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useMemo, useEffect } from 'react';
@@ -55,32 +55,8 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
 
   const relatedProducts = theme.products.filter((p) => p.id !== product.id).slice(0, 3);
 
-  const breadcrumbItems = [
-    { title: 'Accueil', href: basePath || '/' },
-    { title: 'Produits', href: basePath ? `${basePath}/collections/all` : '/collections/all' },
-    { title: product.name, href: '#' },
-  ];
-
   return (
     <Container size="lg" py="xl">
-      <Breadcrumbs mb="xl" style={{ color: colors.text }}>
-        {breadcrumbItems.map((item) =>
-          item.href === '#' ? (
-            <Text key={item.title} size="sm" c="dimmed">
-              {item.title}
-            </Text>
-          ) : (
-            <Link
-              key={item.title}
-              href={item.href}
-              style={{ fontSize: 14, color: colors.primary, textDecoration: 'none' }}
-            >
-              {item.title}
-            </Link>
-          )
-        )}
-      </Breadcrumbs>
-
       <Grid gutter="xl">
         <Grid.Col span={{ base: 12, md: 6 }}>
           <Box>
