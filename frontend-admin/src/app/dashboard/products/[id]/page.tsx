@@ -28,6 +28,19 @@ import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
 import { PageSkeleton } from '@/components/PageSkeleton';
 import { ProductImagesField } from '@/components/ProductImagesField';
+import {
+  ProductVariantsField,
+  variantsFromApi,
+  type ProductOption,
+  type VariantRow,
+} from '@/app/dashboard/products/components/ProductVariantsField';
+
+interface ProductVariant {
+  attributes?: Record<string, string>;
+  price?: number;
+  inventoryQty?: number;
+  sku?: string;
+}
 
 interface Product {
   id: string;
@@ -41,8 +54,7 @@ interface Product {
   sku?: string;
   categoryId?: string | null;
   images?: string[];
-  metaTitle?: string | null;
-  metaDescription?: string | null;
+  variants?: ProductVariant[];
 }
 
 interface Category {
@@ -68,8 +80,8 @@ export default function ProductEditPage() {
       status: 'DRAFT',
       categoryId: null as string | null,
       images: [] as string[],
-      metaTitle: '',
-      metaDescription: '',
+      productOptions: [] as ProductOption[],
+      variants: [] as VariantRow[],
     },
   });
 
@@ -88,6 +100,7 @@ export default function ProductEditPage() {
 
   useEffect(() => {
     if (product) {
+      const { options, variants } = variantsFromApi(product.variants ?? []);
       form.setValues({
         name: product.name,
         description: product.description || '',
@@ -98,8 +111,8 @@ export default function ProductEditPage() {
         status: product.status || 'DRAFT',
         categoryId: product.categoryId ?? null,
         images: product.images ?? [],
-        metaTitle: product.metaTitle || '',
-        metaDescription: product.metaDescription || '',
+        productOptions: options,
+        variants,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form.setValues when product loads
@@ -124,8 +137,15 @@ export default function ProductEditPage() {
         status: values.status,
         categoryId: values.categoryId || null,
         images: values.images,
-        metaTitle: values.metaTitle || null,
-        metaDescription: values.metaDescription || null,
+        variants:
+          values.variants.length > 0
+            ? values.variants.map((v) => ({
+                attributes: v.attributes,
+                price: v.price,
+                inventoryQty: v.inventoryQty,
+                sku: v.sku || undefined,
+              }))
+            : undefined,
       }),
     onMutate: (values) => {
       queryClient.setQueryData<Product[]>(['products'], (old = []) =>
@@ -183,8 +203,9 @@ export default function ProductEditPage() {
   });
 
   const duplicateMutation = useMutation({
-    mutationFn: () =>
-      api.post<Product>('/products', {
+    mutationFn: () => {
+      const { variants } = variantsFromApi(product?.variants ?? []);
+      return api.post<Product>('/products', {
         name: `${product?.name ?? ''} (copie)`,
         description: product?.description,
         price: product?.price ?? 0,
@@ -193,10 +214,18 @@ export default function ProductEditPage() {
         sku: product?.sku ? `${product.sku}-copy` : undefined,
         categoryId: product?.categoryId ?? undefined,
         images: product?.images ?? [],
-        metaTitle: product?.metaTitle ?? undefined,
-        metaDescription: product?.metaDescription ?? undefined,
         status: 'DRAFT',
-      }),
+        variants:
+          variants.length > 0
+            ? variants.map((v) => ({
+                attributes: v.attributes,
+                price: v.price,
+                inventoryQty: v.inventoryQty,
+                sku: v.sku || undefined,
+              }))
+            : undefined,
+      });
+    },
     onSuccess: (res) => {
       const created = res.data as Product;
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -322,45 +351,50 @@ export default function ProductEditPage() {
             <div>
               <Title order={4} mb="xs">Prix</Title>
               <Group grow>
-              <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />
-              <NumberInput label="Prix comparé (XOF)" min={0} {...form.getInputProps('compareAtPrice')} />
-            </Group>
-            <Group grow>
-              <NumberInput label="Stock" min={0} {...form.getInputProps('inventoryQty')} />
-              <TextInput label="SKU" {...form.getInputProps('sku')} />
-            </Group>
-            <Select
-              label="Catégorie"
-              placeholder="Sélectionner une catégorie"
-              data={categories.map((c) => ({ value: c.id, label: c.name }))}
-              clearable
-              {...form.getInputProps('categoryId')}
-            />
-            <Select
-              label="Statut"
-              data={[
-                { value: 'DRAFT', label: 'Brouillon' },
-                { value: 'ACTIVE', label: 'Actif' },
-                { value: 'OUT_OF_STOCK', label: 'Rupture de stock' },
-                { value: 'ARCHIVED', label: 'Archivé' },
-              ]}
-              {...form.getInputProps('status')}
-            />
+                <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />
+                <NumberInput label="Prix comparé (XOF)" min={0} {...form.getInputProps('compareAtPrice')} />
+              </Group>
             </div>
             <Divider />
             <div>
-              <Title order={4} mb="xs">Référencement (SEO)</Title>
-              <TextInput
-              label="Titre SEO"
-              placeholder="Titre pour les moteurs de recherche"
-              {...form.getInputProps('metaTitle')}
-            />
-            <Textarea
-              label="Description SEO"
-              placeholder="Meta description pour les moteurs de recherche"
-              minRows={2}
-              {...form.getInputProps('metaDescription')}
-            />
+              <Title order={4} mb="xs">Inventaire (produit sans variantes)</Title>
+              <Group grow>
+                <NumberInput label="Stock" min={0} {...form.getInputProps('inventoryQty')} />
+                <TextInput label="SKU" {...form.getInputProps('sku')} />
+              </Group>
+            </div>
+            <Divider />
+            <div>
+              <Title order={4} mb="xs">Options et variantes</Title>
+              <ProductVariantsField
+                options={form.values.productOptions}
+                variants={form.values.variants}
+                basePrice={form.values.price}
+                onOptionsChange={(v) => form.setFieldValue('productOptions', v)}
+                onVariantsChange={(v) => form.setFieldValue('variants', v)}
+              />
+            </div>
+            <Divider />
+            <div>
+              <Title order={4} mb="xs">Organisation</Title>
+              <Select
+                label="Catégorie"
+                placeholder="Sélectionner une catégorie"
+                data={categories.map((c) => ({ value: c.id, label: c.name }))}
+                clearable
+                searchable
+                {...form.getInputProps('categoryId')}
+              />
+              <Select
+                label="Statut"
+                data={[
+                  { value: 'DRAFT', label: 'Brouillon' },
+                  { value: 'ACTIVE', label: 'Actif' },
+                  { value: 'OUT_OF_STOCK', label: 'Rupture de stock' },
+                  { value: 'ARCHIVED', label: 'Archivé' },
+                ]}
+                {...form.getInputProps('status')}
+              />
             </div>
             <Group mt="md">
               <Button type="submit" color="green" loading={updateMutation.isPending}>

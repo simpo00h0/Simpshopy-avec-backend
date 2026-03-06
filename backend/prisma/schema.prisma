@@ -305,6 +305,9 @@ model Product {
   metaTitle       String?
   metaDescription String?
   
+  // Type de produit (personnalisé, ex. T-shirt, Mug)
+  productType     String?
+  
   // Relations
   storeId         String
   store           Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)

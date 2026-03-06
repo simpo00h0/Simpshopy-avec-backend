@@ -7,6 +7,10 @@ import {
 } from '../domain/product.repository';
 import { Product } from '../domain/product.entity';
 
+function variantNameFromAttributes(attributes: Record<string, string>): string {
+  return Object.values(attributes).filter(Boolean).join(' / ') || 'Default';
+}
+
 @Injectable()
 export class ProductRepository implements IProductRepository {
   constructor(private prisma: PrismaService) {}
@@ -33,13 +37,26 @@ export class ProductRepository implements IProductRepository {
         sku: data.sku,
         storeId: data.storeId,
         categoryId: data.categoryId,
+        productType: data.productType,
         images: data.images ?? [],
         metaTitle: data.metaTitle,
         metaDescription: data.metaDescription,
         status: data.status ?? 'DRAFT',
       },
     });
-    return product as Product;
+    if (data.variants && data.variants.length > 0) {
+      await this.prisma.productVariant.createMany({
+        data: data.variants.map((v) => ({
+          productId: product.id,
+          name: variantNameFromAttributes(v.attributes),
+          attributes: v.attributes,
+          price: v.price ?? null,
+          inventoryQty: v.inventoryQty ?? 0,
+          sku: v.sku ?? null,
+        })),
+      });
+    }
+    return this.findById(product.id) as Promise<Product>;
   }
 
   async findByStore(storeId: string, status?: string): Promise<Product[]> {
@@ -67,25 +84,43 @@ export class ProductRepository implements IProductRepository {
   }
 
   async update(id: string, data: UpdateProductData): Promise<Product> {
-    const product = await this.prisma.product.update({
-      where: { id },
-      data: {
-        ...(data.name != null && { name: data.name }),
-        ...(data.description != null && { description: data.description }),
-        ...(data.price != null && { price: data.price }),
-        ...(data.compareAtPrice != null && {
-          compareAtPrice: data.compareAtPrice,
-        }),
-        ...(data.inventoryQty != null && { inventoryQty: data.inventoryQty }),
-        ...(data.sku != null && { sku: data.sku }),
-        ...(data.status != null && { status: data.status }),
-        ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
-        ...(data.images != null && { images: data.images }),
-        ...(data.metaTitle != null && { metaTitle: data.metaTitle }),
-        ...(data.metaDescription != null && { metaDescription: data.metaDescription }),
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.product.update({
+        where: { id },
+        data: {
+          ...(data.name != null && { name: data.name }),
+          ...(data.description != null && { description: data.description }),
+          ...(data.price != null && { price: data.price }),
+          ...(data.compareAtPrice != null && {
+            compareAtPrice: data.compareAtPrice,
+          }),
+          ...(data.inventoryQty != null && { inventoryQty: data.inventoryQty }),
+          ...(data.sku != null && { sku: data.sku }),
+          ...(data.status != null && { status: data.status }),
+          ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+          ...(data.productType !== undefined && { productType: data.productType }),
+          ...(data.images != null && { images: data.images }),
+          ...(data.metaTitle != null && { metaTitle: data.metaTitle }),
+          ...(data.metaDescription != null && { metaDescription: data.metaDescription }),
+        },
+      });
+      if (data.variants !== undefined) {
+        await tx.productVariant.deleteMany({ where: { productId: id } });
+        if (data.variants.length > 0) {
+          await tx.productVariant.createMany({
+            data: data.variants.map((v) => ({
+              productId: id,
+              name: variantNameFromAttributes(v.attributes),
+              attributes: v.attributes,
+              price: v.price ?? null,
+              inventoryQty: v.inventoryQty ?? 0,
+              sku: v.sku ?? null,
+            })),
+          });
+        }
+      }
     });
-    return product as Product;
+    return this.findById(id) as Promise<Product>;
   }
 
   async hasOrderItems(productId: string): Promise<boolean> {

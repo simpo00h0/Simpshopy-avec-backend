@@ -1,5 +1,12 @@
 import { Product } from './product.entity';
 
+export interface CreateVariantData {
+  attributes: Record<string, string>;
+  price?: number;
+  inventoryQty?: number;
+  sku?: string;
+}
+
 export interface CreateProductData {
   name: string;
   slug: string;
@@ -10,10 +17,12 @@ export interface CreateProductData {
   sku?: string;
   storeId: string;
   categoryId?: string;
+  productType?: string;
   images?: string[];
   metaTitle?: string;
   metaDescription?: string;
   status?: 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
+  variants?: CreateVariantData[];
 }
 
 export interface UpdateProductData {
@@ -25,9 +34,11 @@ export interface UpdateProductData {
   sku?: string;
   status?: 'DRAFT' | 'ACTIVE' | 'OUT_OF_STOCK' | 'ARCHIVED';
   categoryId?: string | null;
+  productType?: string | null;
   images?: string[];
   metaTitle?: string | null;
   metaDescription?: string | null;
+  variants?: CreateVariantData[];
 }
 
 export interface IProductRepository {

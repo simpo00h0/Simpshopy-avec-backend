@@ -6,8 +6,11 @@ import {
   Min,
   IsArray,
   IsEnum,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateVariantDto } from './create-variant.dto';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'T-shirt imprimé' })
@@ -49,6 +52,18 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   categoryId?: string;
+
+  @ApiProperty({ example: 'T-shirt', required: false, description: 'Type de produit (personnalisé)' })
+  @IsOptional()
+  @IsString()
+  productType?: string;
+
+  @ApiProperty({ type: [CreateVariantDto], required: false, description: 'Variantes (options générées côté client)' })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateVariantDto)
+  variants?: CreateVariantDto[];
 
   @ApiProperty({ type: [String], required: false })
   @IsOptional()
