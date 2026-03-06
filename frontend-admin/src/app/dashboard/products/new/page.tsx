@@ -30,9 +30,12 @@ import { getApiErrorMessage } from '@/lib/api-utils';
 import { ProductImagesField } from '@/components/ProductImagesField';
 import {
   ProductVariantsField,
+  buildVariantsForSubmit,
+  mapVariantToApiPayload,
   type ProductOption,
   type VariantRow,
 } from '@/app/dashboard/products/components/ProductVariantsField';
+import { PRODUCT_STATUS_OPTIONS } from '@/app/dashboard/products/constants';
 
 interface Product {
   id: string;
@@ -80,8 +83,13 @@ export default function ProductCreatePage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (values: typeof form.values) =>
-      api.post<Product>('/products', {
+    mutationFn: (values: typeof form.values) => {
+      const variantsToSend = buildVariantsForSubmit(
+        values.productOptions,
+        values.variants,
+        values.price
+      );
+      return api.post<Product>('/products', {
         name: values.name,
         description: values.description || undefined,
         price: values.price,
@@ -92,16 +100,11 @@ export default function ProductCreatePage() {
         images: values.images.length > 0 ? values.images : undefined,
         status: values.status,
         variants:
-          values.variants.length > 0
-            ? values.variants.map((v) => ({
-                attributes: v.attributes,
-                price: v.price,
-                inventoryQty: v.inventoryQty,
-                sku: v.sku || undefined,
-                imageUrl: v.imageUrl || undefined,
-              }))
+          variantsToSend.length > 0
+            ? variantsToSend.map(mapVariantToApiPayload)
             : undefined,
-      }),
+      });
+    },
     onSuccess: (res) => {
       const created = res.data as Product;
       queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -253,8 +256,6 @@ export default function ProductCreatePage() {
 
             <Divider />
 
-            <Divider />
-
             <div>
               <Title order={4} mb="xs">Options et variantes</Title>
               <ProductVariantsField
@@ -284,12 +285,7 @@ export default function ProductCreatePage() {
                 />
                 <Select
                   label="Statut"
-                  data={[
-                    { value: 'DRAFT', label: 'Brouillon' },
-                    { value: 'ACTIVE', label: 'Actif' },
-                    { value: 'OUT_OF_STOCK', label: 'Rupture de stock' },
-                    { value: 'ARCHIVED', label: 'Archivé' },
-                  ]}
+                  data={PRODUCT_STATUS_OPTIONS}
                   {...form.getInputProps('status')}
                 />
                 <Text size="xs" c="dimmed">

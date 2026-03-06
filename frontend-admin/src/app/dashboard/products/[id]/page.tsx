@@ -32,9 +32,11 @@ import {
   ProductVariantsField,
   variantsFromApi,
   buildVariantsForSubmit,
+  mapVariantToApiPayload,
   type ProductOption,
   type VariantRow,
 } from '@/app/dashboard/products/components/ProductVariantsField';
+import { PRODUCT_STATUS_OPTIONS } from '@/app/dashboard/products/constants';
 
 interface ProductVariant {
   attributes?: Record<string, string>;
@@ -146,13 +148,7 @@ export default function ProductEditPage() {
         images: values.images,
         variants:
           variantsToSend.length > 0
-            ? variantsToSend.map((v) => ({
-                attributes: v.attributes,
-                price: v.price,
-                inventoryQty: v.inventoryQty,
-                sku: v.sku || undefined,
-                imageUrl: v.imageUrl || undefined,
-              }))
+            ? variantsToSend.map(mapVariantToApiPayload)
             : undefined,
       });
     },
@@ -226,13 +222,7 @@ export default function ProductEditPage() {
         status: 'DRAFT',
         variants:
           variants.length > 0
-            ? variants.map((v: VariantRow) => ({
-                attributes: v.attributes,
-                price: v.price,
-                inventoryQty: v.inventoryQty,
-                sku: v.sku || undefined,
-                imageUrl: v.imageUrl || undefined,
-              }))
+            ? variants.map(mapVariantToApiPayload)
             : undefined,
       });
     },
@@ -397,12 +387,7 @@ export default function ProductEditPage() {
               />
               <Select
                 label="Statut"
-                data={[
-                  { value: 'DRAFT', label: 'Brouillon' },
-                  { value: 'ACTIVE', label: 'Actif' },
-                  { value: 'OUT_OF_STOCK', label: 'Rupture de stock' },
-                  { value: 'ARCHIVED', label: 'Archivé' },
-                ]}
+                data={PRODUCT_STATUS_OPTIONS}
                 {...form.getInputProps('status')}
               />
             </div>

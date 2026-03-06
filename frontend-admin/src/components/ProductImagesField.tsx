@@ -24,14 +24,14 @@ export function ProductImagesField({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
-    <Box>
+    <Box style={{ maxWidth: 320 }}>
       <Text size="sm" fw={500} mb={4}>
         Images du produit
       </Text>
       <Text size="xs" c="dimmed" mb="xs">
         La première image est mise en avant (cartes, listes). Utilisez les flèches pour réordonner.
       </Text>
-      <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="sm" mb="sm">
+      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="xs" mb="xs">
         {images.map((url, index) => {
           const canMoveUp = onReorder && index > 0;
           const canMoveDown = onReorder && index < images.length - 1;

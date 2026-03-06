@@ -46,6 +46,23 @@ function variantDisplayName(attributes: Record<string, string>): string {
   return Object.values(attributes).filter(Boolean).join(' / ') || 'Default';
 }
 
+/** Mappe une VariantRow vers le payload API (attributes, price, inventoryQty, sku, imageUrl). */
+export function mapVariantToApiPayload(v: VariantRow): {
+  attributes: Record<string, string>;
+  price?: number;
+  inventoryQty: number;
+  sku?: string;
+  imageUrl?: string;
+} {
+  return {
+    attributes: v.attributes,
+    price: v.price,
+    inventoryQty: v.inventoryQty,
+    sku: v.sku || undefined,
+    imageUrl: v.imageUrl || undefined,
+  };
+}
+
 /** Liste des variantes à envoyer à l'API, calculée à partir des options + overrides. Utiliser au submit. */
 export function buildVariantsForSubmit(
   options: ProductOption[],
@@ -122,34 +139,10 @@ export function ProductVariantsField({
   onOptionsChange,
   onVariantsChange,
 }: Props) {
-  const variantRows = useMemo(() => {
-    if (options.length === 0 || options.every((o) => o.values.length === 0)) {
-      return [];
-    }
-    const optionNames = options.map((o) => o.name).filter(Boolean);
-    const valueArrays = options
-      .filter((o) => o.name && o.values.length > 0)
-      .map((o) => o.values.filter(Boolean));
-    if (valueArrays.length === 0) return [];
-    const combinations = cartesian(valueArrays) as string[][];
-    const newOptNames = options.filter((o) => o.name && o.values.length > 0).map((o) => o.name);
-    const existingByKey = new Map(variants.map((v) => [variantKey(v.attributes), v]));
-    return combinations.map((combo) => {
-      const attributes: Record<string, string> = {};
-      newOptNames.forEach((name, i) => {
-        attributes[name] = combo[i] ?? '';
-      });
-      const key = variantKey(attributes);
-      const existing = existingByKey.get(key);
-      return {
-        attributes,
-        price: existing?.price ?? basePrice,
-        inventoryQty: existing?.inventoryQty ?? 0,
-        sku: existing?.sku ?? '',
-        imageUrl: existing?.imageUrl ?? '',
-      };
-    });
-  }, [options, basePrice, variants]);
+  const variantRows = useMemo(
+    () => buildVariantsForSubmit(options, variants, basePrice),
+    [options, basePrice, variants]
+  );
 
   const optionsSignature = useMemo(
     () => options.map((o) => `${o.name}:${o.values.join(',')}`).join('|'),
