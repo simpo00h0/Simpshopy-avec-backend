@@ -190,31 +190,6 @@ export default function ProductCreatePage() {
             <Divider />
 
             <div>
-              <Title order={4} mb="xs">Médias</Title>
-              <Text size="xs" c="dimmed" mb="sm">
-                La première image sera utilisée comme image principale.
-              </Text>
-              <ProductImagesField
-              images={form.values.images}
-              onRemove={(url) =>
-                form.setFieldValue(
-                  'images',
-                  form.values.images.filter((u) => u !== url)
-                )
-              }
-              onAdd={(url) =>
-                form.setFieldValue('images', [...form.values.images, url])
-              }
-              onAddMultiple={(urls) =>
-                form.setFieldValue('images', [...form.values.images, ...urls])
-              }
-              onReorder={(urls) => form.setFieldValue('images', urls)}
-            />
-            </div>
-
-            <Divider />
-
-            <div>
               <Title order={4} mb="xs">Prix</Title>
               <Text size="xs" c="dimmed" mb="sm">
                 Prix de vente et prix comparé (affiché barré si supérieur).
@@ -239,6 +214,31 @@ export default function ProductCreatePage() {
                   Le prix comparé sera affiché barré sur la fiche produit.
                 </Text>
               )}
+            </div>
+
+            <Divider />
+
+            <div>
+              <Title order={4} mb="xs">Médias</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                La première image sera utilisée comme image principale.
+              </Text>
+              <ProductImagesField
+              images={form.values.images}
+              onRemove={(url) =>
+                form.setFieldValue(
+                  'images',
+                  form.values.images.filter((u) => u !== url)
+                )
+              }
+              onAdd={(url) =>
+                form.setFieldValue('images', [...form.values.images, url])
+              }
+              onAddMultiple={(urls) =>
+                form.setFieldValue('images', [...form.values.images, ...urls])
+              }
+              onReorder={(urls) => form.setFieldValue('images', urls)}
+            />
             </div>
 
             <Divider />

@@ -329,6 +329,14 @@ export default function ProductEditPage() {
             </div>
             <Divider />
             <div>
+              <Title order={4} mb="xs">Prix</Title>
+              <Group grow>
+                <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />
+                <NumberInput label="Prix comparé (XOF)" min={0} {...form.getInputProps('compareAtPrice')} />
+              </Group>
+            </div>
+            <Divider />
+            <div>
               <Title order={4} mb="xs">Médias</Title>
               <ProductImagesField
               images={form.values.images}
@@ -346,14 +354,6 @@ export default function ProductEditPage() {
               }
               onReorder={(urls) => form.setFieldValue('images', urls)}
             />
-            </div>
-            <Divider />
-            <div>
-              <Title order={4} mb="xs">Prix</Title>
-              <Group grow>
-                <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />
-                <NumberInput label="Prix comparé (XOF)" min={0} {...form.getInputProps('compareAtPrice')} />
-              </Group>
             </div>
             <Divider />
             <div>
