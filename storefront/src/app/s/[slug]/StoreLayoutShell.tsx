@@ -11,9 +11,10 @@ import { getSubdomain } from '@/lib/subdomain';
 interface StoreLayoutShellProps {
   children: React.ReactNode;
   initialStore?: unknown;
+  initialBasePath?: string;
 }
 
-export function StoreLayoutShell({ children, initialStore }: StoreLayoutShellProps) {
+export function StoreLayoutShell({ children, initialStore, initialBasePath }: StoreLayoutShellProps) {
   const params = useParams();
   const slug = params?.slug as string | undefined;
   if (!slug) notFound();
@@ -35,7 +36,8 @@ export function StoreLayoutShell({ children, initialStore }: StoreLayoutShellPro
 
   const host = typeof window !== 'undefined' ? window.location.host : '';
   const subdomain = getSubdomain(host);
-  const basePath = subdomain === slug ? '' : `/s/${slug}`;
+  const basePath =
+    initialBasePath ?? (subdomain === slug ? '' : `/s/${slug}`);
 
   return (
     <StoreLayoutClient store={store} subdomain={slug} basePath={basePath}>

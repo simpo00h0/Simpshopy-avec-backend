@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { StoreLayoutShell } from './StoreLayoutShell';
 import { getCachedStore } from '@/lib/store-cache';
 import { buildStorePageUrl } from '@/lib/seo';
+import { getSubdomain } from '@/lib/subdomain';
 
 export async function generateMetadata({
   params,
@@ -55,7 +56,9 @@ export default async function StoreLayout({
   const store = await getCachedStore(slug);
 
   const headersList = await headers();
-  const host = headersList.get('host') || '';
+  const host = headersList.get('host') || headersList.get('x-forwarded-host') || '';
+  const subdomain = getSubdomain(host);
+  const basePath = subdomain === slug ? '' : `/s/${slug}`;
   const url = buildStorePageUrl(host, slug);
   const jsonLd = store
     ? {
@@ -81,7 +84,7 @@ export default async function StoreLayout({
           __html: `if(new URLSearchParams(window.location.search).get("editor")==="1"){window.parent?.postMessage({type:"simpshopy-editor-ready"},"*");}`,
         }}
       />
-      <StoreLayoutShell initialStore={store ?? undefined}>
+      <StoreLayoutShell initialStore={store ?? undefined} initialBasePath={basePath}>
         {children}
       </StoreLayoutShell>
     </>
