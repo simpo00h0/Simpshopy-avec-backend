@@ -54,26 +54,47 @@ export default function ProductsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/products/${id}`),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['products'] });
+      const previous = queryClient.getQueryData<Product[]>(['products']);
+      queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+        old.filter((p) => p.id !== id)
+      );
+      setProductToDelete(null);
+      return { previous };
+    },
+    onError: (err, _id, context) => {
+      if (context?.previous) queryClient.setQueryData(['products'], context.previous);
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       notifications.show({ title: 'Produit supprimé', message: '', color: 'green' });
-      setProductToDelete(null);
     },
-    onError: (err) => {
-      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
-      setProductToDelete(null);
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 
   const archiveMutation = useMutation({
     mutationFn: (id: string) => api.patch(`/products/${id}`, { status: 'ARCHIVED' }),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['products'] });
+      const previous = queryClient.getQueryData<Product[]>(['products']);
+      queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+        old.map((p) => (p.id === id ? { ...p, status: 'ARCHIVED' as const } : p))
+      );
+      return { previous };
+    },
+    onError: (err, _id, context) => {
+      if (context?.previous) queryClient.setQueryData(['products'], context.previous);
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
       notifications.show({ title: 'Produit archivé', message: '', color: 'green' });
     },
-    onError: (err) => {
-      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 
@@ -87,13 +108,36 @@ export default function ProductsPage() {
         sku: p.slug ? `${p.slug}-copy` : undefined,
         status: 'DRAFT',
       }),
-    onSuccess: (res) => {
+    onMutate: async (p) => {
+      await queryClient.cancelQueries({ queryKey: ['products'] });
+      const previous = queryClient.getQueryData<Product[]>(['products']);
+      const placeholderId = `temp-dup-${Date.now()}`;
+      const placeholder: Product = {
+        ...p,
+        id: placeholderId,
+        name: `${p.name} (copie)`,
+        status: 'DRAFT',
+      };
+      queryClient.setQueryData<Product[]>(['products'], (old = []) => [placeholder, ...old]);
+      return { previous, placeholderId };
+    },
+    onSuccess: (res, _p, context) => {
       const created = res.data as Product;
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      const placeholderId = context?.placeholderId;
+      queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+        [created, ...old.filter((x) => x.id !== placeholderId)]
+      );
       notifications.show({ title: 'Produit dupliqué', message: '', color: 'green' });
       router.push(`/dashboard/products/${created.id}`);
     },
-    onError: (err) => {
+    onError: (err, _p, context) => {
+      const placeholderId = context?.placeholderId;
+      if (placeholderId) {
+        queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+          old.filter((x) => x.id !== placeholderId)
+        );
+      }
+      if (context?.previous) queryClient.setQueryData(['products'], context.previous);
       notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
     },
   });
@@ -124,17 +168,29 @@ export default function ProductsPage() {
         await api.patch(`/products/${id}`, { status: 'ARCHIVED' });
       }
     },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey: ['products'] });
+      const previous = queryClient.getQueryData<Product[]>(['products']);
+      const idSet = new Set(ids);
+      queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+        old.map((p) => (idSet.has(p.id) ? { ...p, status: 'ARCHIVED' as const } : p))
+      );
+      setSelectedIds(new Set());
+      return { previous };
+    },
+    onError: (err, _ids, context) => {
+      if (context?.previous) queryClient.setQueryData(['products'], context.previous);
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    },
     onSuccess: (_, ids) => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
       notifications.show({
         title: 'Produits archivés',
         message: `${ids.length} produit(s) archivé(s)`,
         color: 'green',
       });
-      setSelectedIds(new Set());
     },
-    onError: (err) => {
-      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 
@@ -153,17 +209,43 @@ export default function ProductsPage() {
       }
       return created;
     },
-    onSuccess: (created) => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+    onMutate: async (items) => {
+      await queryClient.cancelQueries({ queryKey: ['products'] });
+      const previous = queryClient.getQueryData<Product[]>(['products']);
+      const ts = Date.now();
+      const placeholders: Product[] = items.map((p, i) => ({
+        ...p,
+        id: `temp-dup-${ts}-${i}`,
+        name: `${p.name} (copie)`,
+        status: 'DRAFT',
+      }));
+      queryClient.setQueryData<Product[]>(['products'], (old = []) => [...placeholders, ...old]);
+      setSelectedIds(new Set());
+      return { previous, placeholderPrefix: `temp-dup-${ts}` };
+    },
+    onSuccess: (created, _items, context) => {
+      const prefix = context?.placeholderPrefix ?? 'temp-dup-';
+      queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+        [...created, ...old.filter((x) => !x.id.startsWith(prefix))]
+      );
       notifications.show({
         title: 'Produits dupliqués',
         message: `${created.length} produit(s) créé(s)`,
         color: 'green',
       });
-      setSelectedIds(new Set());
     },
-    onError: (err) => {
+    onError: (err, _items, context) => {
+      const prefix = context?.placeholderPrefix ?? 'temp-dup-';
+      if (context?.previous) queryClient.setQueryData(['products'], context.previous);
+      else {
+        queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+          old.filter((x) => !x.id.startsWith(prefix))
+        );
+      }
       notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 
@@ -174,10 +256,25 @@ export default function ProductsPage() {
       );
       const ok = results.filter((r) => r.status === 'fulfilled').length;
       const failed = results.filter((r) => r.status === 'rejected').length;
-      return { total: ids.length, ok, failed };
+      return { ids, ok, failed };
+    },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey: ['products'] });
+      const previous = queryClient.getQueryData<Product[]>(['products']);
+      const idSet = new Set(ids);
+      queryClient.setQueryData<Product[]>(['products'], (old = []) =>
+        old.filter((p) => !idSet.has(p.id))
+      );
+      setSelectedIds(new Set());
+      setBulkDeleteOpen(false);
+      return { previous };
+    },
+    onError: (err, _ids, context) => {
+      if (context?.previous) queryClient.setQueryData(['products'], context.previous);
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+      setBulkDeleteOpen(false);
     },
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       if (result.failed > 0) {
         notifications.show({
@@ -192,12 +289,9 @@ export default function ProductsPage() {
           color: 'green',
         });
       }
-      setSelectedIds(new Set());
-      setBulkDeleteOpen(false);
     },
-    onError: (err) => {
-      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
-      setBulkDeleteOpen(false);
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
 
@@ -373,79 +467,95 @@ export default function ProductsPage() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {products.map((p) => (
-                  <Table.Tr key={p.id}>
-                    <Table.Td onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={selectedIds.has(p.id)}
-                        onChange={() => toggleOne(p.id)}
-                        aria-label={`Sélectionner ${p.name}`}
-                      />
-                    </Table.Td>
-                    <Table.Td>
-                      <Link href={`/dashboard/products/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <Text fw={500}>{p.name}</Text>
-                      </Link>
-                      <Text size="xs" c="dimmed">
-                        {p.slug}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge color={p.status === 'ACTIVE' ? 'green' : p.status === 'ARCHIVED' ? 'gray' : 'yellow'} size="sm">
-                        {p.status}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>{p.price.toLocaleString('fr-FR')} XOF</Table.Td>
-                    <Table.Td>{p.inventoryQty}</Table.Td>
-                    <Table.Td>
-                      <Group gap="xs" wrap="nowrap">
-                        <Link href={`/dashboard/products/${p.id}`} style={{ textDecoration: 'none' }}>
-                          <Button variant="subtle" size="xs" leftSection={<IconPencil size={14} />}>
-                            Modifier
-                          </Button>
-                        </Link>
-                        <Menu shadow="md" width={180} position="bottom-end">
-                          <Menu.Target>
-                            <ActionIcon variant="subtle" size="sm">
-                              <IconDots size={16} />
-                            </ActionIcon>
-                          </Menu.Target>
-                          <Menu.Dropdown>
-                            <Menu.Item
-                              component={Link}
-                              href={`/dashboard/products/${p.id}`}
-                              leftSection={<IconPencil size={14} />}
-                            >
-                              Modifier
-                            </Menu.Item>
-                            <Menu.Item
-                              leftSection={<IconArchive size={14} />}
-                              onClick={() => archiveMutation.mutate(p.id)}
-                              disabled={archiveMutation.isPending || p.status === 'ARCHIVED'}
-                            >
-                              Archiver
-                            </Menu.Item>
-                            <Menu.Item
-                              leftSection={<IconCopy size={14} />}
-                              onClick={() => duplicateMutation.mutate(p)}
-                              disabled={duplicateMutation.isPending}
-                            >
-                              Dupliquer
-                            </Menu.Item>
-                            <Menu.Divider />
-                            <Menu.Item
-                              leftSection={<IconTrash size={14} />}
-                              color="red"
-                              onClick={() => setProductToDelete(p)}
-                            >
-                              Supprimer
-                            </Menu.Item>
-                          </Menu.Dropdown>
-                        </Menu>
-                      </Group>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
+                {products.map((p) => {
+                  const isPlaceholder = p.id.startsWith('temp-dup-');
+                  return (
+                    <Table.Tr key={p.id}>
+                      <Table.Td onClick={(e) => e.stopPropagation()}>
+                        {!isPlaceholder && (
+                          <Checkbox
+                            checked={selectedIds.has(p.id)}
+                            onChange={() => toggleOne(p.id)}
+                            aria-label={`Sélectionner ${p.name}`}
+                          />
+                        )}
+                      </Table.Td>
+                      <Table.Td>
+                        {isPlaceholder ? (
+                          <>
+                            <Text fw={500}>{p.name}</Text>
+                            <Text size="xs" c="dimmed">Création en cours...</Text>
+                          </>
+                        ) : (
+                          <>
+                            <Link href={`/dashboard/products/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                              <Text fw={500}>{p.name}</Text>
+                            </Link>
+                            <Text size="xs" c="dimmed">{p.slug}</Text>
+                          </>
+                        )}
+                      </Table.Td>
+                      <Table.Td>
+                        <Badge color={p.status === 'ACTIVE' ? 'green' : p.status === 'ARCHIVED' ? 'gray' : 'yellow'} size="sm">
+                          {p.status}
+                        </Badge>
+                      </Table.Td>
+                      <Table.Td>{p.price.toLocaleString('fr-FR')} XOF</Table.Td>
+                      <Table.Td>{p.inventoryQty}</Table.Td>
+                      <Table.Td>
+                        {isPlaceholder ? (
+                          <Text size="xs" c="dimmed">Création...</Text>
+                        ) : (
+                          <Group gap="xs" wrap="nowrap">
+                            <Link href={`/dashboard/products/${p.id}`} style={{ textDecoration: 'none' }}>
+                              <Button variant="subtle" size="xs" leftSection={<IconPencil size={14} />}>
+                                Modifier
+                              </Button>
+                            </Link>
+                            <Menu shadow="md" width={180} position="bottom-end">
+                              <Menu.Target>
+                                <ActionIcon variant="subtle" size="sm">
+                                  <IconDots size={16} />
+                                </ActionIcon>
+                              </Menu.Target>
+                              <Menu.Dropdown>
+                                <Menu.Item
+                                  component={Link}
+                                  href={`/dashboard/products/${p.id}`}
+                                  leftSection={<IconPencil size={14} />}
+                                >
+                                  Modifier
+                                </Menu.Item>
+                                <Menu.Item
+                                  leftSection={<IconArchive size={14} />}
+                                  onClick={() => archiveMutation.mutate(p.id)}
+                                  disabled={archiveMutation.isPending || p.status === 'ARCHIVED'}
+                                >
+                                  Archiver
+                                </Menu.Item>
+                                <Menu.Item
+                                  leftSection={<IconCopy size={14} />}
+                                  onClick={() => duplicateMutation.mutate(p)}
+                                  disabled={duplicateMutation.isPending}
+                                >
+                                  Dupliquer
+                                </Menu.Item>
+                                <Menu.Divider />
+                                <Menu.Item
+                                  leftSection={<IconTrash size={14} />}
+                                  color="red"
+                                  onClick={() => setProductToDelete(p)}
+                                >
+                                  Supprimer
+                                </Menu.Item>
+                              </Menu.Dropdown>
+                            </Menu>
+                          </Group>
+                        )}
+                      </Table.Td>
+                    </Table.Tr>
+                  );
+                })}
               </Table.Tbody>
             </Table>
           </Card>
