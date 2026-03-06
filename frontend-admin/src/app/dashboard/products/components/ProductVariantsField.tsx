@@ -287,38 +287,36 @@ export function ProductVariantsField({
                   <Table.Tr key={key}>
                     <Table.Td>{variantDisplayName(row.attributes)}</Table.Td>
                     <Table.Td>
-                      <Group gap="xs" align="center">
+                      <Box
+                        component="button"
+                        type="button"
+                        onClick={() => setPickerForVariantKey(key)}
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 4,
+                          overflow: 'hidden',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          background: row.imageUrl ? 'transparent' : 'var(--mantine-color-gray-2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
                         {row.imageUrl ? (
                           <Box
                             component="img"
                             src={row.imageUrl}
                             alt=""
-                            style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                           />
                         ) : (
-                          <Box
-                            style={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: 4,
-                              background: 'var(--mantine-color-gray-2)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <IconPhoto size={20} color="var(--mantine-color-dimmed)" />
-                          </Box>
+                          <IconPhoto size={20} color="var(--mantine-color-dimmed)" />
                         )}
-                        <Button
-                          size="xs"
-                          variant="light"
-                          onClick={() => setPickerForVariantKey(key)}
-                        >
-                          {row.imageUrl ? 'Changer' : 'Choisir'}
-                        </Button>
-                      </Group>
+                      </Box>
                     </Table.Td>
                     <Table.Td>
                       <NumberInput
