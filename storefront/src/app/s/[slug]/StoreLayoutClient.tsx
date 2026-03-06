@@ -19,7 +19,7 @@ interface StoreData {
   id: string;
   name: string;
   subdomain: string;
-  description?: string;
+  description?: string | null;
   logo?: string | null;
   themeId: string;
   themeCustomization?: ThemeCustomization | null;
