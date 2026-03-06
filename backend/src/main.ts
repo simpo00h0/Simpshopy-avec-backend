@@ -8,6 +8,14 @@ import { DomainExceptionFilter } from './common/filters/domain-exception.filter'
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
+  // Railway : fallback si DATABASE_PRIVATE_URL est fourni au lieu de DATABASE_URL
+  if (!process.env.DATABASE_URL && process.env.DATABASE_PRIVATE_URL) {
+    process.env.DATABASE_URL = process.env.DATABASE_PRIVATE_URL;
+  }
+  if (!process.env.DIRECT_URL && process.env.DATABASE_PRIVATE_URL) {
+    process.env.DIRECT_URL = process.env.DATABASE_PRIVATE_URL;
+  }
+
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalFilters(
