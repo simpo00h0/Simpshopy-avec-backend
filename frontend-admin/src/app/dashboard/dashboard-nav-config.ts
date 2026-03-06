@@ -53,16 +53,13 @@ export function getNavItems(
       },
     },
     {
-      href: '/dashboard/themes',
-      label: 'Thèmes',
-      icon: IconPalette,
-      onPrefetch: () => prefetchRoute('/dashboard/themes'),
-    },
-    {
-      href: '/dashboard/files',
-      label: 'Fichiers',
-      icon: IconPhoto,
-      onPrefetch: () => prefetchRoute('/dashboard/files'),
+      href: '/dashboard/products',
+      label: 'Produits',
+      icon: IconPackage,
+      onPrefetch: () => {
+        prefetchRoute('/dashboard/products');
+        prefetchProducts(queryClient);
+      },
     },
     {
       href: '/dashboard/orders',
@@ -71,15 +68,6 @@ export function getNavItems(
       onPrefetch: () => {
         prefetchRoute('/dashboard/orders');
         prefetchOrders(queryClient);
-      },
-    },
-    {
-      href: '/dashboard/products',
-      label: 'Produits',
-      icon: IconPackage,
-      onPrefetch: () => {
-        prefetchRoute('/dashboard/products');
-        prefetchProducts(queryClient);
       },
     },
     {
@@ -96,6 +84,18 @@ export function getNavItems(
       label: 'Réductions',
       icon: IconDiscount2,
       onPrefetch: () => prefetchRoute('/dashboard/discounts'),
+    },
+    {
+      href: '/dashboard/themes',
+      label: 'Thèmes',
+      icon: IconPalette,
+      onPrefetch: () => prefetchRoute('/dashboard/themes'),
+    },
+    {
+      href: '/dashboard/files',
+      label: 'Fichiers',
+      icon: IconPhoto,
+      onPrefetch: () => prefetchRoute('/dashboard/files'),
     },
     {
       href: '/dashboard/analytics',
