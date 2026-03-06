@@ -145,8 +145,8 @@ export function ProductImagesField({
             e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)';
           }}
         >
-          <Stack align="center" gap={4}>
-            <IconPhoto size={32} color="var(--mantine-color-dimmed)" stroke={1.5} />
+          <Stack align="center" gap={2}>
+            <IconPhoto size={24} color="var(--mantine-color-dimmed)" stroke={1.5} />
             <Text size="xs" c="dimmed" ta="center">
               Ajouter une image
             </Text>
