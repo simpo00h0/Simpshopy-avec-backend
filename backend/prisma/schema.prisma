@@ -340,7 +340,8 @@ model ProductVariant {
   
   // Attributs (taille, couleur, etc.)
   attributes  Json?        // {size: "M", color: "Rouge"}
-  
+  imageUrl    String?      // Image spécifique à la variante (ex. couleur)
+
   productId   String
   product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   orderItems  OrderItem[]

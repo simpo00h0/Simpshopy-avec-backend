@@ -22,4 +22,9 @@ export class CreateVariantDto {
   @IsOptional()
   @IsString()
   sku?: string;
+
+  @ApiProperty({ description: 'URL image de la variante (ex. couleur)', required: false })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }

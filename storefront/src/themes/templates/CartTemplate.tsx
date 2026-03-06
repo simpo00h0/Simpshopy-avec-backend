@@ -134,7 +134,8 @@ export function CartTemplate() {
                           updateQuantity(
                             item.productId,
                             typeof v === 'string' ? 1 : (v ?? 1),
-                            storeSubdomain
+                            storeSubdomain,
+                            item.variantId
                           )
                         }
                         w={80}
@@ -148,7 +149,7 @@ export function CartTemplate() {
                       <ActionIcon
                         variant="subtle"
                         color="red"
-                        onClick={() => removeItem(item.productId, storeSubdomain)}
+                        onClick={() => removeItem(item.productId, storeSubdomain, item.variantId)}
                         aria-label="Supprimer"
                       >
                         <IconTrash size={16} />

@@ -53,6 +53,7 @@ export class ProductRepository implements IProductRepository {
           price: v.price ?? null,
           inventoryQty: v.inventoryQty ?? 0,
           sku: v.sku ?? null,
+          imageUrl: v.imageUrl ?? null,
         })),
       });
     }
@@ -115,6 +116,7 @@ export class ProductRepository implements IProductRepository {
               price: v.price ?? null,
               inventoryQty: v.inventoryQty ?? 0,
               sku: v.sku ?? null,
+              imageUrl: v.imageUrl ?? null,
             })),
           });
         }

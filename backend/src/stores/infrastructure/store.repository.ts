@@ -71,6 +71,16 @@ export class StoreRepository implements IStoreRepository {
             price: true,
             compareAtPrice: true,
             images: true,
+            variants: {
+              select: {
+                id: true,
+                name: true,
+                attributes: true,
+                price: true,
+                inventoryQty: true,
+                imageUrl: true,
+              },
+            },
           },
         },
         categories: {

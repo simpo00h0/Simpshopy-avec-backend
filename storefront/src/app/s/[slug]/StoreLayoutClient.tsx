@@ -31,22 +31,61 @@ interface StoreData {
     price: number;
     compareAtPrice?: number;
     images?: string[];
+    variants?: Array<{
+      id: string;
+      name: string;
+      attributes: Record<string, string> | null;
+      price: number | null;
+      inventoryQty: number;
+      imageUrl: string | null;
+    }>;
   }>;
   collections?: StoreCollection[];
 }
 
 function mapProducts(products: StoreData['products']): MockProduct[] {
-  return products.map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    price: p.price,
-    priceLabel: `${p.price.toLocaleString('fr-FR')} XOF`,
-    description: p.description ?? '',
-    imagePlaceholder: '📦',
-    imageUrl: p.images?.[0],
-    images: p.images ?? [],
-  }));
+  return products.map((p) => {
+    const variants = p.variants?.length
+      ? p.variants.map((v) => ({
+          id: v.id,
+          attributes: v.attributes ?? {},
+          price: v.price ?? p.price,
+          priceLabel: `${(v.price ?? p.price).toLocaleString('fr-FR')} XOF`,
+          imageUrl: v.imageUrl ?? undefined,
+          inventoryQty: v.inventoryQty ?? 0,
+        }))
+      : undefined;
+    const options =
+      variants?.length &&
+      Object.keys((variants[0]?.attributes as Record<string, string>) ?? {}).length > 0
+        ? [
+            ...new Set(
+              variants.flatMap((v) => Object.keys(v.attributes as Record<string, string>))
+            ),
+          ].sort().map((name) => ({
+            name,
+            values: [
+              ...new Set(
+                variants.map((v) => (v.attributes as Record<string, string>)[name]).filter(Boolean)
+              ),
+            ],
+          }))
+        : undefined;
+    const price = variants?.length ? variants[0].price : p.price;
+    return {
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      price,
+      priceLabel: `${price.toLocaleString('fr-FR')} XOF`,
+      description: p.description ?? '',
+      imagePlaceholder: '📦',
+      imageUrl: p.images?.[0],
+      images: p.images ?? [],
+      options: options ?? undefined,
+      variants: variants ?? undefined,
+    };
+  });
 }
 
 function extractLogoFromBlocks(blocks: ThemeCustomization['blocks']): { logo?: string; favicon?: string; logoAlignment?: 'left' | 'center' | 'right'; logoBlockId?: string } {

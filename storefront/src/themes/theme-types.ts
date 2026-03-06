@@ -1,3 +1,19 @@
+/** Option produit (ex. Taille, Couleur) avec ses valeurs. */
+export interface ProductOption {
+  name: string;
+  values: string[];
+}
+
+/** Variante affichée sur la fiche produit (prix, image, stock). */
+export interface MockVariant {
+  id: string;
+  attributes: Record<string, string>;
+  price: number;
+  priceLabel: string;
+  imageUrl?: string;
+  inventoryQty: number;
+}
+
 export interface MockProduct {
   id: string;
   /** Slug pour l'URL et les liens internes (ex: produit-premium). Requis, comme Shopify. */
@@ -12,6 +28,10 @@ export interface MockProduct {
   /** Toutes les images du produit. La première est mise en avant. */
   images?: string[];
   category?: string;
+  /** Options (ex. Taille, Couleur) pour les sélecteurs façon Shopify. */
+  options?: ProductOption[];
+  /** Variantes (combinaisons d’options) avec prix / image / stock. */
+  variants?: MockVariant[];
 }
 
 export interface ThemeConfig {

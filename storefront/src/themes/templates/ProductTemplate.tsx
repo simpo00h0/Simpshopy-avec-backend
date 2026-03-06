@@ -1,17 +1,28 @@
 'use client';
 
-import { Container, Title, Text, Button, Grid, Box, Breadcrumbs, NumberInput, Divider } from '@mantine/core';
+import { Container, Title, Text, Button, Grid, Box, Breadcrumbs, NumberInput, Divider, Group, Stack } from '@mantine/core';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { useTheme } from '../ThemeContext';
 import { useCartStore } from '@/stores/cartStore';
 import { ProductCard } from '../sections/ProductCard';
-import type { MockProduct } from '../theme-types';
+import type { MockProduct, MockVariant } from '../theme-types';
 
 interface ProductTemplateProps {
   product: MockProduct;
+}
+
+function findVariant(
+  variants: MockVariant[],
+  selectedOptions: Record<string, string>
+): MockVariant | undefined {
+  return variants.find((v) =>
+    Object.entries(selectedOptions).every(
+      ([name, value]) => (v.attributes as Record<string, string>)[name] === value
+    )
+  );
 }
 
 export function ProductTemplate({ product }: ProductTemplateProps) {
@@ -21,8 +32,25 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
   const { theme, basePath, storeSubdomain } = useTheme();
   const addItem = useCartStore((s) => s.addItem);
   const { colors } = theme;
+
+  const hasVariants = product.variants && product.variants.length > 0 && product.options && product.options.length > 0;
+  const initialOptions = useMemo(() => {
+    if (!hasVariants || !product.variants?.length) return {};
+    const first = product.variants[0];
+    return (first.attributes as Record<string, string>) ?? {};
+  }, [hasVariants, product.variants]);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(initialOptions);
+  useEffect(() => {
+    setSelectedOptions(initialOptions);
+  }, [product.id]);
+
+  const selectedVariant = useMemo(
+    () => (hasVariants && product.variants ? findVariant(product.variants, selectedOptions) : undefined),
+    [hasVariants, product.variants, selectedOptions]
+  );
+
   const gallery = product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [];
-  const mainImage = gallery[selectedIndex];
+  const mainImage = selectedVariant?.imageUrl ?? gallery[selectedIndex];
   const showImage = mainImage && !imgError;
 
   const relatedProducts = theme.products.filter((p) => p.id !== product.id).slice(0, 3);
@@ -195,12 +223,52 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
           <Title order={1} mb="md" style={{ color: colors.text }}>
             {product.name}
           </Title>
-          <Text size="xl" fw={700} mb="lg" style={{ color: colors.accent }}>
-            {product.priceLabel}
+          <Text size="xl" fw={700} mb="md" style={{ color: colors.accent }}>
+            {selectedVariant ? selectedVariant.priceLabel : product.priceLabel}
           </Text>
-          <Text size="md" mb="xl" style={{ color: colors.text }}>
+          <Text size="md" mb="lg" style={{ color: colors.text }}>
             {product.description}
           </Text>
+
+          {hasVariants && product.options && (
+            <Stack gap="sm" mb="lg">
+              {product.options.map((opt) => (
+                <div key={opt.name}>
+                  <Text size="sm" fw={500} mb="xs" style={{ color: colors.text }}>
+                    {opt.name}
+                  </Text>
+                  <Group gap="xs" wrap="wrap">
+                    {opt.values.map((val) => {
+                      const isSelected = selectedOptions[opt.name] === val;
+                      return (
+                        <Box
+                          key={val}
+                          component="button"
+                          type="button"
+                          onClick={() => {
+                            setSelectedOptions((prev) => ({ ...prev, [opt.name]: val }));
+                            setImgError(false);
+                          }}
+                          style={{
+                            padding: '8px 14px',
+                            borderRadius: 6,
+                            border: `2px solid ${isSelected ? colors.primary : 'var(--mantine-color-default-border)'}`,
+                            background: isSelected ? `${colors.primary}20` : undefined,
+                            color: colors.text,
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: isSelected ? 600 : 400,
+                          }}
+                        >
+                          {val}
+                        </Box>
+                      );
+                    })}
+                  </Group>
+                </div>
+              ))}
+            </Stack>
+          )}
 
           <NumberInput
             label="Quantité"
@@ -211,11 +279,22 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
             mb="lg"
           />
 
+          {selectedVariant && selectedVariant.inventoryQty <= 0 && (
+            <Text size="sm" c="red" mb="sm">
+              Rupture de stock pour cette variante
+            </Text>
+          )}
           <Button
             size="lg"
             style={{ backgroundColor: colors.primary }}
             fullWidth
-            onClick={() => addItem(product, quantity, storeSubdomain)}
+            disabled={
+              (hasVariants && !selectedVariant) ||
+              !!(selectedVariant && selectedVariant.inventoryQty <= 0)
+            }
+            onClick={() =>
+              addItem(product, quantity, storeSubdomain, selectedVariant?.id)
+            }
           >
             Ajouter au panier
           </Button>

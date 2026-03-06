@@ -5,6 +5,7 @@ export interface CreateVariantData {
   price?: number;
   inventoryQty?: number;
   sku?: string;
+  imageUrl?: string;
 }
 
 export interface CreateProductData {
