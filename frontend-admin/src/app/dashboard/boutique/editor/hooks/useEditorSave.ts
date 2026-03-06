@@ -2,15 +2,9 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { useStoreStore, type ThemeCustomization, type Store } from '@/stores/storeStore';
+import { revalidateStorefrontCache } from '@/lib/revalidate-storefront';
 import type { IStoreSettingsRepository } from '../domain/store-settings.port';
 import { defaultStoreSettingsRepository } from '../infrastructure/store-settings.repository';
-
-function revalidateStorefrontCache(subdomain: string) {
-  const base = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3002';
-  const secret = process.env.NEXT_PUBLIC_REVALIDATE_SECRET || '';
-  const url = `${base}/api/revalidate?store=${encodeURIComponent(subdomain)}${secret ? `&secret=${encodeURIComponent(secret)}` : ''}`;
-  fetch(url, { method: 'POST' }).catch(() => {});
-}
 
 export function useEditorSave(
   customization: ThemeCustomization,

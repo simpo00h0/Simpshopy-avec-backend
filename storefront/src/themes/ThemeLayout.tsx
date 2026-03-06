@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from './ThemeContext';
 import { BlockWrapper } from './BlockWrapper';
+import { ContentProtection } from './ContentProtection';
 import { FaviconUpdater } from './FaviconUpdater';
 import { useCartStore } from '@/stores/cartStore';
 
@@ -56,6 +57,7 @@ export function ThemeLayout({ children }: { children: React.ReactNode }) {
         color: colors.text,
       }}
     >
+      <ContentProtection />
       <FaviconUpdater />
       <style>{`.skip-link { position: absolute; left: -9999px; z-index: 9999; padding: 8px 12px; color: white; border-radius: 4px; }.skip-link:focus { left: 16px; top: 16px; }`}</style>
       <a

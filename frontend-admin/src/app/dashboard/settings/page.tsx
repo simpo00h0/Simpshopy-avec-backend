@@ -14,11 +14,12 @@ import {
   NumberInput,
   Button,
 } from '@mantine/core';
-import { IconSettings, IconBuildingStore, IconCreditCard, IconTruck } from '@tabler/icons-react';
+import { IconSettings, IconBuildingStore, IconCreditCard, IconTruck, IconShieldLock } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
+import { revalidateStorefrontCache } from '@/lib/revalidate-storefront';
 import { useStoreStore } from '@/stores/storeStore';
 import { LoadingScreen } from '@/components/LoadingScreen';
 
@@ -37,6 +38,7 @@ interface StoreData {
     enableCashOnDelivery?: boolean;
     enableShipping?: boolean;
     freeShippingThreshold?: number;
+    themeCustomization?: { contentProtection?: boolean };
   };
 }
 
@@ -68,6 +70,12 @@ export default function SettingsPage() {
     },
   });
 
+  const storefrontForm = useForm({
+    initialValues: {
+      contentProtection: false,
+    },
+  });
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['store', currentStore?.id],
     queryFn: () => api.get<StoreData>(`/stores/${currentStore!.id}`).then((r) => r.data),
@@ -96,6 +104,10 @@ export default function SettingsPage() {
           freeShippingThreshold: data.settings.freeShippingThreshold,
         });
       }
+      const tc = data.settings?.themeCustomization as { contentProtection?: boolean } | undefined;
+      storefrontForm.setValues({
+        contentProtection: tc?.contentProtection ?? false,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- forms used for side effect only when data loads
   }, [data]);
@@ -133,6 +145,24 @@ export default function SettingsPage() {
     },
   });
 
+  const storefrontMutation = useMutation({
+    mutationFn: (values: typeof storefrontForm.values) =>
+      api.patch(`/stores/${currentStore!.id}/settings`, {
+        themeCustomization: { contentProtection: values.contentProtection },
+        partial: true,
+      }),
+    onSuccess: async () => {
+      notifications.show({ title: 'Paramètres storefront mis à jour', message: '', color: 'green' });
+      const { data: updated } = await api.get(`/stores/${currentStore!.id}`);
+      queryClient.setQueryData(['store', currentStore!.id], updated);
+      if (updated?.settings) setCurrentStore({ ...currentStore!, settings: updated.settings });
+      revalidateStorefrontCache(currentStore!.subdomain);
+    },
+    onError: (err) => {
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    },
+  });
+
   const onStoreSubmit = (values: typeof storeForm.values) => {
     if (!currentStore?.id) return;
     storeMutation.mutate(values);
@@ -141,6 +171,11 @@ export default function SettingsPage() {
   const onSettingsSubmit = (values: typeof settingsForm.values) => {
     if (!currentStore?.id) return;
     settingsMutation.mutate(values);
+  };
+
+  const onStorefrontSubmit = (values: typeof storefrontForm.values) => {
+    if (!currentStore?.id) return;
+    storefrontMutation.mutate(values);
   };
 
   if (!currentStore) {
@@ -174,6 +209,9 @@ export default function SettingsPage() {
           </Tabs.Tab>
           <Tabs.Tab value="shipping" leftSection={<IconTruck size={18} />}>
             Livraison
+          </Tabs.Tab>
+          <Tabs.Tab value="storefront" leftSection={<IconShieldLock size={18} />}>
+            Storefront
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="store">
@@ -227,6 +265,26 @@ export default function SettingsPage() {
                   Livraison gratuite au-dessus de ce montant
                 </Text>
                 <Button type="submit" color="green" loading={settingsMutation.isPending}>
+                  Enregistrer
+                </Button>
+              </Stack>
+            </form>
+          </Card>
+        </Tabs.Panel>
+        <Tabs.Panel value="storefront">
+          <Card shadow="sm" padding="xl" radius="md" withBorder>
+            <Title order={4} mb="md">Protection du contenu</Title>
+            <Text size="sm" c="dimmed" mb="md">
+              Comme sur Shopify, empêche la sélection de texte, le clic droit et le téléchargement d&apos;images sur votre boutique. Décourage la copie de vos descriptions et photos par des concurrents.
+            </Text>
+            <form onSubmit={storefrontForm.onSubmit(onStorefrontSubmit)}>
+              <Stack gap="md">
+                <Switch
+                  label="Activer la protection du contenu"
+                  description="Désactive le clic droit, la sélection de texte et le glisser-déposer d'images"
+                  {...storefrontForm.getInputProps('contentProtection', { type: 'checkbox' })}
+                />
+                <Button type="submit" color="green" loading={storefrontMutation.isPending}>
                   Enregistrer
                 </Button>
               </Stack>

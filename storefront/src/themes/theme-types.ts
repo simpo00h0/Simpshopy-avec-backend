@@ -68,4 +68,6 @@ export interface ThemeConfig {
   /** Blocs par instance (chaque bloc a son propre ID et données) */
   blocks?: Record<string, { type: string; data: Record<string, unknown> }>;
   logoBlockId?: string;
+  /** Empêche la sélection de texte, le clic droit et le téléchargement d'images */
+  contentProtection?: boolean;
 }

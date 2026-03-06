@@ -156,6 +156,7 @@ function applyCustomization(base: ThemeConfig, cust: ThemeCustomization | null |
   if (cust.sectionOrder?.length) result.sectionOrder = cust.sectionOrder;
   if (cust.sectionVisibility) result.sectionVisibility = cust.sectionVisibility;
   if (cust.blocks && Object.keys(cust.blocks).length) result.blocks = cust.blocks;
+  if (cust.contentProtection != null) result.contentProtection = cust.contentProtection;
   return result;
 }
 

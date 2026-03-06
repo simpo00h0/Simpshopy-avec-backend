@@ -54,4 +54,6 @@ export interface ThemeCustomization {
   heroHeight?: 'small' | 'medium' | 'large';
   sectionOrder?: string[];
   sectionVisibility?: Record<string, boolean>;
+  /** Empêche la sélection de texte, le clic droit et le téléchargement d'images (comme Shopify) */
+  contentProtection?: boolean;
 }
