@@ -68,8 +68,8 @@ export default function ProductCreatePage() {
       variants: [] as VariantRow[],
     },
     validate: {
-      name: (v) => (!v || v.length < 2 ? 'Nom requis (2 caractères min)' : null),
-      price: (v) => (v < 0 ? 'Prix invalide' : null),
+      name: (v: string) => (!v || v.length < 2 ? 'Nom requis (2 caractères min)' : null),
+      price: (v: number) => (v < 0 ? 'Prix invalide' : null),
     },
   });
 
@@ -98,6 +98,7 @@ export default function ProductCreatePage() {
                 price: v.price,
                 inventoryQty: v.inventoryQty,
                 sku: v.sku || undefined,
+                imageUrl: v.imageUrl || undefined,
               }))
             : undefined,
       }),

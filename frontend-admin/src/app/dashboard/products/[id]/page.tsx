@@ -151,6 +151,7 @@ export default function ProductEditPage() {
                 price: v.price,
                 inventoryQty: v.inventoryQty,
                 sku: v.sku || undefined,
+                imageUrl: v.imageUrl || undefined,
               }))
             : undefined,
       });
@@ -230,6 +231,7 @@ export default function ProductEditPage() {
                 price: v.price,
                 inventoryQty: v.inventoryQty,
                 sku: v.sku || undefined,
+                imageUrl: v.imageUrl || undefined,
               }))
             : undefined,
       });

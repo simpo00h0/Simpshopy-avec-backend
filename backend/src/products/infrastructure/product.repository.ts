@@ -55,6 +55,7 @@ export class ProductRepository implements IProductRepository {
           price: v.price ?? null,
           inventoryQty: v.inventoryQty ?? 0,
           sku: v.sku ?? null,
+          imageUrl: v.imageUrl ?? null,
         })),
       });
     }
@@ -81,7 +82,7 @@ export class ProductRepository implements IProductRepository {
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: {
-        variants: { select: { id: true, name: true, attributes: true, price: true, inventoryQty: true, sku: true } },
+        variants: { select: { id: true, name: true, attributes: true, price: true, inventoryQty: true, sku: true, imageUrl: true } },
         category: true,
       },
     });
@@ -123,6 +124,7 @@ export class ProductRepository implements IProductRepository {
               price: v.price ?? null,
               inventoryQty: v.inventoryQty ?? 0,
               sku: v.sku ?? null,
+              imageUrl: v.imageUrl ?? null,
             })),
           });
         }

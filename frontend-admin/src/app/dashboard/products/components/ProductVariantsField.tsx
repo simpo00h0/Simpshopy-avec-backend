@@ -146,6 +146,7 @@ export function ProductVariantsField({
         price: existing?.price ?? basePrice,
         inventoryQty: existing?.inventoryQty ?? 0,
         sku: existing?.sku ?? '',
+        imageUrl: existing?.imageUrl ?? '',
       };
     });
   }, [options, basePrice, variants]);
@@ -201,9 +202,11 @@ export function ProductVariantsField({
     updateOption(optIndex, { values: opt.values.filter((_, i) => i !== valIndex) });
   };
 
+  const [pickerForVariantKey, setPickerForVariantKey] = useState<string | null>(null);
+
   const setVariantField = (
     attrKey: string,
-    field: 'price' | 'inventoryQty' | 'sku',
+    field: 'price' | 'inventoryQty' | 'sku' | 'imageUrl',
     value: number | string
   ) => {
     const next = variantRows.map((v) => {
@@ -271,6 +274,7 @@ export function ProductVariantsField({
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Variante</Table.Th>
+                <Table.Th>Image</Table.Th>
                 <Table.Th>Prix (XOF)</Table.Th>
                 <Table.Th>Stock</Table.Th>
                 <Table.Th>SKU</Table.Th>
@@ -282,6 +286,40 @@ export function ProductVariantsField({
                 return (
                   <Table.Tr key={key}>
                     <Table.Td>{variantDisplayName(row.attributes)}</Table.Td>
+                    <Table.Td>
+                      <Group gap="xs" align="center">
+                        {row.imageUrl ? (
+                          <Box
+                            component="img"
+                            src={row.imageUrl}
+                            alt=""
+                            style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        ) : (
+                          <Box
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 4,
+                              background: 'var(--mantine-color-gray-2)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <IconPhoto size={20} color="var(--mantine-color-dimmed)" />
+                          </Box>
+                        )}
+                        <Button
+                          size="xs"
+                          variant="light"
+                          onClick={() => setPickerForVariantKey(key)}
+                        >
+                          {row.imageUrl ? 'Changer' : 'Choisir'}
+                        </Button>
+                      </Group>
+                    </Table.Td>
                     <Table.Td>
                       <NumberInput
                         size="xs"
@@ -315,6 +353,18 @@ export function ProductVariantsField({
           </Table>
         </>
       )}
+
+      <MediaPicker
+        opened={pickerForVariantKey !== null}
+        onClose={() => setPickerForVariantKey(null)}
+        mode="single"
+        onSelect={(url) => {
+          if (pickerForVariantKey) {
+            setVariantField(pickerForVariantKey, 'imageUrl', url);
+            setPickerForVariantKey(null);
+          }
+        }}
+      />
     </Stack>
   );
 }
