@@ -15,6 +15,8 @@ import {
 } from '@mantine/core';
 import { IconShoppingCart } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { useStoreStore } from '@/stores/storeStore';
+import { formatMoney } from '@/lib/format-money';
 import { TableSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { ORDER_STATUS_COLORS } from '@/lib/constants';
@@ -31,6 +33,7 @@ interface Order {
 
 export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const currency = useStoreStore((s) => s.currentStore?.currency) ?? '';
   const { data: orders = [], isLoading: loading } = useQuery({
     queryKey: ['orders', statusFilter],
     queryFn: () => api.get<Order[]>('/orders', { params: statusFilter ? { status: statusFilter } : {} }).then((r) => r.data || []),
@@ -101,7 +104,7 @@ export default function OrdersPage() {
                       {o.paymentStatus === 'COMPLETED' ? 'Payé' : o.paymentStatus}
                     </Badge>
                   </Table.Td>
-                  <Table.Td>{o.total?.toLocaleString('fr-FR')} XOF</Table.Td>
+                  <Table.Td>{formatMoney(o.total ?? 0, currency)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

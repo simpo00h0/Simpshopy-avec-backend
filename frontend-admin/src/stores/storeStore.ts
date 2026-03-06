@@ -9,6 +9,7 @@ export interface Store {
   subdomain: string;
   email: string;
   status: string;
+  currency?: string;
   settings?: {
     themeId?: string | null;
     themeCustomization?: ThemeCustomization | null;

@@ -87,4 +87,15 @@ export class ProductRepository implements IProductRepository {
     });
     return product as Product;
   }
+
+  async hasOrderItems(productId: string): Promise<boolean> {
+    const count = await this.prisma.orderItem.count({
+      where: { productId },
+    });
+    return count > 0;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.product.delete({ where: { id } });
+  }
 }

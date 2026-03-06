@@ -15,8 +15,13 @@ import {
   NumberInput,
   Select,
   Textarea,
+  Modal,
+  Text,
+  Menu,
+  Divider,
 } from '@mantine/core';
-import { IconArrowLeft } from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
+import { IconArrowLeft, IconTrash, IconArchive, IconCopy } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
@@ -145,6 +150,64 @@ export default function ProductEditPage() {
     updateMutation.mutate(values);
   };
 
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] =
+    useDisclosure(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/products/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      notifications.show({ title: 'Produit supprimé', message: '', color: 'green' });
+      closeDeleteModal();
+      router.push('/dashboard/products');
+    },
+    onError: (err) => {
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+      closeDeleteModal();
+    },
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: () =>
+      api.patch(`/products/${id}`, { status: 'ARCHIVED' }),
+    onSuccess: () => {
+      form.setFieldValue('status', 'ARCHIVED');
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product', id] });
+      notifications.show({ title: 'Produit archivé', message: '', color: 'green' });
+    },
+    onError: (err) => {
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    },
+  });
+
+  const duplicateMutation = useMutation({
+    mutationFn: () =>
+      api.post<Product>('/products', {
+        name: `${product?.name ?? ''} (copie)`,
+        description: product?.description,
+        price: product?.price ?? 0,
+        compareAtPrice: product?.compareAtPrice,
+        inventoryQty: product?.inventoryQty ?? 0,
+        sku: product?.sku ? `${product.sku}-copy` : undefined,
+        categoryId: product?.categoryId ?? undefined,
+        images: product?.images ?? [],
+        metaTitle: product?.metaTitle ?? undefined,
+        metaDescription: product?.metaDescription ?? undefined,
+        status: 'DRAFT',
+      }),
+    onSuccess: (res) => {
+      const created = res.data as Product;
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      notifications.show({ title: 'Produit dupliqué', message: '', color: 'green' });
+      router.push(`/dashboard/products/${created.id}`);
+    },
+    onError: (err) => {
+      notifications.show({ title: 'Erreur', message: getApiErrorMessage(err), color: 'red' });
+    },
+  });
+
   if (isLoading) {
     return (
       <Container fluid py="xl">
@@ -160,20 +223,85 @@ export default function ProductEditPage() {
 
   return (
     <Container fluid py="xl">
-      <Group mb="xl" gap="md">
-        <Link href="/dashboard/products" style={{ textDecoration: 'none' }}>
-          <Button variant="subtle" leftSection={<IconArrowLeft size={16} />}>
-            Retour
-          </Button>
-        </Link>
+      <Group mb="xl" gap="md" justify="space-between">
+        <Group gap="md">
+          <Link href="/dashboard/products" style={{ textDecoration: 'none' }}>
+            <Button variant="subtle" leftSection={<IconArrowLeft size={16} />}>
+              Retour
+            </Button>
+          </Link>
+        </Group>
+        <Menu shadow="md" width={200}>
+          <Menu.Target>
+            <Button variant="subtle" color="gray">
+              Actions
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<IconArchive size={16} />}
+              onClick={() => archiveMutation.mutate()}
+              disabled={archiveMutation.isPending || product?.status === 'ARCHIVED'}
+            >
+              Archiver
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconCopy size={16} />}
+              onClick={() => duplicateMutation.mutate()}
+              disabled={duplicateMutation.isPending}
+            >
+              Dupliquer
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item
+              leftSection={<IconTrash size={16} />}
+              color="red"
+              onClick={openDeleteModal}
+            >
+              Supprimer
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </Group>
+
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title="Supprimer le produit"
+      >
+        <Text size="sm" c="dimmed" mb="md">
+          Cette action est irréversible. Le produit sera définitivement supprimé.
+          Si ce produit a des commandes associées, la suppression sera refusée.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="subtle" onClick={closeDeleteModal}>
+            Annuler
+          </Button>
+          <Button
+            color="red"
+            loading={deleteMutation.isPending}
+            onClick={() => deleteMutation.mutate()}
+          >
+            Supprimer
+          </Button>
+        </Group>
+      </Modal>
+
       <Card shadow="sm" padding="xl" radius="md" withBorder>
         <Title order={3} mb="lg">Modifier le produit</Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="md">
-            <TextInput label="Nom" required {...form.getInputProps('name')} />
-            <Textarea label="Description" minRows={3} {...form.getInputProps('description')} />
-            <ProductImagesField
+          <Stack gap="lg">
+            <div>
+              <Title order={4} mb="xs">Informations de base</Title>
+              <Stack gap="md">
+                <TextInput label="Nom" required {...form.getInputProps('name')} />
+                <Textarea label="Description" minRows={3} {...form.getInputProps('description')} />
+              </Stack>
+            </div>
+            <Divider />
+            <div>
+              <Title order={4} mb="xs">Médias</Title>
+              <ProductImagesField
               images={form.values.images}
               onRemove={(url) =>
                 form.setFieldValue(
@@ -189,7 +317,11 @@ export default function ProductEditPage() {
               }
               onReorder={(urls) => form.setFieldValue('images', urls)}
             />
-            <Group grow>
+            </div>
+            <Divider />
+            <div>
+              <Title order={4} mb="xs">Prix</Title>
+              <Group grow>
               <NumberInput label="Prix (XOF)" min={0} required {...form.getInputProps('price')} />
               <NumberInput label="Prix comparé (XOF)" min={0} {...form.getInputProps('compareAtPrice')} />
             </Group>
@@ -214,7 +346,11 @@ export default function ProductEditPage() {
               ]}
               {...form.getInputProps('status')}
             />
-            <TextInput
+            </div>
+            <Divider />
+            <div>
+              <Title order={4} mb="xs">Référencement (SEO)</Title>
+              <TextInput
               label="Titre SEO"
               placeholder="Titre pour les moteurs de recherche"
               {...form.getInputProps('metaTitle')}
@@ -225,6 +361,7 @@ export default function ProductEditPage() {
               minRows={2}
               {...form.getInputProps('metaDescription')}
             />
+            </div>
             <Group mt="md">
               <Button type="submit" color="green" loading={updateMutation.isPending}>
                 Enregistrer

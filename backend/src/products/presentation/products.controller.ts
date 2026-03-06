@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -70,5 +71,16 @@ export class ProductsController {
     const store =
       await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
     return this.productsService.update(id, store.id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Supprimer un produit' })
+  async delete(
+    @Request() req: { user: { id: string } },
+    @Param('id') id: string,
+  ) {
+    const store =
+      await this.findFirstStoreByOwnerUseCase.execute(req.user.id);
+    await this.productsService.delete(id, store.id);
   }
 }

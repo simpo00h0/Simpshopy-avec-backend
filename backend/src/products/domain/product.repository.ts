@@ -40,4 +40,8 @@ export interface IProductRepository {
   findById(id: string): Promise<Product | null>;
 
   update(id: string, data: UpdateProductData): Promise<Product>;
+
+  hasOrderItems(productId: string): Promise<boolean>;
+
+  delete(id: string): Promise<void>;
 }

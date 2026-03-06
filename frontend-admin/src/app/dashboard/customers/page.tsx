@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Container, Title, Text, Card, Table } from '@mantine/core';
 import { IconUsers } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { useStoreStore } from '@/stores/storeStore';
+import { formatMoney } from '@/lib/format-money';
 import { TableSkeleton } from '@/components/PageSkeleton';
 import { EmptyState } from '@/components/EmptyState';
 
@@ -14,6 +16,7 @@ interface CustomerRow {
 }
 
 export default function CustomersPage() {
+  const currency = useStoreStore((s) => s.currentStore?.currency) ?? '';
   const { data: customers = [], isLoading: loading } = useQuery({
     queryKey: ['customers'],
     queryFn: () => api.get<CustomerRow[]>('/stores/customers').then((r) => r.data || []),
@@ -54,7 +57,7 @@ export default function CustomersPage() {
                   </Table.Td>
                   <Table.Td>{customer.email}</Table.Td>
                   <Table.Td>{orders}</Table.Td>
-                  <Table.Td>{total.toLocaleString('fr-FR')} XOF</Table.Td>
+                  <Table.Td>{formatMoney(total, currency)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

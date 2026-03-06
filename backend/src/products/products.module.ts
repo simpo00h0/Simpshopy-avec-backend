@@ -7,6 +7,7 @@ import { CreateProductUseCase } from './application/create-product.usecase';
 import { FindProductsByStoreUseCase } from './application/find-products-by-store.usecase';
 import { FindProductUseCase } from './application/find-product.usecase';
 import { UpdateProductUseCase } from './application/update-product.usecase';
+import { DeleteProductUseCase } from './application/delete-product.usecase';
 import { ProductRepository } from './infrastructure/product.repository';
 import { IProductRepository } from './domain/product.repository';
 
@@ -19,6 +20,7 @@ import { IProductRepository } from './domain/product.repository';
     FindProductsByStoreUseCase,
     FindProductUseCase,
     UpdateProductUseCase,
+    DeleteProductUseCase,
     ProductRepository,
     {
       provide: 'IProductRepository',

@@ -5,6 +5,8 @@ import { notifications } from '@mantine/notifications';
 import { Container, Title, Text, Card, Group, Table } from '@mantine/core';
 import { IconWallet } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { useStoreStore } from '@/stores/storeStore';
+import { formatMoney } from '@/lib/format-money';
 import { PageSkeleton } from '@/components/PageSkeleton';
 
 interface Transaction {
@@ -62,7 +64,7 @@ export default function WalletPage() {
         <Group justify="space-between">
           <div>
             <Text size="sm" c="dimmed">Solde disponible</Text>
-            <Text fw={700}>{balance.toLocaleString('fr-FR')} XOF</Text>
+            <Text fw={700}>{formatMoney(balance, currency)}</Text>
           </div>
           <IconWallet size={40} stroke={1.5} />
         </Group>
@@ -93,9 +95,9 @@ export default function WalletPage() {
                   <Table.Td>{new Date(t.createdAt).toLocaleString('fr-FR')}</Table.Td>
                   <Table.Td>{t.type}</Table.Td>
                   <Table.Td style={{ color: t.type === 'credit' ? 'var(--mantine-color-green-7)' : undefined }}>
-                    {t.type === 'credit' ? '+' : '-'}{Math.abs(t.amount).toLocaleString('fr-FR')} XOF
+                    {t.type === 'credit' ? '+' : '-'}{formatMoney(Math.abs(t.amount), currency)}
                   </Table.Td>
-                  <Table.Td>{t.balance?.toLocaleString('fr-FR')} XOF</Table.Td>
+                  <Table.Td>{formatMoney(t.balance ?? 0, currency)}</Table.Td>
                   <Table.Td>{t.description || '-'}</Table.Td>
                 </Table.Tr>
               ))}

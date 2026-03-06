@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Title,
+  Text,
   Button,
   Card,
   Group,
@@ -14,6 +15,7 @@ import {
   NumberInput,
   Textarea,
   Select,
+  Divider,
 } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -21,6 +23,7 @@ import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { getApiErrorMessage } from '@/lib/api-utils';
 import { ProductImagesField } from '@/components/ProductImagesField';
+import { useStoreStore } from '@/stores/storeStore';
 
 interface Product {
   id: string;
@@ -112,20 +115,36 @@ export default function ProductCreatePage() {
           Nouveau produit
         </Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="md">
-            <TextInput
-              label="Nom"
-              placeholder="T-shirt imprimé"
-              required
-              {...form.getInputProps('name')}
-            />
-            <Textarea
-              label="Description"
-              placeholder="Décrivez votre produit"
-              minRows={3}
-              {...form.getInputProps('description')}
-            />
-            <ProductImagesField
+          <Stack gap="lg">
+            <div>
+              <Title order={4} mb="xs">Informations de base</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                Titre et description affichés sur la fiche produit.
+              </Text>
+              <Stack gap="md">
+                <TextInput
+                  label="Nom"
+                  placeholder="T-shirt imprimé"
+                  required
+                  {...form.getInputProps('name')}
+                />
+                <Textarea
+                  label="Description"
+                  placeholder="Décrivez votre produit"
+                  minRows={3}
+                  {...form.getInputProps('description')}
+                />
+              </Stack>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Title order={4} mb="xs">Médias</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                La première image sera utilisée comme image principale.
+              </Text>
+              <ProductImagesField
               images={form.values.images}
               onRemove={(url) =>
                 form.setFieldValue(
@@ -141,7 +160,16 @@ export default function ProductCreatePage() {
               }
               onReorder={(urls) => form.setFieldValue('images', urls)}
             />
-            <Group grow>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Title order={4} mb="xs">Prix</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                Prix de vente et prix comparé (affiché barré si supérieur).
+              </Text>
+              <Group grow>
               <NumberInput
                 label="Prix (XOF)"
                 placeholder="5000"
@@ -156,11 +184,30 @@ export default function ProductCreatePage() {
                 {...form.getInputProps('compareAtPrice')}
               />
             </Group>
-            <Group grow>
-              <NumberInput label="Stock" min={0} placeholder="0" {...form.getInputProps('inventoryQty')} />
-              <TextInput label="SKU" placeholder="SKU-001" {...form.getInputProps('sku')} />
-            </Group>
-            <Select
+            </div>
+
+            <Divider />
+
+            <div>
+              <Title order={4} mb="xs">Inventaire</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                Quantité en stock et référence produit.
+              </Text>
+              <Group grow>
+                <NumberInput label="Stock" min={0} placeholder="0" {...form.getInputProps('inventoryQty')} />
+                <TextInput label="SKU" placeholder="SKU-001" {...form.getInputProps('sku')} />
+              </Group>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Title order={4} mb="xs">Organisation</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                Catégorie et statut de publication.
+              </Text>
+              <Stack gap="md">
+                <Select
               label="Catégorie"
               placeholder="Sélectionner une catégorie"
               data={categories.map((c) => ({ value: c.id, label: c.name }))}
@@ -177,7 +224,18 @@ export default function ProductCreatePage() {
               ]}
               {...form.getInputProps('status')}
             />
-            <TextInput
+              </Stack>
+            </div>
+
+            <Divider />
+
+            <div>
+              <Title order={4} mb="xs">Référencement (SEO)</Title>
+              <Text size="xs" c="dimmed" mb="sm">
+                Titre et description pour les moteurs de recherche.
+              </Text>
+              <Stack gap="md">
+                <TextInput
               label="Titre SEO"
               placeholder="Titre pour les moteurs de recherche"
               {...form.getInputProps('metaTitle')}
@@ -188,6 +246,9 @@ export default function ProductCreatePage() {
               minRows={2}
               {...form.getInputProps('metaDescription')}
             />
+              </Stack>
+            </div>
+
             <Group mt="md">
               <Button type="submit" color="green" loading={createMutation.isPending}>
                 Créer le produit

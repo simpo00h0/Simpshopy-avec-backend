@@ -3,6 +3,7 @@ import { CreateProductUseCase } from './application/create-product.usecase';
 import { FindProductsByStoreUseCase } from './application/find-products-by-store.usecase';
 import { FindProductUseCase } from './application/find-product.usecase';
 import { UpdateProductUseCase } from './application/update-product.usecase';
+import { DeleteProductUseCase } from './application/delete-product.usecase';
 import { CreateProductInput } from './application/create-product.usecase';
 import { UpdateProductData } from './domain/product.repository';
 
@@ -13,6 +14,7 @@ export class ProductsService {
     private findProductsByStoreUseCase: FindProductsByStoreUseCase,
     private findProductUseCase: FindProductUseCase,
     private updateProductUseCase: UpdateProductUseCase,
+    private deleteProductUseCase: DeleteProductUseCase,
   ) {}
 
   async create(storeId: string, dto: CreateProductInput) {
@@ -29,5 +31,9 @@ export class ProductsService {
 
   async update(id: string, storeId: string, data: UpdateProductData) {
     return this.updateProductUseCase.execute(id, storeId, data);
+  }
+
+  async delete(id: string, storeId: string) {
+    return this.deleteProductUseCase.execute(id, storeId);
   }
 }
