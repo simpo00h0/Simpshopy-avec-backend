@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Modal, Tabs, SimpleGrid, Box, Text, Group } from '@mantine/core';
+import { Modal, Tabs, SimpleGrid, Box, Text, Group, Loader } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { IconPhoto, IconUpload, IconCloudUpload } from '@tabler/icons-react';
+import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { uploadMediaToLibrary } from '@/lib/upload-service';
-import type { Media } from '@/lib/upload-service';
+import type { PendingUpload } from '@/lib/types/upload';
+import { UploadProgressOverlay } from './UploadProgressOverlay';
 
 export interface MediaItem {
   id: string;
@@ -18,15 +19,6 @@ export interface MediaItem {
   size?: number;
   altText?: string;
   createdAt: string;
-}
-
-interface PendingUpload {
-  id: string;
-  file: File;
-  blobUrl: string;
-  status: 'uploading' | 'done' | 'error';
-  progress: number;
-  media?: Media | null;
 }
 
 export interface MediaPickerProps {
@@ -202,56 +194,7 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
                       objectFit: 'cover',
                     }}
                   />
-                  {p.status === 'uploading' && (
-                    <Box
-                      pos="absolute"
-                      inset={0}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'flex-end',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
-                        padding: 10,
-                      }}
-                    >
-                      <Box>
-                        <Box
-                          pos="relative"
-                          style={{
-                            height: 12,
-                            borderRadius: 6,
-                            backgroundColor: '#fff',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <Box
-                            style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: 0,
-                              bottom: 0,
-                              width: `${p.progress}%`,
-                              backgroundColor: 'var(--mantine-color-blue-5)',
-                              borderRadius: 6,
-                              transition: 'width 0.2s ease',
-                            }}
-                          />
-                          <Box
-                            pos="absolute"
-                            style={{
-                              left: `clamp(0px, ${p.progress}% - 10px, calc(100% - 20px))`,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              transition: 'left 0.2s ease',
-                              zIndex: 1,
-                            }}
-                          >
-                            <IconCloudUpload size={20} color="var(--mantine-color-blue-5)" stroke={2.5} />
-                          </Box>
-                        </Box>
-                      </Box>
-                    </Box>
-                  )}
+                  {p.status === 'uploading' && <UploadProgressOverlay progress={p.progress} />}
                 </Box>
               ))}
             </SimpleGrid>

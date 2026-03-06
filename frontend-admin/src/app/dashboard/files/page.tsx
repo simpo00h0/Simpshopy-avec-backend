@@ -11,7 +11,7 @@ import {
   Card,
   ActionIcon,
 } from '@mantine/core';
-import { IconPhoto, IconTrash, IconCloudUpload } from '@tabler/icons-react';
+import { IconPhoto, IconTrash } from '@tabler/icons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { notifications } from '@mantine/notifications';
@@ -20,6 +20,8 @@ import { uploadMediaToLibrary } from '@/lib/upload-service';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { EmptyState } from '@/components/EmptyState';
 import { getApiErrorMessage } from '@/lib/api-utils';
+import type { PendingUpload } from '@/lib/types/upload';
+import { UploadProgressOverlay } from '@/components/UploadProgressOverlay';
 
 interface MediaItem {
   id: string;
@@ -29,14 +31,6 @@ interface MediaItem {
   size?: number;
   altText?: string;
   createdAt: string;
-}
-
-interface PendingUpload {
-  id: string;
-  file: File;
-  blobUrl: string;
-  status: 'uploading' | 'done' | 'error';
-  progress: number;
 }
 
 export default function FilesPage() {
@@ -94,9 +88,6 @@ export default function FilesPage() {
                 );
               },
             });
-            setPendingUploads((prev) =>
-              prev.map((item) => (item.id === p.id ? { ...item, status: 'done' as const } : item))
-            );
             if (media) {
               queryClient.invalidateQueries({ queryKey: ['media'] });
               setTimeout(() => removePending(p.id, p.blobUrl), 300);
@@ -135,6 +126,7 @@ export default function FilesPage() {
       mimeType: p.file.type,
       isPending: true,
       status: p.status,
+      progress: p.progress,
     })),
   ];
 
@@ -191,59 +183,9 @@ export default function FilesPage() {
                     objectFit: 'cover',
                   }}
                 />
-                {item.isPending && item.status === 'uploading' && (() => {
-                  const progress = 'progress' in item ? item.progress : 0;
-                  return (
-                    <Box
-                      pos="absolute"
-                      inset={0}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'flex-end',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)',
-                        padding: 10,
-                      }}
-                    >
-                      <Box>
-                        <Box
-                          pos="relative"
-                          style={{
-                            height: 12,
-                            borderRadius: 6,
-                            backgroundColor: '#fff',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <Box
-                            style={{
-                              position: 'absolute',
-                              left: 0,
-                              top: 0,
-                              bottom: 0,
-                              width: `${progress}%`,
-                              backgroundColor: 'var(--mantine-color-blue-5)',
-                              borderRadius: 6,
-                              transition: 'width 0.2s ease',
-                            }}
-                          />
-                          <Box
-                            pos="absolute"
-                            style={{
-                              left: `clamp(0px, ${progress}% - 10px, calc(100% - 20px))`,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              transition: 'left 0.2s ease',
-                              zIndex: 1,
-                            }}
-                          >
-                            <IconCloudUpload size={20} color="var(--mantine-color-blue-5)" stroke={2.5} />
-                          </Box>
-                        </Box>
-                      </Box>
-                    </Box>
-                  );
-                })()}
+                {item.isPending && item.status === 'uploading' && (
+                  <UploadProgressOverlay progress={'progress' in item ? item.progress : 0} />
+                )}
                 {!item.isPending && (
                   <ActionIcon
                     size="sm"
