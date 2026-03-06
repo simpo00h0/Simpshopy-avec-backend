@@ -4,6 +4,7 @@ import { Container, Title, Text, Button, Grid, Box, Breadcrumbs, NumberInput, Di
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import { useTheme } from '../ThemeContext';
 import { useCartStore } from '@/stores/cartStore';
 import { ProductCard } from '../sections/ProductCard';
@@ -80,6 +81,70 @@ export function ProductTemplate({ product }: ProductTemplateProps) {
                 />
               ) : (
                 <span style={{ fontSize: 120 }}>{product.imagePlaceholder}</span>
+              )}
+              {gallery.length > 1 && (
+                <>
+                  {selectedIndex > 0 && (
+                    <Box
+                      component="button"
+                      type="button"
+                      onClick={() => {
+                        setSelectedIndex(selectedIndex - 1);
+                        setImgError(false);
+                      }}
+                      aria-label="Image précédente"
+                      style={{
+                        position: 'absolute',
+                        left: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        border: 'none',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        color: '#333',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      }}
+                    >
+                      <IconChevronLeft size={24} stroke={2} />
+                    </Box>
+                  )}
+                  {selectedIndex < gallery.length - 1 && (
+                    <Box
+                      component="button"
+                      type="button"
+                      onClick={() => {
+                        setSelectedIndex(selectedIndex + 1);
+                        setImgError(false);
+                      }}
+                      aria-label="Image suivante"
+                      style={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        border: 'none',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        color: '#333',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      }}
+                    >
+                      <IconChevronRight size={24} stroke={2} />
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
             {gallery.length > 1 && (
