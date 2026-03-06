@@ -41,3 +41,16 @@ export async function fetchStore(subdomain: string): Promise<StorePublic | null>
     return null;
   }
 }
+
+export async function fetchSubdomains(): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/storefront`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.subdomains ?? [];
+  } catch {
+    return [];
+  }
+}

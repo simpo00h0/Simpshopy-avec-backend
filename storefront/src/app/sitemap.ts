@@ -1,37 +1,7 @@
 import type { MetadataRoute } from 'next';
-import { API_BASE_URL } from '@/lib/constants';
 import { getBaseUrl } from '@/lib/seo';
-
-interface StoreData {
-  subdomain: string;
-  products?: { slug: string }[];
-  collections?: { slug: string }[];
-}
-
-async function fetchStore(subdomain: string): Promise<StoreData | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/storefront/${subdomain}`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
-  }
-}
-
-async function fetchSubdomains(): Promise<string[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/storefront`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.subdomains ?? [];
-  } catch {
-    return [];
-  }
-}
+import { getCachedStore } from '@/lib/store-cache';
+import { fetchSubdomains } from '@/lib/store-api';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl(null);
@@ -41,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   for (const slug of subdomains) {
-    const store = await fetchStore(slug);
+    const store = await getCachedStore(slug);
     if (!store) continue;
 
     const storeUrl = `${baseUrl}/s/${slug}`;
