@@ -136,6 +136,9 @@ export default function ProductCreatePage() {
               onAdd={(url) =>
                 form.setFieldValue('images', [...form.values.images, url])
               }
+              onAddMultiple={(urls) =>
+                form.setFieldValue('images', [...form.values.images, ...urls])
+              }
             />
             <Group grow>
               <NumberInput

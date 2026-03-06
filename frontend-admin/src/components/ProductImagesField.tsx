@@ -10,12 +10,14 @@ export interface ProductImagesFieldProps {
   images: string[];
   onRemove: (url: string) => void;
   onAdd: (url: string) => void;
+  onAddMultiple?: (urls: string[]) => void;
 }
 
 export function ProductImagesField({
   images,
   onRemove,
   onAdd,
+  onAddMultiple,
 }: ProductImagesFieldProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -110,8 +112,13 @@ export function ProductImagesField({
       <MediaPicker
         opened={pickerOpen}
         onClose={() => setPickerOpen(false)}
-        onSelect={(url) => {
-          onAdd(url);
+        mode="multiple"
+        onSelectMultiple={(urls) => {
+          if (onAddMultiple) {
+            onAddMultiple(urls);
+          } else {
+            urls.forEach((url) => onAdd(url));
+          }
           setPickerOpen(false);
         }}
       />

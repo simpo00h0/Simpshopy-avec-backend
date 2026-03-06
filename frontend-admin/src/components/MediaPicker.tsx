@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Modal, Tabs, SimpleGrid, Box, Text, Group, Loader } from '@mantine/core';
+import { Modal, Tabs, SimpleGrid, Box, Text, Group, Loader, Button, Checkbox } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -24,14 +24,46 @@ export interface MediaItem {
 export interface MediaPickerProps {
   opened: boolean;
   onClose: () => void;
-  onSelect: (url: string) => void;
+  /** Mode single : clic = sélection et fermeture. Mode multiple : sélection par cases puis bouton Valider. */
+  mode?: 'single' | 'multiple';
+  onSelect?: (url: string) => void;
+  onSelectMultiple?: (urls: string[]) => void;
 }
 
-export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
+export function MediaPicker({
+  opened,
+  onClose,
+  mode = 'single',
+  onSelect,
+  onSelectMultiple,
+}: MediaPickerProps) {
   const queryClient = useQueryClient();
   const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
+  const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set());
   const pendingRef = useRef<PendingUpload[]>([]);
   pendingRef.current = pendingUploads;
+
+  const handleClose = () => {
+    setSelectedUrls(new Set());
+    onClose();
+  };
+
+  const toggleSelect = (url: string) => {
+    setSelectedUrls((prev) => {
+      const next = new Set(prev);
+      if (next.has(url)) next.delete(url);
+      else next.add(url);
+      return next;
+    });
+  };
+
+  const handleValidateMultiple = () => {
+    const urls = Array.from(selectedUrls);
+    if (urls.length > 0 && onSelectMultiple) {
+      onSelectMultiple(urls);
+      handleClose();
+    }
+  };
 
   const { data: mediaList = [], isLoading } = useQuery({
     queryKey: ['media'],
@@ -86,7 +118,7 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
   return (
     <Modal
       opened={opened}
-      onClose={onClose}
+      onClose={handleClose}
       title="Bibliothèque média"
       size="xl"
       zIndex={10000}
@@ -111,41 +143,79 @@ export function MediaPicker({ opened, onClose, onSelect }: MediaPickerProps) {
               Aucune image dans la bibliothèque. Uploadez des images depuis l’onglet « Upload ».
             </Text>
           ) : (
-            <SimpleGrid cols={{ base: 3, sm: 4, md: 5 }} spacing="sm">
-              {mediaList.map((m) => (
-                <Box
-                  key={m.id}
-                  style={{
-                    aspectRatio: '1',
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    border: '2px solid transparent',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    onSelect(m.url);
-                    onClose();
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--mantine-color-green-5)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'transparent';
-                  }}
-                >
-                  <Box
-                    component="img"
-                    src={m.url}
-                    alt={m.altText || m.filename}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
-                </Box>
-              ))}
-            </SimpleGrid>
+            <>
+              {mode === 'multiple' && selectedUrls.size > 0 && (
+                <Group justify="space-between" mb="sm">
+                  <Text size="sm" c="dimmed">
+                    {selectedUrls.size} image{selectedUrls.size > 1 ? 's' : ''} sélectionnée
+                    {selectedUrls.size > 1 ? 's' : ''}
+                  </Text>
+                  <Button size="sm" onClick={handleValidateMultiple}>
+                    Ajouter {selectedUrls.size} image{selectedUrls.size > 1 ? 's' : ''}
+                  </Button>
+                </Group>
+              )}
+              <SimpleGrid cols={{ base: 3, sm: 4, md: 5 }} spacing="sm">
+                {mediaList.map((m) => {
+                  const isSelected = mode === 'multiple' && selectedUrls.has(m.url);
+                  return (
+                    <Box
+                      key={m.id}
+                      pos="relative"
+                      style={{
+                        aspectRatio: '1',
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                        border: `2px solid ${isSelected ? 'var(--mantine-color-green-5)' : 'transparent'}`,
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        if (mode === 'single' && onSelect) {
+                          onSelect(m.url);
+                          handleClose();
+                        } else if (mode === 'multiple') {
+                          toggleSelect(m.url);
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        if (mode === 'single') {
+                          e.currentTarget.style.borderColor = 'var(--mantine-color-green-5)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (mode === 'single') {
+                          e.currentTarget.style.borderColor = 'transparent';
+                        }
+                      }}
+                    >
+                      {mode === 'multiple' && (
+                        <Checkbox
+                          checked={isSelected}
+                          onChange={() => toggleSelect(m.url)}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            position: 'absolute',
+                            top: 8,
+                            left: 8,
+                            zIndex: 1,
+                          }}
+                        />
+                      )}
+                      <Box
+                        component="img"
+                        src={m.url}
+                        alt={m.altText || m.filename}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    </Box>
+                  );
+                })}
+              </SimpleGrid>
+            </>
           )}
         </Tabs.Panel>
 
