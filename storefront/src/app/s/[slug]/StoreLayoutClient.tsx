@@ -58,17 +58,19 @@ function mapProducts(products: StoreData['products']): MockProduct[] {
     const options =
       variants?.length &&
       Object.keys((variants[0]?.attributes as Record<string, string>) ?? {}).length > 0
-        ? [
-            ...new Set(
+        ? Array.from(
+            new Set(
               variants.flatMap((v) => Object.keys(v.attributes as Record<string, string>))
-            ),
-          ].sort().map((name) => ({
+            )
+          )
+          .sort()
+          .map((name) => ({
             name,
-            values: [
-              ...new Set(
+            values: Array.from(
+              new Set(
                 variants.map((v) => (v.attributes as Record<string, string>)[name]).filter(Boolean)
-              ),
-            ],
+              )
+            ),
           }))
         : undefined;
     const price = variants?.length ? variants[0].price : p.price;
