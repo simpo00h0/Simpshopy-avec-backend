@@ -25,8 +25,9 @@ export function proxy(request: NextRequest) {
   const host = request.headers.get('host') || '';
   const pathname = request.nextUrl.pathname;
 
+  // Sur Vercel/localhost : rester sur /s/[slug], pas de redirection vers sous-domaine
   const sMatch = pathname.match(/^\/s\/([^/]+)(\/.*)?$/);
-  if (sMatch && !isPathOnlyHost(host)) {
+  if (sMatch && !isPathOnlyHost(host) && !isPathOnlyHost(getBaseDomain())) {
     const slug = sMatch[1];
     const rest = sMatch[2] || '';
     const search = request.nextUrl.search;
